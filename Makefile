@@ -1,13 +1,20 @@
-all: unittest main
+all: main
 
-unittest: makedir
-	g++ -std=c++11 -o ./bin/unittest src/arg-parse.cpp test/unittest.cpp
+main: build_dir
+	cd build/ && make main
 
-main: makedir
-	g++ -std=c++11 -o ./bin/main src/arg-parse.cpp src/main.cpp
+build-unit-tests: build_dir
+	cd build/ && make unit
 
-makedir:
-	mkdir -p ./bin
+run-unit-tests: build-unit-tests
+	cd build/ && ./bin/unit
+
+build_dir:
+	mkdir -p build/
+	cd build/ && cmake ../
 
 clean:
-	rm -rf ./bin
+	cd build && make clean
+
+distclean:
+	rm -rf build/
