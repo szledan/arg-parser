@@ -1,5 +1,4 @@
-/* Copyright (C) 2016, Gepard Graphics
- * Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
+/* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,6 +79,11 @@ Arg::Arg(const std::string& name,
 {
 }
 
+Arg::Arg(const Value& value)
+    : Arg("", "", false, value)
+{
+}
+
 // Flag
 
 Flag::Flag(const Flag& f)
@@ -92,23 +96,23 @@ Flag::Flag(const Flag& f)
 {
 }
 
-Flag::Flag(const std::string& longFlag,
-           const std::string& shortFlag,
-           const std::string& description)
-    : _longFlag(longFlag)
-    , _shortFlag(shortFlag)
-    , _description(description)
+Flag::Flag(const std::string& lFlag,
+           const std::string& sFlag,
+           const std::string& dscrptn)
+    : _longFlag(lFlag)
+    , _shortFlag(sFlag)
+    , _description(dscrptn)
     , _isSet(false)
     , _hasValue(false)
     , _callBackFunc(nullptr)
 {
 }
 
-Flag::Flag(const std::string& longFlag,
-           const std::string& shortFlag,
-           const std::string& description,
+Flag::Flag(const std::string& lFlag,
+           const std::string& sFlag,
+           const std::string& dscrptn,
            const Value value)
-    : Flag(longFlag, shortFlag, description)
+    : Flag(lFlag, sFlag, dscrptn)
 {
     _value = value;
     _hasValue = true;
@@ -116,42 +120,62 @@ Flag::Flag(const std::string& longFlag,
 
 // ArgPars
 
-ArgParse::ArgParse(int argc, char* argv[])
-    : _argc(argc)
-    , _argv(argv)
-    , _programName(argv[0])
+namespace {
+
+const std::string readOptionValue(const ArgParse::OptionList& optionList, const std::string& key, const std::string& defaultValue = "")
 {
-    add(Flag("--help", "-h", "Show this help."));
+    for(auto option : optionList) {
+        const size_t posEq = option.find("=");
+        if (posEq != std::string::npos) {
+            if (option.substr(0, posEq) == key) {
+                return option.substr(posEq + 1);
+            }
+        }
+    }
+
+    return defaultValue;
 }
 
-void ArgParse::add(Arg arg)
+} // namespace anonymous
+
+ArgParse::ArgParse(const OptionList& oList)
+{
+    _options = {
+        readOptionValue(oList, "program-name", ""),             // std::string programName
+        readOptionValue(oList, "tab", "    "),                  // std::string tab;
+        readOptionValue(oList, "mode", "compact") == "compact", // bool isCompact;
+        readOptionValue(oList, "help", "on") == "on",           // bool addHelp;
+    };
+
+    if (_options.addHelp)
+        add(Flag("--help", "-h", "Show this help."));
+}
+
+const Arg& ArgParse::add(const Arg& arg)
 {
     _args.push_back(arg);
+    return _args.back();
 }
 
-void ArgParse::add(Arg arg, CallBackFunc cbf)
+const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
 {
-    arg._callBackFunc = cbf;
-    add(arg);
-}
-
-void ArgParse::add(Flag flag)
-{
-    static uint ndx = 0;
-    std::string name = flag._longFlag;
+    std::string name = flag._shortFlag + flag._longFlag;
 
     if (name.empty())
-        do {
-            name = "-" + flag._shortFlag + std::to_string(ndx++);
-        } while (_flags.find(name) != _flags.end());
+        return Flag();
 
     _flags[name] = flag;
-}
 
-void ArgParse::add(Flag flag, CallBackFunc cbf)
-{
-    flag._callBackFunc = cbf;
-    add(flag);
+    Flag* flagPtr = &(_flags[name]);
+    if (!flag._longFlag.empty()) {
+        _longFlags[flag._longFlag] = flagPtr;
+    }
+    if (!flag._shortFlag.empty()) {
+        _shortFlags[flag._shortFlag] = flagPtr;
+    }
+
+    flagPtr->_callBackFunc = cbf;
+    return *flagPtr;
 }
 
 enum ParamType {
@@ -187,17 +211,27 @@ ParamType mapParamType(const std::string& arg)
     return ParamType::LongFlagWithoutEqType;
 }
 
-bool ArgParse::parse()
+const bool ArgParse::parse(const int argc_, char* const argv_[])
 {
+    if ((argc_ < 1) || (!argv_) || (!argv_[0])) {
+        addError(ErrorARGVEmpty, "Wrong argument count: 0!");
+        return false;
+    }
+
+    // Set program name.
+    if (_options.programName.empty())
+        _options.programName = std::string(argv_[0]);
+
+    // Calculate number of required arguments.
     int requiredArgs = 0;
     for (auto const& arg : _args)
         if (arg._isArgNeeded)
             requiredArgs++;
 
-    for (int adv = 1, argCount = 0; adv < _argc; ++adv) {
-        std::string paramStr(_argv[adv]);
+    // Parse params.
+    for (int adv = 1, argCount = 0; adv < argc_; ++adv) {
+        std::string paramStr(argv_[adv]);
 
-std::cout << paramStr << ": ";
         switch (mapParamType(paramStr)) {
         case ParamType::ArgType:
             if (_args.size() > argCount) {
@@ -207,41 +241,213 @@ std::cout << paramStr << ": ";
             } else
                 _args.push_back(Arg("", "", false, Value(paramStr)));
             argCount++;
-std::cout << "ArgType" << std::endl;
             break;
-        case ParamType::ShortFlagType:
-std::cout << "ShortFlagType" << std::endl;
+        case ParamType::ShortFlagType: {
+            Flag* flag = _shortFlags[paramStr];
+            flag->_isSet = true;
+            // TODO: value!!!
             break;
+        }
         case ParamType::ShortFlagsType:
-std::cout << "ShortFlagsType" << std::endl;
             break;
         case ParamType::LongFlagWithEqType:
-std::cout << "LongFlagWithEqType" << std::endl;
             break;
         case ParamType::LongFlagWithoutEqType: {
-            Flag& flag = _flags[paramStr];
-            flag._isSet = true;
-            if (flag._hasValue) {
-                if (adv + 1 < _argc) {
-                    std::string valueStr(_argv[adv + 1]);
+            Flag* flag = _longFlags[paramStr];
+            flag->_isSet = true;
+            if (flag->_hasValue) {
+                if (adv + 1 < argc_) {
+                    std::string valueStr(argv_[adv + 1]);
                     if (mapParamType(valueStr) == ParamType::ArgType) {
-                        flag._value._str = valueStr;
+                        flag->_value._str = valueStr;
                         ++adv;
                     }
                 } else {
                     // TODO: ERROR
                 }
             }
-                std::cout << "has_" << std::endl;
-std::cout << "LongFlagWithoutEqType" << std::endl;
             break;
         }
         default:
             assert(false);
             break;
         };
+    }
 
-std::cout << "needableArgs: " << requiredArgs << std::endl;
+    if (requiredArgs) {
+        for (int i = requiredArgs; i; --i)
+            addError(ErrorRequiredArgumentMissing, "Required argument missing!", &_args[_args.size() - i]);
+        return false;
+    }
+
+    return true;
+}
+
+//bool compFlags (Flag& a, Flag& b) { return (a._shortFlag < b._shortFlag || ); }
+
+const std::string ArgParse::help()
+{
+    const std::string tab = "\t";
+    std::stringstream help;
+
+    // Print program name.
+    help << "usage: " << _options.programName;
+
+    // Print arguments after programname.
+    for (auto const& it : _args) {
+        const Arg& arg = it;
+        if (!arg._name.empty())
+            if (arg._isArgNeeded)
+                help << " <" << arg._name << "> ";
+            else
+                help << " [<" << arg._name << ">] ";
+    }
+
+    // Print arguments.
+    help << std::endl << std::endl << "Arguments:" << std::endl;
+
+    for (auto const& it : _args) {
+        const Arg& arg = it;
+        if (!arg._name.empty()) {
+            if (arg._isArgNeeded)
+                help << tab << " <" << arg._name << "> ";
+            else
+                help << tab << " [<" << arg._name << ">] ";
+            if (!arg._description.empty())
+                help << tab << arg._description;
+            help << std::endl;
+        }
+    }
+
+    // Print option flags.
+    help << std::endl << "Option flags:" << std::endl;
+
+    for (auto const& it : _flags) {
+#define HAS_NAME(CH, VALNAME) do { \
+    if (flag._value._isValueNeeded) \
+        help << CH << "<" << VALNAME << ">"; \
+    else \
+        help << CH << "[<" << VALNAME << ">]"; \
+    } while(false)
+
+#define PRINT_FLAG(FLAG, L) do { \
+    help << FLAG; \
+    if (flag._value._chooseList.size() > 0) \
+        HAS_NAME(" ", flag._value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
+    else if (!flag._value._name.empty()) \
+        HAS_NAME(" ", flag._value._name); \
+    } while(false)
+
+        const Flag& flag = it.second;
+        const bool hasShortFlag = !flag._shortFlag.empty();
+        const bool hasLongFlag = !flag._longFlag.empty();
+
+        help << tab;
+        if (hasShortFlag)
+            PRINT_FLAG(flag._shortFlag, 1);
+        if (hasLongFlag) {
+            if (hasShortFlag)
+                help << ", ";
+            PRINT_FLAG(flag._longFlag, 0);
+        }
+        if (hasShortFlag || hasLongFlag) {
+            help << tab << flag._description << std::endl;
+        }
+
+#undef PRINT_FLAG
+#undef HAS_NAME
+    }
+
+    return help.str();
+}
+
+const std::string ArgParse::error()
+{
+    std::stringstream error;
+    error << "error: the '' is not a valid argument or flag.";
+    return error.str();
+}
+
+const bool ArgParse::checkFlag(const std::string& longFlag)
+{
+    return _flags[longFlag]._isSet;
+}
+
+template<typename T>
+const bool ArgParse::checkFlagAndReadValue(const std::string& longFlag, T* value)
+{
+    if (!checkFlag(longFlag))
+        return false;
+
+    std::string& valueStr = _flags[longFlag]._value._str;
+    std::stringstream s;
+    s << valueStr;
+    s >> (*value);
+    return !s.fail();
+}
+
+Arg const& ArgParse::operator[](const std::size_t& idx)
+{
+    return _args[idx];
+}
+
+const Flag& ArgParse::operator[](const std::string& idx)
+{
+    std::string flagStr(idx);
+    switch (mapParamType(flagStr)) {
+    case ParamType::ArgType:
+        assert(false);
+        break;
+    case ParamType::ShortFlagsType:
+        flagStr = flagStr.substr(0, 2);
+        // Fall through.
+    case ParamType::ShortFlagType:
+        if (_shortFlags.find(flagStr) == _shortFlags.end())
+            return add(Flag("", flagStr));
+        return *(_shortFlags[flagStr]);
+    case ParamType::LongFlagWithEqType:
+        flagStr = flagStr.substr(0, flagStr.find("="));
+        // Fall through.
+    case ParamType::LongFlagWithoutEqType:
+        if (_longFlags.find(flagStr) == _longFlags.end())
+            return add(Flag(flagStr));
+        return *(_longFlags[flagStr]);
+    default:
+        assert(false);
+        break;
+    };
+
+    return Flag();
+}
+
+Flag const& ArgParse::operator[](const char* idx)
+{
+    return ArgParse::operator[](std::string(idx));
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)
+{
+    const ArgError ae = { errorCode, ArgError::GeneralType, nullptr, errorMsg };
+    _errors.push_back(ae);
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
+{
+    const ArgError ae = { errorCode, ArgError::ArgType, reinterpret_cast<const void*>(arg), errorMsg };
+    _errors.push_back(ae);
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
+{
+    const ArgError ae = { errorCode, ArgError::FlagType, reinterpret_cast<const void*>(flag), errorMsg };
+    _errors.push_back(ae);
+}
+
+} // namespace argparse
+
+
+
+
 
 //        bool isFlag = false;
 //        std::string value = "";
@@ -321,94 +527,3 @@ std::cout << "needableArgs: " << requiredArgs << std::endl;
 //        } else {
 //            _args.push_back(Arg("", "", false, Value(value)));
 //        }
-    }
-
-    return true;
-}
-
-//bool compFlags (Flag& a, Flag& b) { return (a._shortFlag < b._shortFlag || ); }
-
-const std::string ArgParse::showHelp()
-{
-    const std::string tab = "\t";
-    std::stringstream help;
-
-    // Print program name.
-    help << "usage: " << _programName;
-
-    // Print arguments after programname.
-    for (auto const& it : _args) {
-        const Arg& arg = it;
-        if (!arg._name.empty())
-            if (arg._isArgNeeded)
-                help << " <" << arg._name << "> ";
-            else
-                help << " [<" << arg._name << ">] ";
-    }
-
-    // Print arguments.
-    help << std::endl << std::endl << "Arguments:" << std::endl;
-
-    for (auto const& it : _args) {
-        const Arg& arg = it;
-        if (!arg._name.empty()) {
-            if (arg._isArgNeeded)
-                help << tab << " <" << arg._name << "> ";
-            else
-                help << tab << " [<" << arg._name << ">] ";
-            if (!arg._description.empty())
-                help << tab << arg._description;
-            help << std::endl;
-        }
-    }
-
-    // Print option flags.
-    help << std::endl << "Option flags:" << std::endl;
-
-    for (auto const& it : _flags) {
-#define HAS_NAME(CH, VALNAME) do { \
-    if (flag._value._isValueNeeded) \
-        help << CH << "<" << VALNAME << ">"; \
-    else \
-        help << CH << "[<" << VALNAME << ">]"; \
-    } while(false)
-
-#define PRINT_FLAG(FLAG, L) do { \
-    help << FLAG; \
-    if (flag._value._chooseList.size() > 0) \
-        HAS_NAME(" ", flag._value.getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
-    else if (!flag._value._name.empty()) \
-        HAS_NAME(" ", flag._value._name); \
-    } while(false)
-
-        const Flag& flag = it.second;
-        const bool hasShortFlag = !flag._shortFlag.empty();
-        const bool hasLongFlag = !flag._longFlag.empty();
-
-        help << tab;
-        if (hasShortFlag)
-            PRINT_FLAG(flag._shortFlag, 1);
-        if (hasLongFlag) {
-            if (hasShortFlag)
-                help << ", ";
-            PRINT_FLAG(flag._longFlag, 0);
-        }
-        if (hasShortFlag || hasLongFlag) {
-            help << tab << flag._description << std::endl;
-        }
-
-#undef PRINT_FLAG
-#undef HAS_NAME
-    }
-
-    return help.str();
-}
-
-const std::string ArgParse::showError(const std::string& errorArg)
-{
-    std::stringstream error;
-    error << "error: the '" << errorArg << "' is not a valid argument or flag.";
-    return error.str();
-}
-
-} // namespace argparse

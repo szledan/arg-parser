@@ -1,5 +1,4 @@
-/* Copyright (C) 2016, Gepard Graphics
- * Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
+/* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,40 +22,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
-#include <iostream>
+#include "unittest.h"
 
-using namespace argparse;
+namespace unittest {
 
-void allFlagFunc(void)
+namespace {
+
+} // namespace anonymous
+
+void valueTests(TestContext* ctx)
 {
-    std::cout << "The '--all' or '-a' was set." << std::endl;
+    // TODO: Value
 }
 
-int main(int argc, char* argv[])
-{
-    ArgParse args(argc, argv);
-    args.add(Arg("func", "Select function.", Arg::IsNeeded));
-    args.add(Arg("method", "Select method."));
-    args.add(Flag("--all", "-a", "Select all functions."), &allFlagFunc);
-    args.add(Flag("--list", "-l", "List all functions."));
-    args.add(Flag("--choose", "-c", "Choose from [A|B|C].", Value("A", {"A", "B", "C"})));
-    args.add(Flag("--file", "-f", "Set filename.", Value("arg-pars.png", "filename", "Source PNG filename.")));
-    args.add(Flag("--pi", "-p", "Set pi number.", Value("3.1415")));
-    args.add(Flag("--run", "", "Run program."));
-
-    if (!args.parse())
-        std::cout  << args.showHelp() << std::endl;
-
-    std::cout  << args.showHelp() << std::endl;
-
-//    std::string fn;
-//    args.checkAndReadFleg("--file", &fn);
-//    std::cout << fn << std::endl;
-
-//    double v = 3.1416;
-//    args.checkAndReadFleg("--pi", &v);
-//    std::cout << v << std::endl;
-
-    return 0;
-}
+} // namespace unittest

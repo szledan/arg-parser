@@ -1,12 +1,18 @@
-all: main
+all: arg-parse
 
-main: build_dir
-	cd build/ && make main
+arg-parse: build_dir
+	cd build/ && make arg-parse
 
-build-unit-tests: build_dir
+build-tests: build_dir
 	cd build/ && make unit
 
-run-unit-tests: build-unit-tests
+run-unit-tests: build-tests
+	cd build/ && ./bin/unit --unit
+
+run-manual-tests: build-tests
+	cd build/ && ./bin/unit --manual
+
+run-tests: build-tests
 	cd build/ && ./bin/unit
 
 build_dir:

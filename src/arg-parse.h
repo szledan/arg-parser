@@ -1,8 +1,7 @@
 #ifndef ARG_PARSE_H
 #define ARG_PARSE_H
 
-/* Copyright (C) 2016, Gepard Graphics
- * Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
+/* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * TODO: README
+ *  ArgParse:
+ *      Arg : Value
+ *      Flag { Value }
+ *      ErrorCodes;
+ */
+
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -35,9 +42,84 @@
 
 namespace argparse {
 
-// Value
-
 typedef void (*CallBackFunc)(void);
+
+struct Value;
+struct Arg;
+struct Flag;
+
+// ArgPars
+
+class ArgParse {
+public:
+    enum ErrorCodes {
+        NoError = 0,
+        ErrorRequiredArgumentMissing,
+        ErrorRequiredFlagValueMissing,
+        ErrorARGVEmpty,
+    };
+
+    struct ArgError {
+        enum ArgErrorType { GeneralType, ArgType, FlagType };
+
+        const ErrorCodes errorCode;
+        const ArgErrorType type;
+        union {
+            const void* _ptr;
+            const Arg* arg;
+            const Flag* flag;
+        };
+        const std::string errorMessage;
+
+    };
+
+    typedef std::initializer_list<std::string> OptionList;
+
+    ArgParse(const OptionList& = { "mode=compact" });
+
+    const Arg& add(const Arg&);
+    const Flag& add(const Flag&, CallBackFunc = nullptr);
+
+    const bool parse(const int argc, char* const argv[]);
+
+    const std::string help();
+    const std::string error();
+    const std::vector<ArgError>& errors() { return _errors; }
+
+    const bool checkFlag(const std::string& longFlag);
+
+    template<typename T>
+    const bool checkFlagAndReadValue(const std::string& longFlag, T* value);
+
+    Arg const& operator[](const std::size_t& idx);
+    Flag const& operator[](const char* idx);
+    Flag const& operator[](const std::string& idx);
+
+private:
+    void addError(const ErrorCodes&, const std::string& errorMsg);
+    void addError(const ErrorCodes&, const std::string& errorMsg, const Arg*);
+    void addError(const ErrorCodes&, const std::string& errorMsg, const Flag*);
+
+    struct {
+        std::string programName;
+        std::string tab;
+        bool isCompact;
+        bool addHelp;
+    } _options;
+    std::vector<Arg> _args;
+    std::map<std::string, Flag> _flags;
+    std::map<std::string, Flag*> _longFlags;
+    std::map<std::string, Flag*> _shortFlags;
+    std::vector<ArgError> _errors;
+};
+
+inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
+{
+    os << "error: " << err.errorMessage;
+    return os;
+}
+
+// Value
 
 typedef std::initializer_list<std::string> ChooseList;
 
@@ -54,21 +136,22 @@ struct Value {
           const std::string& description = "");
 
     const bool hasValue() const { return !_str.empty(); }
-    const std::string getChoosesStr(int size = 0) const
+    const std::string _getChoosesStr(bool full = true) const
     {
+        if (!_chooseList.size())
+            return "";
+
         std::stringstream ss;
-        std::string end("");
-        if (size) {
-            end = "|...";
-        } else size = _chooseList.size();
-        if (size) {
-            for (int i = 0; i < size; ++i)
-                ss << "|" << _chooseList[i];
-        }
+        std::string end(full ? "" : "|...");
+
+        for (size_t i = 0; i < _chooseList.size(); ++i)
+            ss << "|" << _chooseList[i];
+
         return ss.str().substr(1) + end;
     }
 
     std::string _str;
+// private:
     std::string _name;
     std::string _description;
     std::vector<std::string> _chooseList;
@@ -86,6 +169,7 @@ struct Arg : Value {
         const std::string& description = "",
         const bool isNeeded = false,
         const Value& defaultValue = Value());
+    Arg(const Value& value);
 
     void setArg(const std::string& str)
     {
@@ -103,69 +187,23 @@ struct Arg : Value {
 struct Flag {
     Flag(const Flag& f);
 
-    Flag(const std::string& longFlag= "",
+    Flag(const std::string& longFlag = "",
          const std::string& shortFlag = "",
          const std::string& description = "");
 
     Flag(const std::string& longFlag,
          const std::string& shortFlag,
          const std::string& description,
-         const Value value);
+         const Value _value);
 
+    bool _isSet;
+    Value _value;
+    bool _hasValue;
+// private:
     std::string _longFlag;
     std::string _shortFlag;
     std::string _description;
-    Value _value;
-    bool _isSet;
-    bool _hasValue;
     CallBackFunc _callBackFunc;
-};
-
-// ArgPars
-
-class ArgParse {
-public:
-    ArgParse(int argc, char* argv[]);
-
-    void add(Arg arg);
-    void add(Arg arg, CallBackFunc callBackFunc);
-
-    void add(Flag flag);
-    void add(Flag flag, CallBackFunc callBackFunc);
-
-    bool parse();
-    const std::string showHelp();
-
-    const bool checkFlag(const std::string& longFlag)
-    {
-        return _flags[longFlag]._isSet;
-    }
-
-    template<typename T>
-    const bool checkFlagAndReadValue(const std::string& longFlag, T* value)
-    {
-        if (!checkFlag(longFlag))
-            return false;
-
-        std::string& valueStr = _flags[longFlag]._value._str;
-        std::stringstream s;
-        s << valueStr;
-        s >> (*value);
-        return !s.fail();
-    }
-
-    std::string operator[](const std::size_t& idx)
-    {
-        return _args[idx]._str;
-    }
-private:
-    const std::string showError(const std::string& errorArg);
-
-    int _argc;
-    char** _argv;
-    std::string _programName;
-    std::vector<Arg> _args;
-    std::map<std::string, Flag> _flags;
 };
 
 } // namespace argparse
