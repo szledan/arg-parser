@@ -75,7 +75,7 @@ public:
 
     typedef std::initializer_list<std::string> OptionList;
 
-    ArgParse(const OptionList& = { "mode=compact" });
+    ArgParse(const OptionList& = {});
 
     const Arg& add(const Arg&);
     const Flag& add(const Flag&, CallBackFunc = nullptr);
@@ -86,31 +86,47 @@ public:
     const std::string error();
     const std::vector<ArgError>& errors() { return _errors; }
 
-    const bool checkFlag(const std::string& longFlag);
+    const bool areThereAnyUndefinedArgs() const { return _areThereAnyUndefinedArgs; }
+    const bool areThereAnyDefinedArgs() const { return _areThereAnyDefinedArgs; }
+    const bool areThereAnyUndefinedFlags() const { return _areThereAnyUndefinedFlags; }
+    const bool areThereAnyDefinedFlags() const { return _areThereAnyDefinedFlags; }
 
+    const bool checkFlag(const std::string& flagStr);
     template<typename T>
-    const bool checkFlagAndReadValue(const std::string& longFlag, T* value);
+    const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
 
     Arg const& operator[](const std::size_t& idx);
     Flag const& operator[](const char* idx);
     Flag const& operator[](const std::string& idx);
+
+    struct Options {
+        struct Option {
+            const std::string name;
+            std::string value;
+            bool isSet;
+        }
+        programName = { "program-name", "", false },
+        tab = { "tab" , "    ", true },
+        mode = { "mode", "compact", true },
+        helpFlag = { "help-flag", "on", true };
+
+        static void set(Option&, const std::string& value);
+    } options;
 
 private:
     void addError(const ErrorCodes&, const std::string& errorMsg);
     void addError(const ErrorCodes&, const std::string& errorMsg, const Arg*);
     void addError(const ErrorCodes&, const std::string& errorMsg, const Flag*);
 
-    struct {
-        std::string programName;
-        std::string tab;
-        bool isCompact;
-        bool addHelp;
-    } _options;
     std::vector<Arg> _args;
     std::map<std::string, Flag> _flags;
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<ArgError> _errors;
+    bool _areThereAnyUndefinedArgs;
+    bool _areThereAnyDefinedArgs;
+    bool _areThereAnyUndefinedFlags;
+    bool _areThereAnyDefinedFlags;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)

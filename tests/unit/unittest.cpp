@@ -46,15 +46,17 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    const bool all = args["--all"].isSet || !args.areThereAnyDefinedFlags();
+
     unittest::TestContext ctx;
 
-    if (args["--unit"].isSet) {
+    if (args["--unit"].isSet || all) {
         unittest::argErrorTests(&ctx);
         unittest::flagTests(&ctx);
         unittest::valueTests(&ctx);
     }
 
-    if (args["--manual"].isSet) {
+    if (args["--manual"].isSet || all) {
         unittest::manualHelpTest(&ctx);
     }
 
