@@ -56,7 +56,7 @@ bool testArgCountEmptyArgv(TestContext* ctx)
 
 bool testArgCountZeroArgc(TestContext* ctx)
 {
-    char* argv[] = { "program" };
+    char* argv[] = { (char*)"program" };
     const int argc = 0;
 
     ArgParse args;
@@ -78,7 +78,7 @@ bool testArgCountZeroArgc(TestContext* ctx)
 
 bool testArgCountNonEmptyArgv(TestContext* ctx)
 {
-    char* argv[] = { "program" };
+    char* argv[] = { (char*)"program" };
     const int argc = UT_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -93,7 +93,7 @@ bool testArgCountNonEmptyArgv(TestContext* ctx)
 
 bool testErrorCode(TestContext* ctx)
 {
-    char* argv[] = { "program" };
+    char* argv[] = { (char*)"program" };
     const int argc = UT_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -134,7 +134,7 @@ bool testErrorCode(TestContext* ctx)
 
 void argErrorTests(TestContext* ctx)
 {
-//    ctx->add(testArgCountEmptyArgv);
+    ctx->add(testArgCountEmptyArgv);
     ctx->add(testArgCountZeroArgc);
     ctx->add(testArgCountNonEmptyArgv);
     ctx->add(testErrorCode);

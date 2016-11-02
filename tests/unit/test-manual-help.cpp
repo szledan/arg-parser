@@ -42,15 +42,15 @@ const std::string msg("Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 #define MSG (msg.substr(std::rand() % (msg.size() / 20), std::rand() % (msg.size() / 10)))
 #define VALUEV(VL) (VL + LINE)
 #define VALUE ("V" + LINE)
-#define CHAR (std::string("") + (sf++))
-#define SFLAG ("-" + CHAR)
-#define LFLAG ("-" + SFLAG + LINE)
+#define SFLAG (std::string("-") + (sf++))
+#define LFLAG (std::string("--") + (lf++) + LINE)
 
 using namespace argparse;
 
 void showHelp()
 {
     char sf = 'A';
+    char lf = sf;
 
     ArgParse args({"program=show-help", "help=on", "tab=\t", "mode=compact"});
 

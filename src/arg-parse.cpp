@@ -35,16 +35,16 @@ namespace argparse {
 // Value
 
 Value::Value(const Value& v)
-    : _name(v._name)
+    : str(v.str)
+    , _name(v._name)
     , _description(v._description)
-    , _str(v._str)
     , _chooseList(v._chooseList)
     , _isValueNeeded(v._isValueNeeded)
 {
 }
 
 Value::Value(const std::string& defaultValue, const std::string& name, const std::string& description)
-    : _str(defaultValue)
+    : str(defaultValue)
     , _name(name)
     , _description(description)
     , _isValueNeeded(!defaultValue.empty())
@@ -58,11 +58,25 @@ Value::Value(const std::string& defaultValue, const ChooseList& chooseList, cons
         _chooseList.push_back(choose);
 }
 
+const std::string Value::_getChoosesStr(const bool full) const
+{
+    if (!_chooseList.size())
+        return "";
+
+    std::stringstream ss;
+    std::string end(full ? "" : "|...");
+
+    for (size_t i = 0; i < _chooseList.size(); ++i)
+        ss << "|" << _chooseList[i];
+
+    return ss.str().substr(1) + end;
+}
+
 // Arg
 
 Arg::Arg(const Arg& a)
     : Value((Value)a)
-    , _isSet(a._isSet)
+    , isSet(a.isSet)
     , _isArgNeeded(a._isArgNeeded)
     , _callBackFunc(a._callBackFunc)
 {
@@ -72,8 +86,8 @@ Arg::Arg(const std::string& name,
          const std::string& description,
          const bool isNeeded,
          const Value& defaultValue)
-    : Value(defaultValue._str, name, description)
-    , _isSet(false)
+    : Value(defaultValue.str, name, description)
+    , isSet(false)
     , _isArgNeeded(isNeeded)
     , _callBackFunc(nullptr)
 {
@@ -87,11 +101,11 @@ Arg::Arg(const Value& value)
 // Flag
 
 Flag::Flag(const Flag& f)
-    : _longFlag(f._longFlag)
+    : isSet(f.isSet)
+    , value(f.value)
+    , _longFlag(f._longFlag)
     , _shortFlag(f._shortFlag)
     , _description(f._description)
-    , _value(f._value)
-    , _isSet(f._isSet)
     , _callBackFunc(f._callBackFunc)
 {
 }
@@ -99,11 +113,11 @@ Flag::Flag(const Flag& f)
 Flag::Flag(const std::string& lFlag,
            const std::string& sFlag,
            const std::string& dscrptn)
-    : _longFlag(lFlag)
+    : isSet(false)
+    , hasValue(false)
+    , _longFlag(lFlag)
     , _shortFlag(sFlag)
     , _description(dscrptn)
-    , _isSet(false)
-    , _hasValue(false)
     , _callBackFunc(nullptr)
 {
 }
@@ -111,11 +125,11 @@ Flag::Flag(const std::string& lFlag,
 Flag::Flag(const std::string& lFlag,
            const std::string& sFlag,
            const std::string& dscrptn,
-           const Value value)
+           const Value definedValue)
     : Flag(lFlag, sFlag, dscrptn)
 {
-    _value = value;
-    _hasValue = true;
+    value = definedValue;
+    hasValue = true;
 }
 
 // ArgPars
@@ -162,7 +176,7 @@ const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
     std::string name = flag._shortFlag + flag._longFlag;
 
     if (name.empty())
-        return Flag();
+        return _flags[""];
 
     _flags[name] = flag;
 
@@ -217,6 +231,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         addError(ErrorARGVEmpty, "Wrong argument count: 0!");
         return false;
     }
+    size_t argc = (size_t)argc_;
 
     // Set program name.
     if (_options.programName.empty())
@@ -229,7 +244,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             requiredArgs++;
 
     // Parse params.
-    for (int adv = 1, argCount = 0; adv < argc_; ++adv) {
+    for (size_t adv = 1, argCount = 0; adv < argc; ++adv) {
         std::string paramStr(argv_[adv]);
 
         switch (mapParamType(paramStr)) {
@@ -244,7 +259,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         case ParamType::ShortFlagType: {
             Flag* flag = _shortFlags[paramStr];
-            flag->_isSet = true;
+            flag->isSet = true;
             // TODO: value!!!
             break;
         }
@@ -253,13 +268,15 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         case ParamType::LongFlagWithEqType:
             break;
         case ParamType::LongFlagWithoutEqType: {
+            if (_longFlags.find(paramStr) == _longFlags.end())
+                add(Flag(paramStr));
             Flag* flag = _longFlags[paramStr];
-            flag->_isSet = true;
-            if (flag->_hasValue) {
-                if (adv + 1 < argc_) {
+            flag->isSet = true;
+            if (flag->hasValue) {
+                if (adv + 1 < argc) {
                     std::string valueStr(argv_[adv + 1]);
                     if (mapParamType(valueStr) == ParamType::ArgType) {
-                        flag->_value._str = valueStr;
+                        flag->value.str = valueStr;
                         ++adv;
                     }
                 } else {
@@ -296,11 +313,12 @@ const std::string ArgParse::help()
     // Print arguments after programname.
     for (auto const& it : _args) {
         const Arg& arg = it;
-        if (!arg._name.empty())
+        if (!arg._name.empty()) {
             if (arg._isArgNeeded)
                 help << " <" << arg._name << "> ";
             else
                 help << " [<" << arg._name << ">] ";
+        }
     }
 
     // Print arguments.
@@ -324,7 +342,7 @@ const std::string ArgParse::help()
 
     for (auto const& it : _flags) {
 #define HAS_NAME(CH, VALNAME) do { \
-    if (flag._value._isValueNeeded) \
+    if (flag.value._isValueNeeded) \
         help << CH << "<" << VALNAME << ">"; \
     else \
         help << CH << "[<" << VALNAME << ">]"; \
@@ -332,10 +350,10 @@ const std::string ArgParse::help()
 
 #define PRINT_FLAG(FLAG, L) do { \
     help << FLAG; \
-    if (flag._value._chooseList.size() > 0) \
-        HAS_NAME(" ", flag._value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
-    else if (!flag._value._name.empty()) \
-        HAS_NAME(" ", flag._value._name); \
+    if (flag.value._chooseList.size() > 0) \
+        HAS_NAME(" ", flag.value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
+    else if (!flag.value._name.empty()) \
+        HAS_NAME(" ", flag.value._name); \
     } while(false)
 
         const Flag& flag = it.second;
@@ -370,7 +388,7 @@ const std::string ArgParse::error()
 
 const bool ArgParse::checkFlag(const std::string& longFlag)
 {
-    return _flags[longFlag]._isSet;
+    return _flags[longFlag].isSet;
 }
 
 template<typename T>
@@ -379,7 +397,7 @@ const bool ArgParse::checkFlagAndReadValue(const std::string& longFlag, T* value
     if (!checkFlag(longFlag))
         return false;
 
-    std::string& valueStr = _flags[longFlag]._value._str;
+    std::string& valueStr = _flags[longFlag].value.str;
     std::stringstream s;
     s << valueStr;
     s >> (*value);
@@ -417,7 +435,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
         break;
     };
 
-    return Flag();
+    return _flags[""];
 }
 
 Flag const& ArgParse::operator[](const char* idx)
@@ -444,9 +462,6 @@ void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string
 }
 
 } // namespace argparse
-
-
-
 
 
 //        bool isFlag = false;

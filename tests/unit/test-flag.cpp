@@ -37,7 +37,7 @@ const std::string g_description = "Simple settable flag without value.";
 
 bool testShortFlagNotSet(TestContext* ctx)
 {
-    char* argv[] = { "program" };
+    char* argv[] = { (char*)"program" };
     const int argc = UT_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -55,7 +55,7 @@ bool testShortFlagNotSet(TestContext* ctx)
 
 bool testShortFlagOnlySet(TestContext* ctx)
 {
-    char* argv[] = { "program", "-a" };
+    char* argv[] = { (char*)"program", (char*)"-a" };
     const int argc = UT_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -68,19 +68,19 @@ bool testShortFlagOnlySet(TestContext* ctx)
 
     UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (!args[g_shortFlag]._isSet)
+    if (!args[g_shortFlag].isSet)
         return UT_FAIL(ctx, "The flag is not set!");
 
-    if (args[g_shortFlag]._hasValue)
+    if (args[g_shortFlag].hasValue)
         return UT_FAIL(ctx, "Wrong '_hasValue' set to true!");
 
     if (&(args[g_shortFlag]) != &(args[g_longFlag]))
         return UT_FAIL(ctx, "The short and long flag return values not same!");
 
-    if (!args[g_longFlag]._isSet)
+    if (!args[g_longFlag].isSet)
         return UT_FAIL(ctx, "The flag is not set!");
 
-    if (args[g_longFlag]._hasValue)
+    if (args[g_longFlag].hasValue)
         return UT_FAIL(ctx, "Wrong '_hasValue' set to true!");
 
     return UT_PASS(ctx, "Simple short flag tests");

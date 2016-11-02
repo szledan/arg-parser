@@ -31,22 +31,30 @@
 int main(int argc, char* argv[])
 {
     argparse::ArgParse args;
+
     args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
     args.add(argparse::Flag("--manual", "-m", "Select manual tests."));
+
     if (!args.parse(argc, argv)) {
         std::cout << args.error() << std::endl;
         std::cout << args.help() << std::endl;
+        return 1;
+    }
+
+    if (args["--help"].isSet) {
+        std::cout << args.help() << std::endl;
+        return 0;
     }
 
     unittest::TestContext ctx;
 
-    if (args["--unit"]._isSet) {
+    if (args["--unit"].isSet) {
         unittest::argErrorTests(&ctx);
         unittest::flagTests(&ctx);
         unittest::valueTests(&ctx);
     }
 
-    if (args["--manual"]._isSet) {
+    if (args["--manual"].isSet) {
         unittest::manualHelpTest(&ctx);
     }
 

@@ -135,23 +135,13 @@ struct Value {
           const std::string& name = "",
           const std::string& description = "");
 
-    const bool hasValue() const { return !_str.empty(); }
-    const std::string _getChoosesStr(bool full = true) const
-    {
-        if (!_chooseList.size())
-            return "";
+    const bool empty() const { return str.empty(); }
 
-        std::stringstream ss;
-        std::string end(full ? "" : "|...");
+    std::string str;
 
-        for (size_t i = 0; i < _chooseList.size(); ++i)
-            ss << "|" << _chooseList[i];
-
-        return ss.str().substr(1) + end;
-    }
-
-    std::string _str;
 // private:
+    const std::string _getChoosesStr(bool full = true) const;
+
     std::string _name;
     std::string _description;
     std::vector<std::string> _chooseList;
@@ -171,13 +161,14 @@ struct Arg : Value {
         const Value& defaultValue = Value());
     Arg(const Value& value);
 
-    void setArg(const std::string& str)
+    void setArg(const std::string& value)
     {
-        _isSet = true;
-        _str = str;
+        isSet = true;
+        str = value;
     }
 
-    bool _isSet;
+    bool isSet;
+// private:
     bool _isArgNeeded;
     CallBackFunc _callBackFunc;
 };
@@ -194,11 +185,11 @@ struct Flag {
     Flag(const std::string& longFlag,
          const std::string& shortFlag,
          const std::string& description,
-         const Value _value);
+         const Value value);
 
-    bool _isSet;
-    Value _value;
-    bool _hasValue;
+    bool isSet;
+    Value value;
+    bool hasValue;
 // private:
     std::string _longFlag;
     std::string _shortFlag;
