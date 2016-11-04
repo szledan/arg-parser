@@ -140,7 +140,7 @@ bool testLongFlagOnlySet(TestContext* ctx)
 
 bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 {
-    std::string value("v");
+    std::string value("--v");
 
     ArgParse args;
 
@@ -188,7 +188,7 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 
 bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
 {
-    std::string value("v");
+    std::string value("-v");
 
     ArgParse args;
 

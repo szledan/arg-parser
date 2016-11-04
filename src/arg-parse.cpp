@@ -48,16 +48,16 @@ const bool readOptionValue(const ArgParse::OptionList& optionList, ArgParse::Opt
         }
     }
 
-    return opt.isSet;
+    return opt.current.isSet();
 }
 
 } // namespace anonymous
 
 ArgParse::ArgParse(const OptionList& oList)
-    : _areThereAnyUndefinedArgs(false)
-    , _areThereAnyDefinedArgs(false)
-    , _areThereAnyUndefinedFlags(false)
-    , _areThereAnyDefinedFlags(false)
+    : _undefArgsCount(0)
+    , _defArgsCount(0)
+    , _undefFlagsCount(0)
+    , _defFlagsCount(0)
 {
     readOptionValue(oList, options.programName);
     readOptionValue(oList, options.tab);
@@ -76,8 +76,8 @@ const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
 {
     std::string name = flag._shortFlag + flag._longFlag;
 
-    if (name.empty())
-        return _flags[""];
+//    if (name.empty())
+//        return _flags[""];
 
     _flags[name] = flag;
 
@@ -135,8 +135,10 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     size_t argc = (size_t)argc_;
 
     // Set program name.
-    if (options.programName.value.empty())
-        options.programName.value = std::string(argv_[0]);
+    if (!options.programName.current.isSet()) {
+        assert(options.programName.current.value.empty());
+        Options::set(options.programName, std::string(argv_[0]));
+    }
 
     // Calculate number of required arguments.
     int requiredArgs = 0;
@@ -149,27 +151,29 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         std::string paramStr(argv_[adv]);
         std::string valueStr(adv + 1 < argc ? argv_[adv + 1] : "");
 
+std::cout << "paramStr " << paramStr << std::endl;
+std::cout << "valueStr " << valueStr << std::endl;
         switch (mapParamType(paramStr)) {
         case ParamType::ArgType:
             if (_args.size() > argCount) {
                 if (_args[argCount]._isArgNeeded)
                     requiredArgs--;
                 _args[argCount].setArg(paramStr);
-                _areThereAnyDefinedArgs = true;
+                _defArgsCount++;
             } else {
                 _args.push_back(Arg("", "", false, Value(paramStr)));
-                _areThereAnyUndefinedArgs = true;
+                _undefArgsCount++;
             }
             argCount++;
             break;
+        case ParamType::ShortFlagsType:
+            // Fall through.
         case ParamType::ShortFlagType: {
-            Flag* flag = _shortFlags[paramStr];
-            flag->isSet = true;
+//            Flag* flag = _shortFlags[paramStr];
+//            flag->isSet = true;
             // TODO: value!!!
             break;
         }
-        case ParamType::ShortFlagsType:
-            break;
         case ParamType::LongFlagWithEqType: {
             const size_t posEq = paramStr.find("=");
             valueStr = paramStr.substr(posEq + 1);
@@ -177,28 +181,28 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             // Fall through.
         }
         case ParamType::LongFlagWithoutEqType: {
+//#define SETUP_FLAG(FLAGS)
             if (_longFlags.find(paramStr) == _longFlags.end()) {
-                add(Flag(paramStr));
-                _areThereAnyUndefinedFlags = true;
+                add(Flag(paramStr, ""));
+                _undefFlagsCount++;
             } else
-                _areThereAnyDefinedFlags = true;
+                _defFlagsCount++;
 
             Flag* flag = _longFlags[paramStr];
+            assert(flag);
             flag->isSet = true;
+
             if (flag->hasValue) {
-                if (valueStr.empty()) {
-                    if (!flag->value._isValueNeeded)
-                        break;
-                    // TODO: error
+                if (valueStr.empty() && flag->value._isValueNeeded) {
+                    addError(ErrorRequiredFlagValueMissing, "",flag);
+                } else if ((flag->value._isValueNeeded)
+                           && (mapParamType(valueStr) != ParamType::ArgType)
+                           && (checkFlag(valueStr))) {
+                    addError(ErrorRequiredFlagValueMissing, "",flag);
+                } else {
+                    flag->value.str = valueStr;
+                    ++adv;
                 }
-                if ((flag->value._isValueNeeded)
-                        && (mapParamType(valueStr) != ParamType::ArgType)
-                        && (checkFlag(valueStr))) {
-                    // TODO: error
-                    break;
-                }
-                flag->value.str = valueStr;
-                ++adv;
             }
             break;
         }
@@ -221,11 +225,11 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
 const std::string ArgParse::help()
 {
-    const std::string tab = options.tab.value;
+    const std::string tab = options.tab.current.isSet() ? options.tab.current.value : options.tab.init.value;
     std::stringstream help;
 
     // Print program name.
-    help << "usage: " << options.programName.value;
+    help << "usage: " << options.programName.current.value;
 
     // Print arguments after programname.
     for (auto const& it : _args) {
@@ -381,10 +385,25 @@ void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string
     _errors.push_back(ae);
 }
 
-void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& value)
+void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& value, const int& state)
 {
-    opt.value = value;
-    opt.isSet = true;
+    int currentState = state;
+
+    if (state == Option::Value::Unused && opt.init.state != Option::Value::Unused) {
+        if (value == opt.init.value) {
+            currentState = opt.init.state;
+        } else {
+            if (opt.init.state < Option::Value::NotBool) {
+                assert(((!Option::Value::Set) == Option::Value::NotSet) && ((!Option::Value::NotSet) == Option::Value::Set));
+                currentState = !opt.init.state;
+            } else {
+                currentState = opt.current.state;
+            }
+        }
+    }
+
+    opt.current.state = currentState;
+    opt.current.value = value;
 }
 
 // Value

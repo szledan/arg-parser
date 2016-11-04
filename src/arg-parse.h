@@ -86,10 +86,10 @@ public:
     const std::string error();
     const std::vector<ArgError>& errors() { return _errors; }
 
-    const bool areThereAnyUndefinedArgs() const { return _areThereAnyUndefinedArgs; }
-    const bool areThereAnyDefinedArgs() const { return _areThereAnyDefinedArgs; }
-    const bool areThereAnyUndefinedFlags() const { return _areThereAnyUndefinedFlags; }
-    const bool areThereAnyDefinedFlags() const { return _areThereAnyDefinedFlags; }
+    const size_t undefArgsCount() const { return _undefArgsCount; }
+    const size_t defArgsCount() const { return _defArgsCount; }
+    const size_t undefFlagsCount() const { return _undefFlagsCount; }
+    const size_t defFlagsCount() const { return _defFlagsCount; }
 
     const bool checkFlag(const std::string& flagStr);
     template<typename T>
@@ -102,15 +102,30 @@ public:
     struct Options {
         struct Option {
             const std::string name;
-            std::string value;
-            bool isSet;
+            struct Value {
+                enum {
+                    Unused = -1,
+                    // Boolean.
+                    NotSet = 0,
+                    Set = 1,
+                    // Not boolean.
+                    NotBool,
+                    FourSpace,
+                };
+                const bool isSet() const { return state != NotSet; }
+                std::string value;
+                int state;
+            };
+            const Value init;
+            Value current;
         }
-        programName = { "program-name", "", false },
-        tab = { "tab" , "    ", true },
-        mode = { "mode", "compact", true },
-        helpFlag = { "help-flag", "on", true };
 
-        static void set(Option&, const std::string& value);
+        programName = { "program-name", { "", Option::Value::NotSet } },
+        tab = { "tab", { "    ", Option::Value::FourSpace } },
+        mode = { "mode", { "compact", Option::Value::Set } },
+        helpFlag = { "help-flag", { "on", Option::Value::Set } };
+
+        static void set(Option&, const std::string& value, const int& state = Option::Value::Unused);
     } options;
 
 private:
@@ -123,10 +138,10 @@ private:
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<ArgError> _errors;
-    bool _areThereAnyUndefinedArgs;
-    bool _areThereAnyDefinedArgs;
-    bool _areThereAnyUndefinedFlags;
-    bool _areThereAnyDefinedFlags;
+    size_t _undefArgsCount;
+    size_t _defArgsCount;
+    size_t _undefFlagsCount;
+    size_t _defFlagsCount;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
