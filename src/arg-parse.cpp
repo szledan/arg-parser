@@ -158,6 +158,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         if (arg._isArgNeeded)
             requiredArgs++;
 
+    std::vector<CallBackFunc> callBackFuncs;
     // Parse params.
     for (size_t adv = 1, argCount = 0; adv < argc; ++adv) {
         std::string paramStr(argv_[adv]);
@@ -173,6 +174,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         Flag* flag = FLAGS[paramStr]; \
         assert(flag); \
         flag->isSet = true; \
+        if (flag->_callBackFunc) { \
+            callBackFuncs.push_back(flag->_callBackFunc); \
+        } \
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
             if (valueStr.empty() && flag->value._isValueNeeded) { \
@@ -237,7 +241,13 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         return false;
     }
 
-    return true;
+    // Call functions.
+    if (!_errors.size()) {
+        for (auto const& func : callBackFuncs)
+            func();
+    }
+
+    return !_errors.size();
 }
 
 const std::string ArgParse::help()
