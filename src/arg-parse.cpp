@@ -84,6 +84,19 @@ ParamType mapParamType(const std::string& arg)
     return ParamType::LongFlagWithoutEqType;
 }
 
+const bool findValue(const std::string& valueStr, const std::vector<std::string>& chooseList)
+{
+    if (!chooseList.size())
+        return true;
+
+    for (auto const& choose : chooseList) {
+        if (choose == valueStr)
+            return true;
+    }
+
+    return false;
+}
+
 } // namespace anonymous
 
 // ArgPars
@@ -163,11 +176,13 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
             if (valueStr.empty() && flag->value._isValueNeeded) { \
-                addError(ErrorRequiredFlagValueMissing, "",flag); \
+                addError(ErrorRequiredFlagValueMissing, "", flag); \
             } else if ((flag->value._isValueNeeded) \
                        && (mapParamType(valueStr) != ParamType::ArgType) \
                        && (checkFlag(valueStr))) { \
-                addError(ErrorRequiredFlagValueMissing, "",flag); \
+                addError(ErrorRequiredFlagValueMissing, "", flag); \
+            } else if (!findValue(valueStr, flag->value._chooseList)) { \
+                    addError(ErrorRequiredFlagValueMissing, "", flag); \
             } else { \
                 flag->value.str = valueStr; \
                 ++adv; \
@@ -510,8 +525,8 @@ Flag::Flag(const std::string& lFlag,
            const Value definedValue)
     : Flag(lFlag, sFlag, dscrptn)
 {
-    value = definedValue;
     hasValue = true;
+    value = definedValue;
 }
 
 } // namespace argparse
