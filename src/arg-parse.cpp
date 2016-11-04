@@ -327,10 +327,23 @@ const std::string ArgParse::help()
     return help.str();
 }
 
+inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
+{
+    std::string typeSpecMsg("");
+    if (err.type == ArgParse::ArgError::ArgType)
+        typeSpecMsg = std::string(", arg: ") + err.arg->_name;
+    else if (err.type == ArgParse::ArgError::FlagType)
+        typeSpecMsg = std::string(", flag: ") + err.flag->_longFlag + " " + err.flag->_shortFlag;
+
+    os << "error: '" << err.errorMessage << "', code: " << err.errorCode << typeSpecMsg << ".";
+    return os;
+}
+
 const std::string ArgParse::error()
 {
     std::stringstream error;
-    error << "error: the '' is not a valid argument or flag.";
+    for (auto const& err : _errors)
+        error << err << std::endl;
     return error.str();
 }
 

@@ -144,11 +144,7 @@ private:
     size_t _defFlagsCount;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
-{
-    os << "error: " << err.errorMessage;
-    return os;
-}
+inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err);
 
 // Value
 
