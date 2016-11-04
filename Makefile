@@ -1,26 +1,26 @@
 all: arg-parse
 
-arg-parse: build_dir
+arg-parse: build-dir
 	cd build/ && make arg-parse
 
-build-tests: build_dir
-	cd build/ && make unit
+tests.build: build-dir
+	cd build/ && make tests
 
-run-unit-tests: build-tests
-	cd build/ && ./bin/unit --unit
+tests.run.unit: tests.build
+	cd build/ && ./bin/tests --unit
 
-run-manual-tests: build-tests
-	cd build/ && ./bin/unit --manual
+tests.run.manual: tests.build
+	cd build/ && ./bin/tests --manual
 
-run-tests: build-tests
-	cd build/ && ./bin/unit
+tests.run.all: tests.build
+	cd build/ && ./bin/tests
 
-build_dir:
+build-dir:
 	mkdir -p build/
 	cd build/ && cmake ../
 
 clean:
 	cd build && make clean
 
-distclean:
+dist-clean:
 	rm -rf build/
