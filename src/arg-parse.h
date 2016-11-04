@@ -77,6 +77,11 @@ public:
 
     ArgParse(const OptionList& = {});
 
+    const size_t undefArgsCount() const { return _undefArgsCount; }
+    const size_t defArgsCount() const { return _defArgsCount; }
+    const size_t undefFlagsCount() const { return _undefFlagsCount; }
+    const size_t defFlagsCount() const { return _defFlagsCount; }
+
     const Arg& add(const Arg&);
     const Flag& add(const Flag&, CallBackFunc = nullptr);
 
@@ -86,18 +91,13 @@ public:
     const std::string error();
     const std::vector<ArgError>& errors() { return _errors; }
 
-    const size_t undefArgsCount() const { return _undefArgsCount; }
-    const size_t defArgsCount() const { return _defArgsCount; }
-    const size_t undefFlagsCount() const { return _undefFlagsCount; }
-    const size_t defFlagsCount() const { return _defFlagsCount; }
-
     const bool checkFlag(const std::string& flagStr);
     template<typename T>
     const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
 
     Arg const& operator[](const std::size_t& idx);
-    Flag const& operator[](const char* idx);
     Flag const& operator[](const std::string& idx);
+    Flag const& operator[](const char* idx);
 
     struct Options {
         struct Option {
@@ -192,11 +192,7 @@ struct Arg : Value {
         const Value& defaultValue = Value());
     Arg(const Value& value);
 
-    void setArg(const std::string& value)
-    {
-        isSet = true;
-        str = value;
-    }
+    void setArg(const std::string& value);
 
     bool isSet;
 // private:
@@ -219,8 +215,8 @@ struct Flag {
          const Value value);
 
     bool isSet;
-    Value value;
     bool hasValue;
+    Value value;
 // private:
     std::string _longFlag;
     std::string _shortFlag;

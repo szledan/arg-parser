@@ -32,7 +32,7 @@
 
 namespace argparse {
 
-// ArgPars
+// Util functions.
 
 namespace {
 
@@ -49,48 +49,6 @@ const bool readOptionValue(const ArgParse::OptionList& optionList, ArgParse::Opt
     }
 
     return opt.current.isSet();
-}
-
-} // namespace anonymous
-
-ArgParse::ArgParse(const OptionList& oList)
-    : _undefArgsCount(0)
-    , _defArgsCount(0)
-    , _undefFlagsCount(0)
-    , _defFlagsCount(0)
-{
-    readOptionValue(oList, options.programName);
-    readOptionValue(oList, options.tab);
-    readOptionValue(oList, options.mode);
-    if (readOptionValue(oList, options.helpFlag))
-        add(Flag("--help", "-h", "Show this help."));
-}
-
-const Arg& ArgParse::add(const Arg& arg)
-{
-    _args.push_back(arg);
-    return _args.back();
-}
-
-const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
-{
-    std::string name = flag._shortFlag + flag._longFlag;
-
-//    if (name.empty())
-//        return _flags[""];
-
-    _flags[name] = flag;
-
-    Flag* flagPtr = &(_flags[name]);
-    if (!flag._longFlag.empty()) {
-        _longFlags[flag._longFlag] = flagPtr;
-    }
-    if (!flag._shortFlag.empty()) {
-        _shortFlags[flag._shortFlag] = flagPtr;
-    }
-
-    flagPtr->_callBackFunc = cbf;
-    return *flagPtr;
 }
 
 enum ParamType {
@@ -126,6 +84,47 @@ ParamType mapParamType(const std::string& arg)
     return ParamType::LongFlagWithoutEqType;
 }
 
+} // namespace anonymous
+
+// ArgPars
+
+ArgParse::ArgParse(const OptionList& oList)
+    : _undefArgsCount(0)
+    , _defArgsCount(0)
+    , _undefFlagsCount(0)
+    , _defFlagsCount(0)
+{
+    readOptionValue(oList, options.programName);
+    readOptionValue(oList, options.tab);
+    readOptionValue(oList, options.mode);
+    if (readOptionValue(oList, options.helpFlag))
+        add(Flag("--help", "-h", "Show this help."));
+}
+
+const Arg& ArgParse::add(const Arg& arg)
+{
+    _args.push_back(arg);
+    return _args.back();
+}
+
+const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
+{
+    std::string name = flag._shortFlag + flag._longFlag;
+
+    _flags[name] = flag;
+
+    Flag* flagPtr = &(_flags[name]);
+    if (!flag._longFlag.empty()) {
+        _longFlags[flag._longFlag] = flagPtr;
+    }
+    if (!flag._shortFlag.empty()) {
+        _shortFlags[flag._shortFlag] = flagPtr;
+    }
+
+    flagPtr->_callBackFunc = cbf;
+    return *flagPtr;
+}
+
 const bool ArgParse::parse(const int argc_, char* const argv_[])
 {
     if ((argc_ < 1) || (!argv_) || (!argv_[0])) {
@@ -151,8 +150,31 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         std::string paramStr(argv_[adv]);
         std::string valueStr(adv + 1 < argc ? argv_[adv + 1] : "");
 
-std::cout << "paramStr " << paramStr << std::endl;
-std::cout << "valueStr " << valueStr << std::endl;
+#define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
+        if (FLAGS.find(paramStr) == FLAGS.end()) { \
+            add(Flag(paramStr, "")); \
+            _undefFlagsCount++; \
+        } else \
+            _defFlagsCount++; \
+    \
+        Flag* flag = FLAGS[paramStr]; \
+        assert(flag); \
+        flag->isSet = true; \
+    \
+        if ((CHECH_VALUE) && flag->hasValue) { \
+            if (valueStr.empty() && flag->value._isValueNeeded) { \
+                addError(ErrorRequiredFlagValueMissing, "",flag); \
+            } else if ((flag->value._isValueNeeded) \
+                       && (mapParamType(valueStr) != ParamType::ArgType) \
+                       && (checkFlag(valueStr))) { \
+                addError(ErrorRequiredFlagValueMissing, "",flag); \
+            } else { \
+                flag->value.str = valueStr; \
+                ++adv; \
+            } \
+        } \
+    } while (false)
+
         switch (mapParamType(paramStr)) {
         case ParamType::ArgType:
             if (_args.size() > argCount) {
@@ -166,50 +188,32 @@ std::cout << "valueStr " << valueStr << std::endl;
             }
             argCount++;
             break;
-        case ParamType::ShortFlagsType:
-            // Fall through.
-        case ParamType::ShortFlagType: {
-//            Flag* flag = _shortFlags[paramStr];
-//            flag->isSet = true;
-            // TODO: value!!!
+        case ParamType::ShortFlagsType: {
+            const std::string shortFlags = paramStr;
+            for (size_t i = 1; i < paramStr.size(); ++i) {
+                paramStr = std::string("-") + shortFlags[i];
+                const bool check = i == (paramStr.size() - 1);
+                AP_SETUP_FLAG(_shortFlags, check);
+            }
             break;
         }
+        case ParamType::ShortFlagType:
+            AP_SETUP_FLAG(_shortFlags, true);
+            break;
         case ParamType::LongFlagWithEqType: {
             const size_t posEq = paramStr.find("=");
             valueStr = paramStr.substr(posEq + 1);
             paramStr = paramStr.substr(0, posEq);
             // Fall through.
         }
-        case ParamType::LongFlagWithoutEqType: {
-//#define SETUP_FLAG(FLAGS)
-            if (_longFlags.find(paramStr) == _longFlags.end()) {
-                add(Flag(paramStr, ""));
-                _undefFlagsCount++;
-            } else
-                _defFlagsCount++;
-
-            Flag* flag = _longFlags[paramStr];
-            assert(flag);
-            flag->isSet = true;
-
-            if (flag->hasValue) {
-                if (valueStr.empty() && flag->value._isValueNeeded) {
-                    addError(ErrorRequiredFlagValueMissing, "",flag);
-                } else if ((flag->value._isValueNeeded)
-                           && (mapParamType(valueStr) != ParamType::ArgType)
-                           && (checkFlag(valueStr))) {
-                    addError(ErrorRequiredFlagValueMissing, "",flag);
-                } else {
-                    flag->value.str = valueStr;
-                    ++adv;
-                }
-            }
+        case ParamType::LongFlagWithoutEqType:
+            AP_SETUP_FLAG(_longFlags, true);
             break;
-        }
         default:
             assert(false);
             break;
         };
+#undef AP_SETUP_FLAG
     }
 
     if (requiredArgs) {
@@ -220,8 +224,6 @@ std::cout << "valueStr " << valueStr << std::endl;
 
     return true;
 }
-
-//bool compFlags (Flag& a, Flag& b) { return (a._shortFlag < b._shortFlag || ); }
 
 const std::string ArgParse::help()
 {
@@ -262,19 +264,19 @@ const std::string ArgParse::help()
     help << std::endl << "Option flags:" << std::endl;
 
     for (auto const& it : _flags) {
-#define HAS_NAME(CH, VALNAME) do { \
-    if (flag.value._isValueNeeded) \
-        help << CH << "<" << VALNAME << ">"; \
-    else \
-        help << CH << "[<" << VALNAME << ">]"; \
+#define AP_HAS_NAME(CH, VALNAME) do { \
+        if (flag.value._isValueNeeded) \
+            help << CH << "<" << VALNAME << ">"; \
+        else \
+            help << CH << "[<" << VALNAME << ">]"; \
     } while(false)
 
-#define PRINT_FLAG(FLAG, L) do { \
-    help << FLAG; \
-    if (flag.value._chooseList.size() > 0) \
-        HAS_NAME(" ", flag.value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
-    else if (!flag.value._name.empty()) \
-        HAS_NAME(" ", flag.value._name); \
+#define AP_PRINT_FLAG(FLAG, L) do { \
+        help << FLAG; \
+        if (flag.value._chooseList.size() > 0) \
+            AP_HAS_NAME(" ", flag.value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
+        else if (!flag.value._name.empty()) \
+            AP_HAS_NAME(" ", flag.value._name); \
     } while(false)
 
         const Flag& flag = it.second;
@@ -283,18 +285,18 @@ const std::string ArgParse::help()
 
         help << tab;
         if (hasShortFlag)
-            PRINT_FLAG(flag._shortFlag, 1);
+            AP_PRINT_FLAG(flag._shortFlag, 1);
         if (hasLongFlag) {
             if (hasShortFlag)
                 help << ", ";
-            PRINT_FLAG(flag._longFlag, 0);
+            AP_PRINT_FLAG(flag._longFlag, 0);
         }
         if (hasShortFlag || hasLongFlag) {
             help << tab << flag._description << std::endl;
         }
 
-#undef PRINT_FLAG
-#undef HAS_NAME
+#undef AP_PRINT_FLAG
+#undef AP_HAS_NAME
     }
 
     return help.str();
@@ -367,24 +369,6 @@ Flag const& ArgParse::operator[](const char* idx)
     return ArgParse::operator[](std::string(idx));
 }
 
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)
-{
-    const ArgError ae = { errorCode, ArgError::GeneralType, nullptr, errorMsg };
-    _errors.push_back(ae);
-}
-
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
-{
-    const ArgError ae = { errorCode, ArgError::ArgType, reinterpret_cast<const void*>(arg), errorMsg };
-    _errors.push_back(ae);
-}
-
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
-{
-    const ArgError ae = { errorCode, ArgError::FlagType, reinterpret_cast<const void*>(flag), errorMsg };
-    _errors.push_back(ae);
-}
-
 void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& value, const int& state)
 {
     int currentState = state;
@@ -404,6 +388,24 @@ void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& v
 
     opt.current.state = currentState;
     opt.current.value = value;
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)
+{
+    const ArgError ae = { errorCode, ArgError::GeneralType, nullptr, errorMsg };
+    _errors.push_back(ae);
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
+{
+    const ArgError ae = { errorCode, ArgError::ArgType, reinterpret_cast<const void*>(arg), errorMsg };
+    _errors.push_back(ae);
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
+{
+    const ArgError ae = { errorCode, ArgError::FlagType, reinterpret_cast<const void*>(flag), errorMsg };
+    _errors.push_back(ae);
 }
 
 // Value
@@ -472,6 +474,12 @@ Arg::Arg(const Value& value)
 {
 }
 
+void Arg::setArg(const std::string& value)
+{
+    isSet = true;
+    str = value;
+}
+
 // Flag
 
 Flag::Flag(const Flag& f)
@@ -507,83 +515,3 @@ Flag::Flag(const std::string& lFlag,
 }
 
 } // namespace argparse
-
-
-//        bool isFlag = false;
-//        std::string value = "";
-
-//        std::cout << arg << std::endl;
-
-//        // Valid flags:
-//        //  -abc
-//        //  -abc valueForC
-//        //  -x
-//        //  -x valueForX
-//        //  --flag
-//        //  --flag=valueForFlag
-//        //  (--flag valueForFlag)
-//        // Arguments:
-//        //  argument
-//        //  -
-//        //  --
-
-//        assert(arg.size());
-//        if (arg[0] == '-')                  // '-___
-//        {
-//            isFlag = true;
-//            if (arg.size() == 1)            // '-'
-//            {
-//                isFlag = false;
-//                value = arg;
-//            }
-//            else if (arg[1] == '-')         // '--___
-//            {
-//                if (arg.size() == 2)        // '--'
-//                {
-//                    isFlag = false;
-//                    value = arg;
-//                }
-//                else                        // '--flag' valid long flag
-//                {
-//                    // TODO: check the Flag type: simple or need value
-//                    int eqPos = arg.find("=");
-//                    std::string longFlag = arg.substr(0, eqPos);
-//                    std::string valueStr("");
-//                    if (eqPos > 0)
-//                        valueStr = arg.substr(eqPos + 1);
-//std::cout << "longFlag: " << longFlag << ", valueStr: " << valueStr << ",  eqPos: " << eqPos << std::endl;
-
-//                    if (_flags.find(arg) == _flags.end()) {
-//                        // TODO: error
-//                        isFlag = false;
-//                        value = arg;
-//                    } else {
-//                        Flag& f = _flags[arg];
-//                        f._isSet = true;
-//std::cout << f._isSet << std::endl;
-//                        if (f._hasValue) {
-//std::cout << "has value" << std::endl;
-//                        }
-//                    }
-//                }
-//            }
-//            else if (arg.size() == 2)       // '-_' valid short flag
-//            {
-//                // TODO: check the Flag type: simple or need value
-//            }
-//            else                            // '-___' valid short flags
-//            {
-//                // TODO: check the Flag type: simple or need value
-//            }
-//        }
-//        else                                // '___' argument
-//        {
-//            isFlag = false;
-//            value = arg;
-//        }
-
-//        if (isFlag) {
-
-//        } else {
-//            _args.push_back(Arg("", "", false, Value(value)));
-//        }
