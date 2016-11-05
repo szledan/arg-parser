@@ -102,10 +102,6 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
 // ArgPars
 
 ArgParse::ArgParse(const OptionList& oList)
-    : _undefArgsCount(0)
-    , _defArgsCount(0)
-    , _undefFlagsCount(0)
-    , _defFlagsCount(0)
 {
     readOptionValue(oList, options.programName);
     readOptionValue(oList, options.tab);
@@ -167,9 +163,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 #define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
         if (FLAGS.find(paramStr) == FLAGS.end()) { \
             add(Flag(paramStr, "")); \
-            _undefFlagsCount++; \
+            counts.undefinedFlags++; \
         } else \
-            _defFlagsCount++; \
+            counts.definedFlags++; \
     \
         Flag* flag = FLAGS[paramStr]; \
         assert(flag); \
@@ -200,10 +196,10 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                 if (_args[argCount]._isArgNeeded)
                     requiredArgs--;
                 _args[argCount].setArg(paramStr);
-                _defArgsCount++;
+                counts.definedArgs++;
             } else {
                 _args.push_back(Arg("", "", false, Value(paramStr)));
-                _undefArgsCount++;
+                counts.undefinedArgs++;
             }
             argCount++;
             break;
@@ -430,19 +426,19 @@ void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& v
 
 void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)
 {
-    const ArgError ae = { errorCode, ArgError::GeneralType, nullptr, errorMsg };
+    const ArgError ae = { ArgError::GeneralType, errorCode, nullptr, errorMsg };
     _errors.push_back(ae);
 }
 
 void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
 {
-    const ArgError ae = { errorCode, ArgError::ArgType, reinterpret_cast<const void*>(arg), errorMsg };
+    const ArgError ae = { ArgError::ArgType, errorCode, reinterpret_cast<const void*>(arg), errorMsg };
     _errors.push_back(ae);
 }
 
 void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
 {
-    const ArgError ae = { errorCode, ArgError::FlagType, reinterpret_cast<const void*>(flag), errorMsg };
+    const ArgError ae = { ArgError::FlagType, errorCode, reinterpret_cast<const void*>(flag), errorMsg };
     _errors.push_back(ae);
 }
 

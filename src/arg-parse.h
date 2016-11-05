@@ -60,27 +60,24 @@ public:
     };
 
     struct ArgError {
-        enum ArgErrorType { GeneralType, ArgType, FlagType };
+        enum ArgErrorType {
+            GeneralType,
+            ArgType,
+            FlagType,
+        } const type;
 
         const ErrorCodes errorCode;
-        const ArgErrorType type;
         union {
             const void* _ptr;
             const Arg* arg;
             const Flag* flag;
         };
         const std::string errorMessage;
-
     };
 
     typedef std::initializer_list<std::string> OptionList;
 
     ArgParse(const OptionList& = {});
-
-    const size_t undefArgsCount() const { return _undefArgsCount; }
-    const size_t defArgsCount() const { return _defArgsCount; }
-    const size_t undefFlagsCount() const { return _undefFlagsCount; }
-    const size_t defFlagsCount() const { return _defFlagsCount; }
 
     const Arg& add(const Arg&);
     const Flag& add(const Flag&, CallBackFunc = nullptr);
@@ -99,9 +96,15 @@ public:
     Flag const& operator[](const std::string& idx);
     Flag const& operator[](const char* idx);
 
+    struct Counts {
+        size_t undefinedArgs;
+        size_t definedArgs;
+        size_t undefinedFlags;
+        size_t definedFlags;
+    } counts = { 0u, 0u, 0u, 0u };
+
     struct Options {
         struct Option {
-            const std::string name;
             struct Value {
                 enum {
                     Unused = -1,
@@ -113,9 +116,12 @@ public:
                     FourSpace,
                 };
                 const bool isSet() const { return state != NotSet; }
+
                 std::string value;
                 int state;
             };
+
+            const std::string name;
             const Value init;
             Value current;
         }
@@ -138,10 +144,6 @@ private:
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<ArgError> _errors;
-    size_t _undefArgsCount;
-    size_t _defArgsCount;
-    size_t _undefFlagsCount;
-    size_t _defFlagsCount;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err);

@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    const bool all = args["--all"].isSet || !args.defFlagsCount();
+    const bool all = args["--all"].isSet || !args.counts.definedFlags;
 
     unittest::TestContext ctx;
 
