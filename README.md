@@ -16,6 +16,8 @@ make arg-parse
 ```
 ## Usage
 
+Read more: [API reference](./doc/api-reference.md) and [examples](./demos/README.md).
+
 Source files
 ```
 ./arg-parse.cpp
