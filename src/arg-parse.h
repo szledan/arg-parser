@@ -25,14 +25,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
- * TODO: README
- *  ArgParse:
- *      Arg : Value
- *      Flag { Value }
- *      ErrorCodes;
- */
-
 #include <iostream>
 #include <map>
 #include <sstream>
