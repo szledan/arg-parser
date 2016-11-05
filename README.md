@@ -78,9 +78,9 @@ Run: `./build/main`.
 
 Build all tests
 ```
-make build-tests
+make tests.build
 ```
 Run all tests
 ```
-make run-tests
+make tests.run.all
 ```
