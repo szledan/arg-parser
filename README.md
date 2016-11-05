@@ -20,8 +20,8 @@ Read more: [API reference](./doc/api-reference.md) and [examples](./demos/README
 
 Source files
 ```
-./arg-parse.cpp
-./arg-parse.h
+./arg-parse.cpp // Copy from './src'.
+./arg-parse.h   // Copy from './src'.
 ./main.cpp
 ```
 
