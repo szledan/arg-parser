@@ -93,6 +93,7 @@ public:
     const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
 
     Arg const& operator[](const std::size_t& idx);
+    Arg const& operator[](const int idx);
     Flag const& operator[](const std::string& idx);
     Flag const& operator[](const char* idx);
 

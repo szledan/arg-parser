@@ -369,6 +369,11 @@ Arg const& ArgParse::operator[](const std::size_t& idx)
     return _args[idx];
 }
 
+const Arg&ArgParse::operator[](const int idx)
+{
+    return _args[std::size_t(idx)];
+}
+
 const Flag& ArgParse::operator[](const std::string& idx)
 {
     std::string flagStr(idx);

@@ -60,6 +60,8 @@ class ArgParse {
     // TODO: missing description.
     Arg const& operator[](const std::size_t& idx);
     // TODO: missing description.
+    Arg const& operator[](const int idx);
+    // TODO: missing description.
     Flag const& operator[](const std::string& idx);
     // TODO: missing description.
     Flag const& operator[](const char* idx);
