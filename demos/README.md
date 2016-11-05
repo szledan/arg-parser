@@ -5,6 +5,8 @@ Some examples for usage.
 
 ---
 
+[API Reference](./../doc/api-reference.md)
+
 ### Compile together
 
 - Example: `./demos/compile-together`.
@@ -18,5 +20,4 @@ The `make copy-arg-parse` command in Makefile copy the current header and source
 
 ### Using like a dynamic library
 
-
-Please see: [API Reference](./doc/api-reference.md).
+// TODO: missing
