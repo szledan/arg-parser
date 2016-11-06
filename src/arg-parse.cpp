@@ -110,12 +110,6 @@ ArgParse::ArgParse(const OptionList& oList)
         add(Flag("--help", "-h", "Show this help."));
 }
 
-const Arg& ArgParse::add(const Arg& arg)
-{
-    _args.push_back(arg);
-    return _args.back();
-}
-
 const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
 {
     std::string name = flag._shortFlag + flag._longFlag;
@@ -132,6 +126,12 @@ const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
 
     flagPtr->_callBackFunc = cbf;
     return *flagPtr;
+}
+
+const Arg& ArgParse::add(const Arg& arg)
+{
+    _args.push_back(arg);
+    return _args.back();
 }
 
 const bool ArgParse::parse(const int argc_, char* const argv_[])
@@ -191,18 +191,6 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     } while (false)
 
         switch (mapParamType(paramStr)) {
-        case ParamType::ArgType:
-            if (_args.size() > argCount) {
-                if (_args[argCount]._isArgNeeded)
-                    requiredArgs--;
-                _args[argCount].setArg(paramStr);
-                counts.definedArgs++;
-            } else {
-                _args.push_back(Arg("", "", false, Value(paramStr)));
-                counts.undefinedArgs++;
-            }
-            argCount++;
-            break;
         case ParamType::ShortFlagsType: {
             const std::string shortFlags = paramStr;
             for (size_t i = 1; i < shortFlags.size(); ++i) {
@@ -223,6 +211,18 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         }
         case ParamType::LongFlagWithoutEqType:
             AP_SETUP_FLAG(_longFlags, true, paramStr, "");
+            break;
+        case ParamType::ArgType:
+            if (_args.size() > argCount) {
+                if (_args[argCount]._isArgNeeded)
+                    requiredArgs--;
+                _args[argCount].setArg(paramStr);
+                counts.definedArgs++;
+            } else {
+                _args.push_back(Arg("", "", false, Value(paramStr)));
+                counts.undefinedArgs++;
+            }
+            argCount++;
             break;
         default:
             assert(false);
@@ -326,10 +326,10 @@ const std::string ArgParse::help()
 inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
 {
     std::string typeSpecMsg("");
-    if (err.type == ArgParse::ArgError::ArgType)
-        typeSpecMsg = std::string(", arg: ") + err.arg->_name;
-    else if (err.type == ArgParse::ArgError::FlagType)
+    if (err.type == ArgParse::ArgError::FlagType)
         typeSpecMsg = std::string(", flag: ") + err.flag->_longFlag + " " + err.flag->_shortFlag;
+    else if (err.type == ArgParse::ArgError::ArgType)
+        typeSpecMsg = std::string(", arg: ") + err.arg->_name;
 
     os << "error: '" << err.errorMessage << "', code: " << err.errorCode << typeSpecMsg << ".";
     return os;
@@ -362,16 +362,6 @@ const bool ArgParse::checkFlagAndReadValue(const std::string& flagStr, T* value)
     s << flag.value.str;
     s >> (*value);
     return !s.fail();
-}
-
-Arg const& ArgParse::operator[](const std::size_t& idx)
-{
-    return _args[idx];
-}
-
-const Arg&ArgParse::operator[](const int idx)
-{
-    return _args[std::size_t(idx)];
 }
 
 const Flag& ArgParse::operator[](const std::string& idx)
@@ -408,6 +398,16 @@ Flag const& ArgParse::operator[](const char* idx)
     return ArgParse::operator[](std::string(idx));
 }
 
+const Arg& ArgParse::operator[](const std::size_t& idx)
+{
+    return _args[idx];
+}
+
+const Arg& ArgParse::operator[](const int idx)
+{
+    return _args[std::size_t(idx)];
+}
+
 void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& value, const int& state)
 {
     int currentState = state;
@@ -435,15 +435,15 @@ void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string
     _errors.push_back(ae);
 }
 
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
-{
-    const ArgError ae = { ArgError::ArgType, errorCode, reinterpret_cast<const void*>(arg), errorMsg };
-    _errors.push_back(ae);
-}
-
 void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
 {
     const ArgError ae = { ArgError::FlagType, errorCode, reinterpret_cast<const void*>(flag), errorMsg };
+    _errors.push_back(ae);
+}
+
+void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
+{
+    const ArgError ae = { ArgError::ArgType, errorCode, reinterpret_cast<const void*>(arg), errorMsg };
     _errors.push_back(ae);
 }
 
@@ -487,38 +487,6 @@ const std::string Value::_getChoosesStr(const bool full) const
     return ss.str().substr(1) + end;
 }
 
-// Arg
-
-Arg::Arg(const Arg& a)
-    : Value((Value)a)
-    , isSet(a.isSet)
-    , _isArgNeeded(a._isArgNeeded)
-    , _callBackFunc(a._callBackFunc)
-{
-}
-
-Arg::Arg(const std::string& name,
-         const std::string& description,
-         const bool isNeeded,
-         const Value& defaultValue)
-    : Value(defaultValue.str, name, description)
-    , isSet(false)
-    , _isArgNeeded(isNeeded)
-    , _callBackFunc(nullptr)
-{
-}
-
-Arg::Arg(const Value& value)
-    : Arg("", "", false, value)
-{
-}
-
-void Arg::setArg(const std::string& value)
-{
-    isSet = true;
-    str = value;
-}
-
 // Flag
 
 Flag::Flag(const Flag& f)
@@ -551,6 +519,38 @@ Flag::Flag(const std::string& lFlag,
 {
     hasValue = true;
     value = definedValue;
+}
+
+// Arg
+
+Arg::Arg(const Arg& a)
+    : Value((Value)a)
+    , isSet(a.isSet)
+    , _isArgNeeded(a._isArgNeeded)
+    , _callBackFunc(a._callBackFunc)
+{
+}
+
+Arg::Arg(const std::string& name,
+         const std::string& description,
+         const bool isNeeded,
+         const Value& defaultValue)
+    : Value(defaultValue.str, name, description)
+    , isSet(false)
+    , _isArgNeeded(isNeeded)
+    , _callBackFunc(nullptr)
+{
+}
+
+Arg::Arg(const Value& value)
+    : Arg("", "", false, value)
+{
+}
+
+void Arg::setArg(const std::string& value)
+{
+    isSet = true;
+    str = value;
 }
 
 } // namespace argparse

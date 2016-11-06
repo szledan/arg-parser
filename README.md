@@ -34,8 +34,6 @@ int main(int argc, char* argv[])
 {
     argparse::ArgParse args;
 
-    args.add(argparse::Arg("first", "This arg needs to be set.", argparse::Arg::IsNeeded));
-    args.add(argparse::Arg("second", "This arg does not need.", !argparse::Arg::IsNeeded));
     args.add(argparse::Flag("--flag", "-f", "This flag is only setable, doesn't have value."));
     args.add(argparse::Flag("--number", "-n", "Set a 'number', this flag does not have 'default value', but has 'name' and 'desciption'.", argparse::Value("", "integer", "An integer number.")));
     args.add(argparse::Flag("--choose", "-c", "Choose a value with 'default'.", argparse::Value("A", {"A", "B", "C"})));
@@ -45,6 +43,8 @@ int main(int argc, char* argv[])
                             argparse::Value("3.14", /* default string of value; if it is not set then value of flag needs to be set. */
                                             "pi", /* name of value of flag, only for help */
                                             "The pi number." /* description of value of flag, only for help */)));
+    args.add(argparse::Arg("first", "This arg needs to be set.", argparse::Arg::IsNeeded));
+    args.add(argparse::Arg("second", "This arg does not need.", !argparse::Arg::IsNeeded));
 
     if (!args.parse(argc, argv)) {
         // Show error messages.

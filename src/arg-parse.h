@@ -46,23 +46,23 @@ class ArgParse {
 public:
     enum ErrorCodes {
         NoError = 0,
-        ErrorRequiredArgumentMissing,
         ErrorRequiredFlagValueMissing,
+        ErrorRequiredArgumentMissing,
         ErrorARGVEmpty,
     };
 
     struct ArgError {
         enum ArgErrorType {
             GeneralType,
-            ArgType,
             FlagType,
+            ArgType,
         } const type;
 
         const ErrorCodes errorCode;
         union {
             const void* _ptr;
-            const Arg* arg;
             const Flag* flag;
+            const Arg* arg;
         };
         const std::string errorMessage;
     };
@@ -71,8 +71,8 @@ public:
 
     ArgParse(const OptionList& = {});
 
-    const Arg& add(const Arg&);
     const Flag& add(const Flag&, CallBackFunc = nullptr);
+    const Arg& add(const Arg&);
 
     const bool parse(const int argc, char* const argv[]);
 
@@ -84,16 +84,16 @@ public:
     template<typename T>
     const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
 
-    Arg const& operator[](const std::size_t& idx);
-    Arg const& operator[](const int idx);
     Flag const& operator[](const std::string& idx);
     Flag const& operator[](const char* idx);
+    Arg const& operator[](const std::size_t& idx);
+    Arg const& operator[](const int idx);
 
     struct Counts {
-        size_t undefinedArgs;
-        size_t definedArgs;
-        size_t undefinedFlags;
         size_t definedFlags;
+        size_t undefinedFlags;
+        size_t definedArgs;
+        size_t undefinedArgs;
     } counts = { 0u, 0u, 0u, 0u };
 
     struct Options {
@@ -129,13 +129,13 @@ public:
 
 private:
     void addError(const ErrorCodes&, const std::string& errorMsg);
-    void addError(const ErrorCodes&, const std::string& errorMsg, const Arg*);
     void addError(const ErrorCodes&, const std::string& errorMsg, const Flag*);
+    void addError(const ErrorCodes&, const std::string& errorMsg, const Arg*);
 
-    std::vector<Arg> _args;
     std::map<std::string, Flag> _flags;
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
+    std::vector<Arg> _args;
     std::vector<ArgError> _errors;
 };
 
@@ -170,27 +170,6 @@ struct Value {
     bool _isValueNeeded;
 };
 
-// Arg
-
-struct Arg : Value {
-    static const bool IsNeeded = true;
-
-    Arg(const Arg& a);
-
-    Arg(const std::string& name = "",
-        const std::string& description = "",
-        const bool isNeeded = false,
-        const Value& defaultValue = Value());
-    Arg(const Value& value);
-
-    void setArg(const std::string& value);
-
-    bool isSet;
-// private:
-    bool _isArgNeeded;
-    CallBackFunc _callBackFunc;
-};
-
 // Flag
 
 struct Flag {
@@ -212,6 +191,27 @@ struct Flag {
     std::string _longFlag;
     std::string _shortFlag;
     std::string _description;
+    CallBackFunc _callBackFunc;
+};
+
+// Arg
+
+struct Arg : Value {
+    static const bool IsNeeded = true;
+
+    Arg(const Arg& a);
+
+    Arg(const std::string& name = "",
+        const std::string& description = "",
+        const bool isNeeded = false,
+        const Value& defaultValue = Value());
+    Arg(const Value& value);
+
+    void setArg(const std::string& value);
+
+    bool isSet;
+// private:
+    bool _isArgNeeded;
     CallBackFunc _callBackFunc;
 };
 
