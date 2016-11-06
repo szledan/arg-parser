@@ -147,8 +147,8 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
     args.add(Flag(g_longFlag, "", g_description, Value("w", "value")));
 
     struct {
-        const std::string flag;
-        const std::string flagStr;
+        const std::string givenFlag;
+        const std::string definedFlag;
     } testCases[] = {
         { "--a", g_longFlag },
         { std::string("--a=") + value, g_longFlag },
@@ -157,10 +157,11 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
-        const std::string flag = testCases[testCase].flag;
-        const std::string flagStr = testCases[testCase].flagStr;
+        const std::string givenFlag = testCases[testCase].givenFlag;
+        const std::string definedFlag = testCases[testCase].definedFlag;
+        const std::string caseName = givenFlag + "|" + definedFlag + " testcase. ";
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(flag.c_str()), TAP_CHARS(value.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()), TAP_CHARS(value.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);
@@ -169,17 +170,17 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 
         TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-        if (!args[flagStr].isSet)
-            return TAP_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
+        if (!args[definedFlag].isSet)
+            return TAP_FAIL(ctx, caseName + "The flag is not set!");
 
-        if (!args[flagStr].hasValue)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
+        if (!args[definedFlag].hasValue)
+            return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-        if (args[flagStr].value._isValueNeeded)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
+        if (args[definedFlag].value._isValueNeeded)
+            return TAP_FAIL(ctx, caseName + "Wrong '_isValueNeeded'!");
 
-        if (args[flagStr].value.str != value)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Different values!");
+        if (args[definedFlag].value.str != value)
+            return TAP_FAIL(ctx, caseName + "Different values!");
     }
 
     return TAP_PASS(ctx, "Long and short flag tests with not needed value.");
@@ -195,20 +196,23 @@ bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
     args.add(Flag(g_longFlag, "", g_description, Value("", "value")));
 
     struct {
-        const std::string flag;
-        const std::string flagStr;
+        const std::string givenFlag;
+        const std::string definedFlag;
+        const std::string definedValue;
     } testCases[] = {
-        { "--a", g_longFlag },
-        { std::string("--a=") + value, g_longFlag },
-        { "-a", g_shortFlag },
+        { "--a", g_longFlag, value },
+        { std::string("--a=") + value, g_longFlag, "" },
+        { "-a", g_shortFlag, value },
     };
 
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
-        const std::string flag = testCases[testCase].flag;
-        const std::string flagStr = testCases[testCase].flagStr;
+        const std::string givenFlag = testCases[testCase].givenFlag;
+        const std::string definedFlag = testCases[testCase].definedFlag;
+        const std::string definedValue = testCases[testCase].definedValue;
+        const std::string caseName = givenFlag + "|" + definedFlag + " testcase. ";
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(flag.c_str()), TAP_CHARS(value.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);
@@ -217,17 +221,17 @@ bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
 
         TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-        if (!args[flagStr].isSet)
-            return TAP_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
+        if (!args[definedFlag].isSet)
+            return TAP_FAIL(ctx, caseName + "The flag is not set!");
 
-        if (!args[flagStr].hasValue)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
+        if (!args[definedFlag].hasValue)
+            return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-        if (!args[flagStr].value._isValueNeeded)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
+        if (!args[definedFlag].value._isValueNeeded)
+            return TAP_FAIL(ctx, caseName + "Wrong '_isValueNeeded'!");
 
-        if (args[flagStr].value.str != value)
-            return TAP_FAIL(ctx, flag + " testcase. " + "Different values!");
+        if (args[definedFlag].value.str != value)
+            return TAP_FAIL(ctx, caseName + "Different values!");
     }
 
     return TAP_PASS(ctx, "Long and short flag tests with not needed value.");

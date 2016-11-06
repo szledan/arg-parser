@@ -59,11 +59,9 @@ enum ParamType {
     LongFlagWithoutEqType,
 };
 
-ParamType mapParamType(const std::string& arg)
+const ParamType mapParamType(const std::string& arg)
 {
-    assert(arg.size());
-
-    if (arg.size() == 1 || arg[0] != '-' || (arg.size() == 2 && arg[1] == '-'))
+    if (arg.size() <= 1 || arg[0] != '-' || (arg.size() == 2 && arg[1] == '-'))
         return ParamType::ArgType;
 
     assert(arg[0] == '-');
@@ -157,17 +155,28 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     std::vector<CallBackFunc> callBackFuncs;
     // Parse params.
     for (size_t adv = 1, argCount = 0; adv < argc; ++adv) {
-        std::string paramStr(argv_[adv]);
-        std::string valueStr(adv + 1 < argc ? argv_[adv + 1] : "");
+        struct {
+            std::string paramStr;
+            const ParamType paramType;
+            const bool hasNextParam;
+            std::string valueStr;
+        } param = {
+            std::string(argv_[adv]),
+            mapParamType(param.paramStr),
+            adv + 1 < argc,
+            std::string(param.hasNextParam ? argv_[adv + 1] : ""),
+        };
 
-#define AP_SETUP_FLAG(FLAGS, CHECH_VALUE, LONG, SHORT) do { \
-        if (FLAGS.find(paramStr) == FLAGS.end()) { \
+#define AP_CHECK_FLAG_EXIST(FLAGS, LONG, SHORT) do { \
+        if (FLAGS.find(param.paramStr) == FLAGS.end()) { \
             add(Flag(LONG, SHORT)); \
             counts.undefinedFlags++; \
         } else \
             counts.definedFlags++; \
-    \
-        Flag* flag = FLAGS[paramStr]; \
+    } while (false)
+
+#define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
+        Flag* flag = FLAGS[param.paramStr]; \
         assert(flag); \
         flag->isSet = true; \
         if (flag->_callBackFunc) { \
@@ -175,51 +184,68 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         } \
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
-            if (valueStr.empty() && flag->value._isValueNeeded) { \
-                addError(ErrorRequiredFlagValueMissing, "", flag); \
+            if (!param.hasNextParam && flag->value._isValueNeeded) { \
+                addError(ErrorRequiredFlagValueMissing, "Missing required value.", flag); \
             } else if ((flag->value._isValueNeeded) \
-                       && (mapParamType(valueStr) != ParamType::ArgType) \
-                       && (checkFlag(valueStr))) { \
-                addError(ErrorRequiredFlagValueMissing, "", flag); \
-            } else if (!findValue(valueStr, flag->value._chooseList)) { \
-                    addError(ErrorRequiredFlagValueMissing, "", flag); \
+                       && (mapParamType(param.valueStr) != ParamType::ArgType) \
+                       && (checkFlag(param.valueStr))) { \
+                addError(ErrorRequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
+            } else if (!findValue(param.valueStr, flag->value._chooseList)) { \
+                    addError(ErrorRequiredFlagValueMissing, "Did not find choose in list.", flag); \
             } else { \
-                flag->value.str = valueStr; \
-                ++adv; \
+                flag->value.str = param.valueStr; \
+                if (param.paramType != LongFlagWithEqType) \
+                    ++adv; \
             } \
         } \
     } while (false)
 
-        switch (mapParamType(paramStr)) {
+        switch (param.paramType) {
         case ParamType::ShortFlagsType: {
-            const std::string shortFlags = paramStr;
+            const std::string shortFlags = param.paramStr;
             for (size_t i = 1; i < shortFlags.size(); ++i) {
-                paramStr = std::string("-") + shortFlags[i];
-                const bool check = i == (paramStr.size() - 1);
-                AP_SETUP_FLAG(_shortFlags, check, "", paramStr);
+                param.paramStr = std::string("-") + shortFlags[i];
+                const bool check = i == (param.paramStr.size() - 1);
+                AP_CHECK_FLAG_EXIST(_shortFlags, "", param.paramStr);
+                AP_SETUP_FLAG(_shortFlags, check);
             }
             break;
         }
         case ParamType::ShortFlagType:
-            AP_SETUP_FLAG(_shortFlags, true, "", paramStr);
+            AP_CHECK_FLAG_EXIST(_shortFlags, "", param.paramStr);
+            AP_SETUP_FLAG(_shortFlags, true);
             break;
         case ParamType::LongFlagWithEqType: {
-            const size_t posEq = paramStr.find("=");
-            valueStr = paramStr.substr(posEq + 1);
-            paramStr = paramStr.substr(0, posEq);
-            // Fall through.
+            const bool isDefinedFullParam = _longFlags.find(param.paramStr) != _longFlags.end();
+            if (!isDefinedFullParam) {
+                const size_t posEq = param.paramStr.find("=");
+                param.valueStr = param.paramStr.substr(posEq + 1);
+                param.paramStr = param.paramStr.substr(0, posEq);
+
+                if (_longFlags.find(param.paramStr) == _longFlags.end()) {
+                    // Add undefined flag with value.
+                    add(Flag(param.paramStr, "", "", Value("_")));
+                    _longFlags[param.paramStr]->value.str = param.valueStr;
+                    counts.undefinedFlags++;
+                } else {
+                    AP_CHECK_FLAG_EXIST(_longFlags, param.paramStr, "");
+                }
+            }
+            AP_SETUP_FLAG(_longFlags, true);
+            break;
         }
         case ParamType::LongFlagWithoutEqType:
-            AP_SETUP_FLAG(_longFlags, true, paramStr, "");
+            AP_CHECK_FLAG_EXIST(_longFlags, param.paramStr, "");
+            AP_SETUP_FLAG(_longFlags, true);
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
                 if (_args[argCount]._isArgNeeded)
                     requiredArgs--;
-                _args[argCount].setArg(paramStr);
+                _args[argCount].setArg(param.paramStr);
                 counts.definedArgs++;
             } else {
-                _args.push_back(Arg("", "", false, Value(paramStr)));
+                _args.push_back(Arg("", "", false, Value(param.paramStr)));
                 counts.undefinedArgs++;
             }
             argCount++;
@@ -369,6 +395,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
     std::string flagStr(idx);
     switch (mapParamType(flagStr)) {
     case ParamType::ArgType:
+        // FIXME: delete this assert, return something.
         assert(false);
         break;
     case ParamType::ShortFlagsType:
@@ -379,7 +406,8 @@ const Flag& ArgParse::operator[](const std::string& idx)
             return add(Flag("", flagStr));
         return *(_shortFlags[flagStr]);
     case ParamType::LongFlagWithEqType:
-        flagStr = flagStr.substr(0, flagStr.find("="));
+        if (_longFlags.find(flagStr) == _longFlags.end())
+            flagStr = flagStr.substr(0, flagStr.find("="));
         // Fall through.
     case ParamType::LongFlagWithoutEqType:
         if (_longFlags.find(flagStr) == _longFlags.end())

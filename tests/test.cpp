@@ -56,10 +56,10 @@ int main(int argc, char* argv[])
         testargparse::argErrorTests(&ctx);
         testargparse::flagTests(&ctx);
         testargparse::valueTests(&ctx);
-//        testargparse::parserTests(&ctx);
-//        testargparse::operatorTests(&ctx);
-//        testargparse::checkFlagTests(&ctx);
-//        testargparse::checkFlagAndReadValueTests(&ctx);
+        testargparse::parserTests(&ctx);
+        testargparse::operatorTests(&ctx);
+        testargparse::checkFlagTests(&ctx);
+        testargparse::checkFlagAndReadValueTests(&ctx);
         testargparse::countsTests(&ctx);
 //        testargparse::optionsTests(&ctx);
 //        testargparse::argStructTests(&ctx);

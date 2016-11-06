@@ -1,6 +1,3 @@
-#ifndef TEST_H
-#define TEST_H
-
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -25,47 +22,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
-#include "test-defs.h"
-#include <string>
-#include <sstream>
-#include <vector>
+#include "test.h"
+
+#include <assert.h>
 
 namespace testargparse {
+namespace {
 
-class TestContext {
-public:
-    TestContext(const bool& showPass = true) : _pass(0), _nums(0), _showPass(showPass) {}
-    typedef bool (*TestInstanceFunc)(TestContext*);
+using namespace argparse;
 
-    void add(TestInstanceFunc);
-    int run();
+const std::string g_shortFlag = "-a";
+const std::string g_longFlag = "--a";
+const std::string g_description = "Simple settable flag without value.";
 
-    bool pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    bool fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-private:
-    void test(const std::string& file, const std::string& func, const std::string& line);
+} // namespace anonymous
 
-    uint32_t _pass;
-    uint32_t _nums;
-    const bool _showPass;
-    std::vector<TestInstanceFunc> _tests;
-    std::stringstream _result;
-};
-
-// Unit and api tests.
-void argErrorTests(TestContext*);
-void flagTests(TestContext*);
-void valueTests(TestContext*);
-void parserTests(TestContext*);
-void operatorTests(TestContext*);
-void checkFlagTests(TestContext*);
-void checkFlagAndReadValueTests(TestContext*);
-void countsTests(TestContext*);
-
-// Manual tests.
-void manualHelpTest(TestContext*);
+void checkFlagAndReadValueTests(TestContext* ctx)
+{
+}
 
 } // namespace testargparse
-
-#endif // TEST_H
