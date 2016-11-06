@@ -31,14 +31,13 @@ namespace {
 
 using namespace argparse;
 
-#define CHARS(STR) (char*)STR
 const std::string g_shortFlag = "-a";
 const std::string g_longFlag = "--a";
 const std::string g_description = "Simple settable flag without value.";
 
 bool testShortFlagNotSet(TestContext* ctx)
 {
-    char* argv[] = { CHARS("program") };
+    char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -56,7 +55,7 @@ bool testShortFlagNotSet(TestContext* ctx)
 
 bool testShortFlagOnlySet(TestContext* ctx)
 {
-    char* argv[] = { CHARS("program"), CHARS("-a") };
+    char* argv[] = { TAP_CHARS("program"), TAP_CHARS("-a") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -89,7 +88,7 @@ bool testShortFlagOnlySet(TestContext* ctx)
 
 bool testLongFlagNotSet(TestContext* ctx)
 {
-    char* argv[] = { CHARS("program") };
+    char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -107,7 +106,7 @@ bool testLongFlagNotSet(TestContext* ctx)
 
 bool testLongFlagOnlySet(TestContext* ctx)
 {
-    char* argv[] = { CHARS("program"), CHARS("--a") };
+    char* argv[] = { TAP_CHARS("program"), TAP_CHARS("--a") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -161,7 +160,7 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
         const std::string flag = testCases[testCase].flag;
         const std::string flagStr = testCases[testCase].flagStr;
 
-        char* argv[] = { CHARS("program"), CHARS(flag.c_str()), CHARS(value.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(flag.c_str()), TAP_CHARS(value.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);
@@ -209,7 +208,7 @@ bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
         const std::string flag = testCases[testCase].flag;
         const std::string flagStr = testCases[testCase].flagStr;
 
-        char* argv[] = { CHARS("program"), CHARS(flag.c_str()), CHARS(value.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(flag.c_str()), TAP_CHARS(value.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);

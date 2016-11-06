@@ -41,6 +41,10 @@
 #define TAP_FAIL(CTX, MSG) CTX->fail(MSG, TAP_FILE_FUNC_LINE)
 #endif // TAP_FAIL
 
+#ifndef TAP_CHARS
+#define TAP_CHARS(STR) (char*)STR
+#endif // TAP_CHARS
+
 #ifndef TAP_CHECK_NON_REQUIRED_ERRORS
 #define TAP_CHECK_NON_REQUIRED_ERRORS(CTX, ARGS, NUMS) do { \
         if (args.errors().size() != NUMS) { \

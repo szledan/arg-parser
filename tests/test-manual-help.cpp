@@ -54,14 +54,6 @@ void showHelp()
 
     ArgParse args({"program=show-help", "help=on", "tab=\t", "mode=compact"});
 
-    for (int i = 0; i < 2; ++i)
-    for (int v = 0; v < 2; ++v) {
-        args.add(Arg());
-        args.add(Arg("", "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.add(Arg(ARG, "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.add(Arg(ARG, MSG, !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-    }
-
     args.add(Flag());
     for (int i = 0; i < 8; ++i) {
         Value value;
@@ -81,6 +73,14 @@ void showHelp()
         args.add(Flag(LFLAG, SFLAG, "", value));
         args.add(Flag(LFLAG, "", MSG, value));
         args.add(Flag(LFLAG, SFLAG, MSG, value));
+    }
+
+    for (int i = 0; i < 2; ++i)
+    for (int v = 0; v < 2; ++v) {
+        args.add(Arg());
+        args.add(Arg("", "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.add(Arg(ARG, "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.add(Arg(ARG, MSG, !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
     }
 
     std::cout  << args.help() << std::endl;

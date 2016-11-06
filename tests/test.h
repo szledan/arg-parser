@@ -35,7 +35,7 @@ namespace testargparse {
 
 class TestContext {
 public:
-    TestContext() : _pass(0), _nums(0) {}
+    TestContext(const bool& showPass = true) : _pass(0), _nums(0), _showPass(showPass) {}
     typedef bool (*TestInstanceFunc)(TestContext*);
 
     void add(TestInstanceFunc);
@@ -48,13 +48,18 @@ private:
 
     uint32_t _pass;
     uint32_t _nums;
+    const bool _showPass;
     std::vector<TestInstanceFunc> _tests;
     std::stringstream _result;
 };
 
+// Unit and api tests.
 void argErrorTests(TestContext*);
 void flagTests(TestContext*);
 void valueTests(TestContext*);
+void countsTests(TestContext*);
+
+// Manual tests.
 void manualHelpTest(TestContext*);
 
 } // namespace testargparse

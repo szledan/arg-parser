@@ -35,6 +35,7 @@ int main(int argc, char* argv[])
 
     args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
     args.add(argparse::Flag("--manual", "-m", "Select manual tests."));
+    args.add(argparse::Flag("--silent", "-s", "Fails show only."));
 
     if (!args.parse(argc, argv)) {
         std::cout << args.error() << std::endl;
@@ -47,18 +48,28 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    const bool all = args["--all"].isSet || !args.counts.definedFlags;
+    const bool all = args["--all"].isSet || !(args["-u"].isSet || args["-m"].isSet);
 
-    testargparse::TestContext ctx;
+    testargparse::TestContext ctx(!args["--silent"].isSet);
 
     if (args["--unit"].isSet || all) {
         testargparse::argErrorTests(&ctx);
         testargparse::flagTests(&ctx);
         testargparse::valueTests(&ctx);
+//        testargparse::parserTests(&ctx);
+//        testargparse::operatorTests(&ctx);
+//        testargparse::checkFlagTests(&ctx);
+//        testargparse::checkFlagAndReadValueTests(&ctx);
+        testargparse::countsTests(&ctx);
+//        testargparse::optionsTests(&ctx);
+//        testargparse::argStructTests(&ctx);
+//        testargparse::valueStructTests(&ctx);
+//        testargparse::flagStructTests(&ctx);
     }
 
     if (args["--manual"].isSet || all) {
         testargparse::manualHelpTest(&ctx);
+//        testargparse::manualErrorTest(&ctx);
     }
 
     return ctx.run();
@@ -89,7 +100,10 @@ int testargparse::TestContext::run()
     size_t pass = 0;
 
     if (nums) {
-        _result << std::endl << "Run " << nums << " collected test(s)!" << std::endl << std::endl;
+        _result << std::endl << "Run " << nums << " collected test(s)!" << std::endl;
+        if (!_showPass)
+            _result << "Fails show only." << std::endl;
+        _result << std::endl;
 
         for (auto test : _tests)
             if (test(this))
@@ -107,8 +121,10 @@ int testargparse::TestContext::run()
 
 bool testargparse::TestContext::pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
-    this->test(file, func, line);
-    _result << "\033[32;1m" << "PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+    if (_showPass) {
+        this->test(file, func, line);
+        _result << "\033[32;1m" << "PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+    }
     return true;
 }
 

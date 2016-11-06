@@ -160,9 +160,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         std::string paramStr(argv_[adv]);
         std::string valueStr(adv + 1 < argc ? argv_[adv + 1] : "");
 
-#define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
+#define AP_SETUP_FLAG(FLAGS, CHECH_VALUE, LONG, SHORT) do { \
         if (FLAGS.find(paramStr) == FLAGS.end()) { \
-            add(Flag(paramStr, "")); \
+            add(Flag(LONG, SHORT)); \
             counts.undefinedFlags++; \
         } else \
             counts.definedFlags++; \
@@ -205,15 +205,15 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         case ParamType::ShortFlagsType: {
             const std::string shortFlags = paramStr;
-            for (size_t i = 1; i < paramStr.size(); ++i) {
+            for (size_t i = 1; i < shortFlags.size(); ++i) {
                 paramStr = std::string("-") + shortFlags[i];
                 const bool check = i == (paramStr.size() - 1);
-                AP_SETUP_FLAG(_shortFlags, check);
+                AP_SETUP_FLAG(_shortFlags, check, "", paramStr);
             }
             break;
         }
         case ParamType::ShortFlagType:
-            AP_SETUP_FLAG(_shortFlags, true);
+            AP_SETUP_FLAG(_shortFlags, true, "", paramStr);
             break;
         case ParamType::LongFlagWithEqType: {
             const size_t posEq = paramStr.find("=");
@@ -222,7 +222,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             // Fall through.
         }
         case ParamType::LongFlagWithoutEqType:
-            AP_SETUP_FLAG(_longFlags, true);
+            AP_SETUP_FLAG(_longFlags, true, paramStr, "");
             break;
         default:
             assert(false);
