@@ -26,7 +26,8 @@
 
 #include "arg-parse.h"
 #include <iostream>
-#include <math.h>
+
+// Configure and run tests.
 
 int main(int argc, char* argv[])
 {
@@ -63,6 +64,20 @@ int main(int argc, char* argv[])
     return ctx.run();
 }
 
+// TestContext
+
+// Util functions.
+namespace {
+
+#include <math.h>
+
+inline float perCent(const size_t& counter, const size_t& denom, const float& precision = 100.0f)
+{
+    return (denom * precision) ? trunc(float(counter) / float(denom) * precision * 100.0f) / precision : 0.0f;
+}
+
+} // namespace anonymous
+
 void testargparse::TestContext::add(testargparse::TestContext::TestInstanceFunc test)
 {
     _tests.push_back(test);
@@ -81,8 +96,8 @@ int testargparse::TestContext::run()
                 pass++;
 
         _result << std::endl << "Results:" << std::endl;
-        _result << "  Pass: " << pass << "/" << nums << " (" << (trunc(float(pass) / float(nums) * 10000.0f) / 100.0f) << "%)" << std::endl;
-        _result << "  Fail: " << nums - pass << "/" << nums << " (" << (trunc(float(nums - pass) / float(nums) * 10000.0f) / 100.0f) << "%)" << std::endl;
+        _result << "  Pass: " << pass << "/" << nums << " (" << perCent(pass, nums) << "%)" << std::endl;
+        _result << "  Fail: " << nums - pass << "/" << nums << " (" << perCent(nums - pass, nums) << "%)" << std::endl;
 
         std::clog << _result.str();
     }
