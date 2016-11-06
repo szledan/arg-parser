@@ -28,7 +28,7 @@
 #include <iostream>
 #include <random>
 
-namespace unittest {
+namespace testargparse {
 namespace {
 
 const std::string msg("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec non odio dignissim, dignissim lorem vitae, auctor dolor. Ut eu lacus ut mi finibus finibus. Donec eget condimentum elit, ut facilisis massa. Donec quis erat nulla. Maecenas a pretium nibh. Aliquam pulvinar varius mauris, id feugiat ligula sagittis non. Mauris sit amet convallis ipsum. Etiam accumsan id lorem eu tempus. In rhoncus semper maximus. Nulla quis leo vitae lacus mollis laoreet. Integer in sagittis ligula. Cras eu lacinia enim. Quisque a elit ante. Phasellus tincidunt, ipsum id tempor auctor, quam ex gravida elit, auctor porta elit dolor sit amet lorem. Ut lobortis ante lacus, quis dictum nisi condimentum nec.");
@@ -93,4 +93,4 @@ void manualHelpTest(TestContext* ctx)
     showHelp();
 }
 
-} // namespace unittest
+} // namespace testargparse

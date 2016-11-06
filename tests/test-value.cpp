@@ -24,7 +24,7 @@
 
 #include "test.h"
 
-namespace unittest {
+namespace testargparse {
 
 namespace {
 
@@ -35,4 +35,4 @@ void valueTests(TestContext* ctx)
     // TODO: Value
 }
 
-} // namespace unittest
+} // namespace testargparse

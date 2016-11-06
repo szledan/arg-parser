@@ -26,7 +26,7 @@
 
 #include <assert.h>
 
-namespace unittest {
+namespace testargparse {
 namespace {
 
 using namespace argparse;
@@ -39,7 +39,7 @@ const std::string g_description = "Simple settable flag without value.";
 bool testShortFlagNotSet(TestContext* ctx)
 {
     char* argv[] = { CHARS("program") };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
 
@@ -47,17 +47,17 @@ bool testShortFlagNotSet(TestContext* ctx)
 
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    return UT_PASS(ctx, "Simple short flag test where flag doesn't set.");
+    return TAP_PASS(ctx, "Simple short flag test where flag doesn't set.");
 }
 
 bool testShortFlagOnlySet(TestContext* ctx)
 {
     char* argv[] = { CHARS("program"), CHARS("-a") };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
 
@@ -65,32 +65,32 @@ bool testShortFlagOnlySet(TestContext* ctx)
 
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
     if (!args[g_shortFlag].isSet)
-        return UT_FAIL(ctx, "The flag is not set!");
+        return TAP_FAIL(ctx, "The flag is not set!");
 
     if (args[g_shortFlag].hasValue)
-        return UT_FAIL(ctx, "Wrong 'hasValue' set to true!");
+        return TAP_FAIL(ctx, "Wrong 'hasValue' set to true!");
 
     if (&(args[g_shortFlag]) != &(args[g_longFlag]))
-        return UT_FAIL(ctx, "The short and long flag return values not same!");
+        return TAP_FAIL(ctx, "The short and long flag return values not same!");
 
     if (!args[g_longFlag].isSet)
-        return UT_FAIL(ctx, "The flag is not set!");
+        return TAP_FAIL(ctx, "The flag is not set!");
 
     if (args[g_longFlag].hasValue)
-        return UT_FAIL(ctx, "Wrong 'hasValue' set to true!");
+        return TAP_FAIL(ctx, "Wrong 'hasValue' set to true!");
 
-    return UT_PASS(ctx, "Simple short flag test.");
+    return TAP_PASS(ctx, "Simple short flag test.");
 }
 
 bool testLongFlagNotSet(TestContext* ctx)
 {
     char* argv[] = { CHARS("program") };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
 
@@ -98,17 +98,17 @@ bool testLongFlagNotSet(TestContext* ctx)
 
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    return UT_PASS(ctx, "Simple long flag test where flag doesn't set.");
+    return TAP_PASS(ctx, "Simple long flag test where flag doesn't set.");
 }
 
 bool testLongFlagOnlySet(TestContext* ctx)
 {
     char* argv[] = { CHARS("program"), CHARS("--a") };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
 
@@ -116,26 +116,26 @@ bool testLongFlagOnlySet(TestContext* ctx)
 
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
     if (!args[g_longFlag].isSet)
-        return UT_FAIL(ctx, "The flag is not set!");
+        return TAP_FAIL(ctx, "The flag is not set!");
 
     if (args[g_longFlag].hasValue)
-        return UT_FAIL(ctx, "Wrong 'hasValue' set to true!");
+        return TAP_FAIL(ctx, "Wrong 'hasValue' set to true!");
 
     if (&(args[g_shortFlag]) != &(args[g_longFlag]))
-        return UT_FAIL(ctx, "The short and long flag return values not same!");
+        return TAP_FAIL(ctx, "The short and long flag return values not same!");
 
     if (!args[g_shortFlag].isSet)
-        return UT_FAIL(ctx, "The flag is not set!");
+        return TAP_FAIL(ctx, "The flag is not set!");
 
     if (args[g_shortFlag].hasValue)
-        return UT_FAIL(ctx, "Wrong 'hasValue' set to true!");
+        return TAP_FAIL(ctx, "Wrong 'hasValue' set to true!");
 
-    return UT_PASS(ctx, "Simple long flag test.");
+    return TAP_PASS(ctx, "Simple long flag test.");
 }
 
 bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
@@ -156,34 +156,34 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
         { "-a", g_shortFlag },
     };
 
-    for (size_t testCase = 0; testCase < UT_ARRAY_SIZE(testCases); ++testCase)
+    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
         const std::string flag = testCases[testCase].flag;
         const std::string flagStr = testCases[testCase].flagStr;
 
         char* argv[] = { CHARS("program"), CHARS(flag.c_str()), CHARS(value.c_str()) };
-        const int argc = UT_ARRAY_SIZE(argv);
+        const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);
 
-        UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-        UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
         if (!args[flagStr].isSet)
-            return UT_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
 
         if (!args[flagStr].hasValue)
-            return UT_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
 
         if (args[flagStr].value._isValueNeeded)
-            return UT_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
 
         if (args[flagStr].value.str != value)
-            return UT_FAIL(ctx, flag + " testcase. " + "Different values!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Different values!");
     }
 
-    return UT_PASS(ctx, "Long and short flag tests with not needed value.");
+    return TAP_PASS(ctx, "Long and short flag tests with not needed value.");
 }
 
 bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
@@ -204,34 +204,34 @@ bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
         { "-a", g_shortFlag },
     };
 
-    for (size_t testCase = 0; testCase < UT_ARRAY_SIZE(testCases); ++testCase)
+    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
         const std::string flag = testCases[testCase].flag;
         const std::string flagStr = testCases[testCase].flagStr;
 
         char* argv[] = { CHARS("program"), CHARS(flag.c_str()), CHARS(value.c_str()) };
-        const int argc = UT_ARRAY_SIZE(argv);
+        const int argc = TAP_ARRAY_SIZE(argv);
 
         const bool parseRet = args.parse(argc, argv);
 
-        UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-        UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
         if (!args[flagStr].isSet)
-            return UT_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "The flag is not set!");
 
         if (!args[flagStr].hasValue)
-            return UT_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong set of 'hasValue'!");
 
         if (!args[flagStr].value._isValueNeeded)
-            return UT_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Wrong '_isValueNeeded'!");
 
         if (args[flagStr].value.str != value)
-            return UT_FAIL(ctx, flag + " testcase. " + "Different values!");
+            return TAP_FAIL(ctx, flag + " testcase. " + "Different values!");
     }
 
-    return UT_PASS(ctx, "Long and short flag tests with not needed value.");
+    return TAP_PASS(ctx, "Long and short flag tests with not needed value.");
 }
 
 } // namespace anonymous
@@ -246,4 +246,4 @@ void flagTests(TestContext* ctx)
     ctx->add(testLongAndShortFlagWithNeededValue);
 }
 
-} // namespace unittest
+} // namespace testargparse

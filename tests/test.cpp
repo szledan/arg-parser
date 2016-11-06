@@ -48,27 +48,27 @@ int main(int argc, char* argv[])
 
     const bool all = args["--all"].isSet || !args.counts.definedFlags;
 
-    unittest::TestContext ctx;
+    testargparse::TestContext ctx;
 
     if (args["--unit"].isSet || all) {
-        unittest::argErrorTests(&ctx);
-        unittest::flagTests(&ctx);
-        unittest::valueTests(&ctx);
+        testargparse::argErrorTests(&ctx);
+        testargparse::flagTests(&ctx);
+        testargparse::valueTests(&ctx);
     }
 
     if (args["--manual"].isSet || all) {
-        unittest::manualHelpTest(&ctx);
+        testargparse::manualHelpTest(&ctx);
     }
 
     return ctx.run();
 }
 
-void unittest::TestContext::add(unittest::TestContext::TestInstanceFunc test)
+void testargparse::TestContext::add(testargparse::TestContext::TestInstanceFunc test)
 {
     _tests.push_back(test);
 }
 
-int unittest::TestContext::run()
+int testargparse::TestContext::run()
 {
     const size_t nums = _tests.size();
     size_t pass = 0;
@@ -90,21 +90,21 @@ int unittest::TestContext::run()
     return pass == nums ? 0 : 1;
 }
 
-bool unittest::TestContext::pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
+bool testargparse::TestContext::pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     this->test(file, func, line);
     _result << "\033[32;1m" << "PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     return true;
 }
 
-bool unittest::TestContext::fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
+bool testargparse::TestContext::fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     this->test(file, func, line);
     _result << "\033[31;1m" << "FAIL" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     return false;
 }
 
-inline void unittest::TestContext::test(const std::string& file, const std::string& func, const std::string& line)
+inline void testargparse::TestContext::test(const std::string& file, const std::string& func, const std::string& line)
 {
     _result << "The " << func  << "() at " << file << ":" << line << std::endl;
 }

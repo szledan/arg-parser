@@ -1,5 +1,5 @@
-#ifndef UNITTEST_H
-#define UNITTEST_H
+#ifndef TEST_H
+#define TEST_H
 
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
@@ -26,27 +26,12 @@
  */
 
 #include "arg-parse.h"
+#include "test-defs.h"
 #include <string>
 #include <sstream>
 #include <vector>
 
-namespace unittest {
-
-#ifndef UT_ARRAY_SIZE
-#define UT_ARRAY_SIZE(A) (sizeof(A) ? sizeof(A) / sizeof(A[0]) : 0)
-#endif // UT_ARRAY_SIZE
-
-#ifndef UT_FILE_FUNC_LINE
-#define UT_FILE_FUNC_LINE std::string(__FILE__), std::string(__func__), std::to_string(__LINE__)
-#endif // UT_FILE_FUNC_LINE
-
-#ifndef UT_PASS
-#define UT_PASS(CTX, MSG) CTX->pass(MSG, UT_FILE_FUNC_LINE)
-#endif // UT_PASS
-
-#ifndef UT_FAIL
-#define UT_FAIL(CTX, MSG) CTX->fail(MSG, UT_FILE_FUNC_LINE)
-#endif // UT_FAIL
+namespace testargparse {
 
 class TestContext {
 public:
@@ -72,30 +57,6 @@ void flagTests(TestContext*);
 void valueTests(TestContext*);
 void manualHelpTest(TestContext*);
 
-#ifndef UT_CHECK_NON_REQUIRED_ERRORS
-#define UT_CHECK_NON_REQUIRED_ERRORS(CTX, ARGS, NUMS) do { \
-        if (args.errors().size() != NUMS) { \
-            std::string msg("Generated non required error(s)! Number Of required errors: "); \
-            msg += std::to_string(NUMS) + ", but have: "; \
-            msg += std::to_string(args.errors().size()) + ". "; \
-            msg += "Error message(s): "; \
-            for (auto const& err : args.errors()) \
-                msg += err.errorMessage + " "; \
-            return UT_FAIL(ctx, msg);  \
-        } \
-    } while (false)
+} // namespace testargparse
 
-#endif // UT_CHECK_NON_REQUIRED_ERRORS
-
-#ifndef UT_CHECK_PARSER_EXPECTED_RETURN
-#define UT_CHECK_PARSER_EXPECTED_RETURN(CTX, CONDITION) do { \
-        if (CONDITION) { \
-            return UT_FAIL(ctx, "The parse() returns wrong value! The wrong condition is: " #CONDITION "."); \
-        } \
-    } while (false)
-
-#endif // UT_NON_REQUIRED_ERRORS
-
-} // namespace unittest
-
-#endif // UNITTEST_H
+#endif // TEST_H

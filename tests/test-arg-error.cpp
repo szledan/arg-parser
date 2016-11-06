@@ -27,7 +27,7 @@
 #include <assert.h>
 #include <iostream> // only for testing, delete it!
 
-namespace unittest {
+namespace testargparse {
 namespace {
 
 using namespace argparse;
@@ -40,18 +40,18 @@ bool testArgCountEmptyArgv(TestContext* ctx)
     ArgParse args;
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
 
     if (!args.errors().size())
-        return UT_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
+        return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
     if (args.errors()[0].errorCode != ArgParse::ErrorARGVEmpty)
-        return UT_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
+        return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
     if (args.errors()[0].type != ArgParse::ArgError::GeneralType)
-        return UT_FAIL(ctx, "Wrong error type!");
+        return TAP_FAIL(ctx, "Wrong error type!");
 
-    return UT_PASS(ctx, "ArgCount test with empty 'argv'.");
+    return TAP_PASS(ctx, "ArgCount test with empty 'argv'.");
 }
 
 bool testArgCountZeroArgc(TestContext* ctx)
@@ -62,39 +62,39 @@ bool testArgCountZeroArgc(TestContext* ctx)
     ArgParse args;
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
 
     if (!args.errors().size())
-        return UT_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
+        return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
     if (args.errors()[0].errorCode != ArgParse::ErrorARGVEmpty)
-        return UT_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
+        return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
     if (args.errors()[0].type != ArgParse::ArgError::GeneralType)
-        return UT_FAIL(ctx, "Wrong error type!");
+        return TAP_FAIL(ctx, "Wrong error type!");
 
-    return UT_PASS(ctx, "ArgCount test with zero 'argc'.");
+    return TAP_PASS(ctx, "ArgCount test with zero 'argc'.");
 }
 
 bool testArgCountNonEmptyArgv(TestContext* ctx)
 {
     char* argv[] = { (char*)"program" };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
     const bool parseRet = args.parse(argc, argv);
 
-    UT_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    return UT_PASS(ctx, "ArgCount test with non empty 'argv'.");
+    return TAP_PASS(ctx, "ArgCount test with non empty 'argv'.");
 }
 
 bool testErrorCode(TestContext* ctx)
 {
     char* argv[] = { (char*)"program" };
-    const int argc = UT_ARRAY_SIZE(argv);
+    const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
 
@@ -105,29 +105,29 @@ bool testErrorCode(TestContext* ctx)
     const bool parseRet = args.parse(argc, argv);
 
     if (parseRet == true)
-        return UT_FAIL(ctx, "The parse() return true instead of false!");
+        return TAP_FAIL(ctx, "The parse() return true instead of false!");
 
     if (!args.errors().size())
-        return UT_FAIL(ctx, "Missing error logging after some args missing!");
+        return TAP_FAIL(ctx, "Missing error logging after some args missing!");
 
-    UT_CHECK_NON_REQUIRED_ERRORS(ctx, args, 2);
+    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 2);
 
     for (auto const& e : args.errors()) {
         switch (e.errorCode) {
         case ArgParse::ErrorRequiredArgumentMissing:
             assert(e.arg && "Argument missing!");
             if (e.type != ArgParse::ArgError::ArgType)
-                return UT_FAIL(ctx, "Wrong error type!");
+                return TAP_FAIL(ctx, "Wrong error type!");
             else if (!e.arg->IsNeeded)
-                return UT_FAIL(ctx, "Wrong argument option!");
+                return TAP_FAIL(ctx, "Wrong argument option!");
             break;
         default:
-            return UT_FAIL(ctx, "Wrong ErrorCode!");
+            return TAP_FAIL(ctx, "Wrong ErrorCode!");
             break;
         }
     }
 
-    return UT_PASS(ctx, "ErrorCode tests");
+    return TAP_PASS(ctx, "ErrorCode tests");
 }
 
 } // namespace anonymous
@@ -140,4 +140,4 @@ void argErrorTests(TestContext* ctx)
     ctx->add(testErrorCode);
 }
 
-} // namespace unittest
+} // namespace testargparse
