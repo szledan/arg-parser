@@ -206,41 +206,17 @@ struct Counts {
     size_t definedFlags;
 } = { 0u, 0u, 0u, 0u };
 ```
-#### The ArgParse::Options and ArgParse::Options::Option structure
+#### The ArgParse::Options structure
 ```c++
 struct Options {
-    struct Option;
-
-    Option programName = { "program-name", { "", Option::Value::NotSet } },
-    Option tab = { "tab", { "    ", Option::Value::FourSpace } },
-    Option mode = { "mode", { "compact", Option::Value::Set } },
-    Option helpFlag = { "help-flag", { "on", Option::Value::Set } };
-
-    static void set(Option&, const std::string& value, const int& state = Option::Value::Unused);
-};
-
-struct Option {
-    struct Value {
-        // Setting type of option value.
-        enum {
-            Unused = -1,
-            // Boolean.
-            NotSet = 0,
-            Set = 1,
-            // Not boolean.
-            NotBool,
-            FourSpace,
-        };
-        const bool isSet() const { return state != NotSet; }
-
-        std::string value;
-        int state;
-    };
-
-    // Name for parsing.
-    const std::string name;
-    // Default value.
-    const Value init;
-    Value current;
+    struct { std::string name; } program; // Set name of program. If is empty then read from 'argv[0]'. (Default = "");
+    std::string tab; // Set tab type for 'help'. (Default = "    ")
+    struct { bool strict; } mode;
+    struct Help {
+        enum { ShowOnesWithDescription = 0, ShowAllDefined = 1, ShowAll = 2 };
+        bool add;
+        bool compact;
+        int show;
+    } help = { true, true, Help::ShowAllDefined };
 };
 ```

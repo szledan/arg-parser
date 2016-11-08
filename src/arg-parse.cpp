@@ -36,19 +36,38 @@ namespace argparse {
 
 namespace {
 
-const bool readOptionValue(const ArgParse::OptionList& optionList, ArgParse::Options::Option& opt)
+template <typename T>
+const T returnValue(const std::string& value, const T& def)
+{
+    std::stringstream s;
+    T retValue;
+    s << value;
+    s >> retValue;
+    return !s.fail() ? retValue : def;
+}
+
+const bool returnValue(const std::string& value, const bool& def)
+{
+    return !(value.empty() || (value == "false") || (value == "off") || (value == "0"));
+}
+
+const std::string returnValue(const std::string& valueStr, const std::string& def)
+{
+    return valueStr;
+}
+
+template <typename T>
+const T readOption(const ArgParse::OptionList& optionList, const std::string& key, const T& def)
 {
     for(auto option : optionList) {
         const size_t posEq = option.find("=");
         if (posEq != std::string::npos) {
-            if (option.substr(0, posEq) == opt.name) {
-                ArgParse::Options::set(opt, option.substr(posEq + 1));
-                break;
-            }
+            if (option.substr(0, posEq) == key)
+                return returnValue(option.substr(posEq + 1), def);
         }
     }
 
-    return opt.current.isSet();
+    return def;
 }
 
 enum ParamType {
@@ -101,11 +120,15 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
 
 ArgParse::ArgParse(const OptionList& oList)
 {
-    readOptionValue(oList, options.programName);
-    readOptionValue(oList, options.tab);
-    readOptionValue(oList, options.mode);
-    if (readOptionValue(oList, options.helpFlag))
+#define AP_SET_OPTION(VALUE, KEY) (VALUE = readOption(oList, KEY, VALUE))
+    AP_SET_OPTION(options.program.name, "program.name");
+    AP_SET_OPTION(options.tab, "tab");
+    AP_SET_OPTION(options.mode.strict, "mode.strict");
+    if (AP_SET_OPTION(options.help.add, "help.add"))
         add(Flag("--help", "-h", "Show this help."));
+    AP_SET_OPTION(options.help.compact, "help.compact");
+    AP_SET_OPTION(options.help.show, "help.show");
+#undef AP_SET_OPTION
 }
 
 const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
@@ -141,10 +164,8 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     size_t argc = (size_t)argc_;
 
     // Set program name.
-    if (!options.programName.current.isSet()) {
-        assert(options.programName.current.value.empty());
-        Options::set(options.programName, std::string(argv_[0]));
-    }
+    if (options.program.name.empty())
+        options.program.name = std::string(argv_[0]);
 
     // Calculate number of required arguments.
     int requiredArgs = 0;
@@ -274,11 +295,11 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
 const std::string ArgParse::help()
 {
-    const std::string tab = options.tab.current.isSet() ? options.tab.current.value : options.tab.init.value;
+    const std::string tab = options.tab;
     std::stringstream help;
 
     // Print program name.
-    help << "usage: " << options.programName.current.value;
+    help << "usage: " << options.program.name;
 
     // Print arguments after programname.
     for (auto const& it : _args) {
@@ -298,9 +319,9 @@ const std::string ArgParse::help()
         const Arg& arg = it;
         if (!arg._name.empty()) {
             if (arg._isArgNeeded)
-                help << tab << " <" << arg._name << "> ";
+                help << tab << "<" << arg._name << ">";
             else
-                help << tab << " [<" << arg._name << ">] ";
+                help << tab << "[<" << arg._name << ">]";
             if (!arg._description.empty())
                 help << tab << arg._description;
             help << std::endl;
@@ -330,7 +351,8 @@ const std::string ArgParse::help()
         const bool hasShortFlag = !flag._shortFlag.empty();
         const bool hasLongFlag = !flag._longFlag.empty();
 
-        help << tab;
+        if (hasShortFlag || hasLongFlag)
+            help << tab;
         if (hasShortFlag)
             AP_PRINT_FLAG(flag._shortFlag, 1);
         if (hasLongFlag) {
@@ -338,9 +360,8 @@ const std::string ArgParse::help()
                 help << ", ";
             AP_PRINT_FLAG(flag._longFlag, 0);
         }
-        if (hasShortFlag || hasLongFlag) {
+        if (hasShortFlag || hasLongFlag)
             help << tab << flag._description << std::endl;
-        }
 
 #undef AP_PRINT_FLAG
 #undef AP_HAS_NAME
@@ -367,6 +388,11 @@ const std::string ArgParse::error()
     for (auto const& err : _errors)
         error << err << std::endl;
     return error.str();
+}
+
+const std::vector<ArgParse::ArgError>&ArgParse::errors() const
+{
+    return _errors;
 }
 
 const bool ArgParse::checkFlag(const std::string& flagStr)
@@ -434,27 +460,6 @@ const Arg& ArgParse::operator[](const std::size_t& idx)
 const Arg& ArgParse::operator[](const int idx)
 {
     return _args[std::size_t(idx)];
-}
-
-void ArgParse::Options::set(ArgParse::Options::Option& opt, const std::string& value, const int& state)
-{
-    int currentState = state;
-
-    if (state == Option::Value::Unused && opt.init.state != Option::Value::Unused) {
-        if (value == opt.init.value) {
-            currentState = opt.init.state;
-        } else {
-            if (opt.init.state < Option::Value::NotBool) {
-                assert(((!Option::Value::Set) == Option::Value::NotSet) && ((!Option::Value::NotSet) == Option::Value::Set));
-                currentState = !opt.init.state;
-            } else {
-                currentState = opt.current.state;
-            }
-        }
-    }
-
-    opt.current.state = currentState;
-    opt.current.value = value;
 }
 
 void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)

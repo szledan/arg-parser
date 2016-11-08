@@ -52,7 +52,12 @@ void showHelp()
     char sf = 'A';
     char lf = sf;
 
-    ArgParse args({"program=show-help", "help=on", "tab=\t", "mode=compact"});
+    ArgParse args({"program.name=show-help",
+                   "help.add=false",
+                   "tab=\t",
+                   "mode.strict=true"
+                   "help.compact=on",
+                   "help.show=2"});
 
     args.add(Flag());
     for (int i = 0; i < 8; ++i) {

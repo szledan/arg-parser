@@ -78,7 +78,7 @@ public:
 
     const std::string help();
     const std::string error();
-    const std::vector<ArgError>& errors() { return _errors; }
+    const std::vector<ArgError>& errors() const;
 
     const bool checkFlag(const std::string& flagStr);
     template<typename T>
@@ -97,34 +97,15 @@ public:
     } counts = { 0u, 0u, 0u, 0u };
 
     struct Options {
-        struct Option {
-            struct Value {
-                enum {
-                    Unused = -1,
-                    // Boolean.
-                    NotSet = 0,
-                    Set = 1,
-                    // Not boolean.
-                    NotBool,
-                    FourSpace,
-                };
-                const bool isSet() const { return state != NotSet; }
-
-                std::string value;
-                int state;
-            };
-
-            const std::string name;
-            const Value init;
-            Value current;
-        }
-
-        programName = { "program-name", { "", Option::Value::NotSet } },
-        tab = { "tab", { "    ", Option::Value::FourSpace } },
-        mode = { "mode", { "compact", Option::Value::Set } },
-        helpFlag = { "help-flag", { "on", Option::Value::Set } };
-
-        static void set(Option&, const std::string& value, const int& state = Option::Value::Unused);
+        struct { std::string name; } program = { "" };
+        std::string tab = "    ";
+        struct { bool strict; } mode = { false };
+        struct Help {
+            enum { ShowOnesWithDescription = 0, ShowAllDefined = 1, ShowAll = 2 };
+            bool add;
+            bool compact;
+            int show;
+        } help = { true, true, Help::ShowAllDefined };
     } options;
 
 private:
