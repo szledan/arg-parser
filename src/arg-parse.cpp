@@ -30,7 +30,7 @@
  *
  * FIXME LIST:
  *  [4] The showHelp works buggly: sometimes not show [value]s.
- *  [3] Update documentation: ./README.md ./doc/* ./demos/README.md ./src/README.md
+ *  [3] Update documentation: ./README.md ./doc/api-references.md ./demos/README.md ./src/README.md
  *
  * FUTURE LIST:
  *  [6] Extend ArgParse with: argc(), argv() native getter functions to _argc, _argv.
