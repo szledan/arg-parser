@@ -158,10 +158,17 @@ const Arg& ArgParse::add(const Arg& arg)
 const bool ArgParse::parse(const int argc_, char* const argv_[])
 {
     if ((argc_ < 1) || (!argv_) || (!argv_[0])) {
-        addError(ErrorARGVEmpty, "Wrong argument count: 0!");
+        addError(Errors::ARGVIsEmpty, "Wrong argument count: 0!", argv_ ? reinterpret_cast<void*>(argv_[0]) : nullptr);
         return false;
     }
-    size_t argc = (size_t)argc_;
+    for (int argIndex = 0; argIndex < argc_; ++argIndex) {
+        if (argv_[argIndex] == nullptr) {
+            std::string message = std::string("The 'argc' > count('argv'): ") + std::to_string(argc_) + " != " + std::to_string(argIndex);
+            addError(Errors::ArgCBiggerThanElementsOfArgV, message, reinterpret_cast<void*>(argv_[0]));
+            return false;
+        }
+    }
+    const size_t argc = (size_t)argc_;
 
     // Set program name.
     if (options.program.name.empty())
@@ -191,9 +198,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 #define AP_CHECK_FLAG_EXIST(FLAGS, LONG, SHORT) do { \
         if (FLAGS.find(param.paramStr) == FLAGS.end()) { \
             add(Flag(LONG, SHORT)); \
-            counts.undefinedFlags++; \
+            counts.flags.undefined++; \
         } else \
-            counts.definedFlags++; \
+            counts.flags.defined++; \
     } while (false)
 
 #define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
@@ -206,13 +213,13 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
             if (!param.hasNextParam && flag->value._isValueNeeded) { \
-                addError(ErrorRequiredFlagValueMissing, "Missing required value.", flag); \
+                addError(Errors::RequiredFlagValueMissing, "Missing required value.", flag); \
             } else if ((flag->value._isValueNeeded) \
                        && (mapParamType(param.valueStr) != ParamType::ArgType) \
                        && (checkFlag(param.valueStr))) { \
-                addError(ErrorRequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
+                addError(Errors::RequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
             } else if (!findValue(param.valueStr, flag->value._chooseList)) { \
-                    addError(ErrorRequiredFlagValueMissing, "Did not find choose in list.", flag); \
+                    addError(Errors::RequiredFlagValueMissing, "Did not find choose in list.", flag); \
             } else { \
                 flag->value.str = param.valueStr; \
                 if (param.paramType != LongFlagWithEqType) \
@@ -247,7 +254,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                     // Add undefined flag with value.
                     add(Flag(param.paramStr, "", "", Value("_")));
                     _longFlags[param.paramStr]->value.str = param.valueStr;
-                    counts.undefinedFlags++;
+                    counts.flags.undefined++;
                 } else {
                     AP_CHECK_FLAG_EXIST(_longFlags, param.paramStr, "");
                 }
@@ -264,10 +271,10 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                 if (_args[argCount]._isArgNeeded)
                     requiredArgs--;
                 _args[argCount].setArg(param.paramStr);
-                counts.definedArgs++;
+                counts.args.defined++;
             } else {
                 _args.push_back(Arg("", "", false, Value(param.paramStr)));
-                counts.undefinedArgs++;
+                counts.args.undefined++;
             }
             argCount++;
             break;
@@ -280,7 +287,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
     if (requiredArgs) {
         for (int i = requiredArgs; i; --i)
-            addError(ErrorRequiredArgumentMissing, "Required argument missing!", &_args[_args.size() - i]);
+            addError(Errors::RequiredArgumentMissing, "Required argument missing!", &_args[_args.size() - i]);
         return false;
     }
 
@@ -370,15 +377,15 @@ const std::string ArgParse::help()
     return help.str();
 }
 
-inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err)
+inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err)
 {
     std::string typeSpecMsg("");
-    if (err.type == ArgParse::ArgError::FlagType)
-        typeSpecMsg = std::string(", flag: ") + err.flag->_longFlag + " " + err.flag->_shortFlag;
-    else if (err.type == ArgParse::ArgError::ArgType)
-        typeSpecMsg = std::string(", arg: ") + err.arg->_name;
+    if (err.suspect.type == ArgParse::Errors::Suspect::FlagType)
+        typeSpecMsg = std::string(", flag: ") + err.suspect.flag->_longFlag + " " + err.suspect.flag->_shortFlag;
+    else if (err.suspect.type == ArgParse::Errors::Suspect::ArgType)
+        typeSpecMsg = std::string(", arg: ") + err.suspect.arg->_name;
 
-    os << "error: '" << err.errorMessage << "', code: " << err.errorCode << typeSpecMsg << ".";
+    os << "error: '" << err.message << "', code: " << err.code << typeSpecMsg << ".";
     return os;
 }
 
@@ -390,7 +397,7 @@ const std::string ArgParse::error()
     return error.str();
 }
 
-const std::vector<ArgParse::ArgError>&ArgParse::errors() const
+const std::vector<ArgParse::Errors>&ArgParse::errors() const
 {
     return _errors;
 }
@@ -462,22 +469,25 @@ const Arg& ArgParse::operator[](const int idx)
     return _args[std::size_t(idx)];
 }
 
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg)
+void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::string& errorMsg, const ArgParse::Errors::Suspect& suspect)
 {
-    const ArgError ae = { ArgError::GeneralType, errorCode, nullptr, errorMsg };
+    const Errors ae = { errorCode, errorMsg, suspect };
     _errors.push_back(ae);
 }
 
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Flag* flag)
+void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::string& errorMsg, const void* ptr)
 {
-    const ArgError ae = { ArgError::FlagType, errorCode, reinterpret_cast<const void*>(flag), errorMsg };
-    _errors.push_back(ae);
+    addError(errorCode, errorMsg, { Errors::Suspect::GeneralType, ptr });
 }
 
-void ArgParse::addError(const ArgParse::ErrorCodes& errorCode, const std::string& errorMsg, const Arg* arg)
+void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::string& errorMsg, const Flag* flag)
 {
-    const ArgError ae = { ArgError::ArgType, errorCode, reinterpret_cast<const void*>(arg), errorMsg };
-    _errors.push_back(ae);
+    addError(errorCode, errorMsg, { Errors::Suspect::FlagType, reinterpret_cast<const void*>(flag) });
+}
+
+void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::string& errorMsg, const Arg* arg)
+{
+    addError(errorCode, errorMsg, { Errors::Suspect::ArgType, reinterpret_cast<const void*>(arg) });
 }
 
 // Value

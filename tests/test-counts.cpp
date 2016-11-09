@@ -51,16 +51,16 @@ bool testNoArgNoFlag(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs)
+    if (args.counts.args.defined)
         return TAP_FAIL(ctx, "Defined argument counts not null.");
 
-    if (args.counts.undefinedArgs)
+    if (args.counts.args.undefined)
         return TAP_FAIL(ctx, "Undefined argument counts not null.");
 
-    if (args.counts.definedFlags)
+    if (args.counts.flags.defined)
         return TAP_FAIL(ctx, "Defined flag counts not null.");
 
-    if (args.counts.undefinedFlags)
+    if (args.counts.flags.undefined)
         return TAP_FAIL(ctx, "Undefined flag counts not null.");
 
     return TAP_PASS(ctx, "Test counters when no args and flags.");
@@ -84,16 +84,16 @@ bool testDefinedArgs(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs != 3)
+    if (args.counts.args.defined != 3)
         return TAP_FAIL(ctx, "Defined argument counts wrong.");
 
-    if (args.counts.undefinedArgs)
+    if (args.counts.args.undefined)
         return TAP_FAIL(ctx, "Undefined argument counts not null.");
 
-    if (args.counts.definedFlags)
+    if (args.counts.flags.defined)
         return TAP_FAIL(ctx, "Defined flag counts not null.");
 
-    if (args.counts.undefinedFlags)
+    if (args.counts.flags.undefined)
         return TAP_FAIL(ctx, "Undefined flag counts not null.");
 
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
@@ -114,16 +114,16 @@ bool testUndefinedArgs(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs)
+    if (args.counts.args.defined)
         return TAP_FAIL(ctx, "Defined argument counts not null.");
 
-    if (args.counts.undefinedArgs != 3)
+    if (args.counts.args.undefined != 3)
         return TAP_FAIL(ctx, "Undefined argument counts wrong.");
 
-    if (args.counts.definedFlags)
+    if (args.counts.flags.defined)
         return TAP_FAIL(ctx, "Defined flag counts not null.");
 
-    if (args.counts.undefinedFlags)
+    if (args.counts.flags.undefined)
         return TAP_FAIL(ctx, "Undefined flag counts not null.");
 
     return TAP_PASS(ctx, "Test counters when only undefined arguments.");
@@ -147,16 +147,16 @@ bool testDefinedFlags(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs)
+    if (args.counts.args.defined)
         return TAP_FAIL(ctx, "Defined argument counts not null.");
 
-    if (args.counts.undefinedArgs)
+    if (args.counts.args.undefined)
         return TAP_FAIL(ctx, "Undefined argument counts not null.");
 
-    if (args.counts.definedFlags != 3)
+    if (args.counts.flags.defined != 3)
         return TAP_FAIL(ctx, "Defined flag counts wrong.");
 
-    if (args.counts.undefinedFlags)
+    if (args.counts.flags.undefined)
         return TAP_FAIL(ctx, "Undefined flag counts not null.");
 
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
@@ -177,16 +177,16 @@ bool testUndefinedFlags(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs)
+    if (args.counts.args.defined)
         return TAP_FAIL(ctx, "Defined argument counts not null.");
 
-    if (args.counts.undefinedArgs)
+    if (args.counts.args.undefined)
         return TAP_FAIL(ctx, "Undefined argument counts not null.");
 
-    if (args.counts.definedFlags)
+    if (args.counts.flags.defined)
         return TAP_FAIL(ctx, "Defined flag counts not null.");
 
-    if (args.counts.undefinedFlags != 3)
+    if (args.counts.flags.undefined != 3)
         return TAP_FAIL(ctx, "Undefined flag counts wrong.");
 
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
@@ -222,16 +222,16 @@ bool testComplex(TestContext* ctx)
 
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-    if (args.counts.definedArgs != 3)
+    if (args.counts.args.defined != 3)
         return TAP_FAIL(ctx, "Defined argument counts wrong.");
 
-    if (args.counts.undefinedArgs != 1)
+    if (args.counts.args.undefined != 1)
         return TAP_FAIL(ctx, "Undefined argument counts wrong.");
 
-    if (args.counts.definedFlags != 2)
+    if (args.counts.flags.defined != 2)
         return TAP_FAIL(ctx, "Defined flag counts wrong.");
 
-    if (args.counts.undefinedFlags != 1)
+    if (args.counts.flags.undefined != 1)
         return TAP_FAIL(ctx, "Undefined flag counts wrong.");
 
     return TAP_PASS(ctx, "Test counters when only defined arguments.");

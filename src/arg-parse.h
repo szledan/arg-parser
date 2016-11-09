@@ -44,30 +44,10 @@ struct Flag;
 
 class ArgParse {
 public:
-    enum ErrorCodes {
-        NoError = 0,
-        ErrorRequiredFlagValueMissing,
-        ErrorRequiredArgumentMissing,
-        ErrorARGVEmpty,
-    };
-
-    struct ArgError {
-        enum ArgErrorType {
-            GeneralType,
-            FlagType,
-            ArgType,
-        } const type;
-
-        const ErrorCodes errorCode;
-        union {
-            const void* _ptr;
-            const Flag* flag;
-            const Arg* arg;
-        };
-        const std::string errorMessage;
-    };
-
     typedef std::initializer_list<std::string> OptionList;
+    struct Counters;
+    struct Options;
+    struct Errors;
 
     ArgParse(const OptionList& = {});
 
@@ -78,7 +58,7 @@ public:
 
     const std::string help();
     const std::string error();
-    const std::vector<ArgError>& errors() const;
+    const std::vector<Errors>& errors() const;
 
     const bool checkFlag(const std::string& flagStr);
     template<typename T>
@@ -90,11 +70,11 @@ public:
     Arg const& operator[](const int idx);
 
     struct Counts {
-        size_t definedFlags;
-        size_t undefinedFlags;
-        size_t definedArgs;
-        size_t undefinedArgs;
-    } counts = { 0u, 0u, 0u, 0u };
+        struct {
+            size_t defined;
+            size_t undefined;
+        } flags, args;
+    } counts = { { 0u, 0u, }, { 0u, 0u } };
 
     struct Options {
         struct { std::string name; } program = { "" };
@@ -108,19 +88,43 @@ public:
         } help = { true, true, Help::ShowAllDefined };
     } options;
 
+    struct Errors {
+        enum Codes {
+            NoError = 0,
+            RequiredFlagValueMissing,
+            RequiredArgumentMissing,
+            ARGVIsEmpty,
+            ArgCBiggerThanElementsOfArgV,
+        } const code;
+        const std::string message;
+        struct Suspect {
+            enum {
+                GeneralType,
+                FlagType,
+                ArgType,
+            } const type;
+            union {
+                const void* _ptr;
+                const Flag* flag;
+                const Arg* arg;
+            };
+        } const suspect;
+    };
+
 private:
-    void addError(const ErrorCodes&, const std::string& errorMsg);
-    void addError(const ErrorCodes&, const std::string& errorMsg, const Flag*);
-    void addError(const ErrorCodes&, const std::string& errorMsg, const Arg*);
+    void addError(const Errors::Codes&, const std::string& errorMsg, const ArgParse::Errors::Suspect& = { Errors::Suspect::GeneralType, nullptr });
+    void addError(const Errors::Codes&, const std::string& errorMsg, const void*);
+    void addError(const Errors::Codes&, const std::string& errorMsg, const Flag*);
+    void addError(const Errors::Codes&, const std::string& errorMsg, const Arg*);
 
     std::map<std::string, Flag> _flags;
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<Arg> _args;
-    std::vector<ArgError> _errors;
+    std::vector<Errors> _errors;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ArgParse::ArgError& err);
+inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err);
 
 // Value
 

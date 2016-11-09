@@ -32,6 +32,25 @@ namespace {
 
 using namespace argparse;
 
+bool testArgArgvIsNullPtr(TestContext* ctx)
+{
+    ArgParse args;
+    const bool parseRet = args.parse(1985, nullptr);
+
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
+
+    if (!args.errors().size())
+        return TAP_FAIL(ctx, "Missing error logging after 'argv' is 'nullptr'!");
+
+    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
+        return TAP_FAIL(ctx, "The 'argv' is 'nullptr', but error codes is wrong!");
+
+    if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
+        return TAP_FAIL(ctx, "Wrong error type!");
+
+    return TAP_PASS(ctx, "ArgCount test with 'argv' is nullptr.");
+}
+
 bool testArgCountEmptyArgv(TestContext* ctx)
 {
     char* argv[] = { nullptr };
@@ -45,10 +64,10 @@ bool testArgCountEmptyArgv(TestContext* ctx)
     if (!args.errors().size())
         return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
-    if (args.errors()[0].errorCode != ArgParse::ErrorARGVEmpty)
+    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
         return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
-    if (args.errors()[0].type != ArgParse::ArgError::GeneralType)
+    if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
         return TAP_FAIL(ctx, "Wrong error type!");
 
     return TAP_PASS(ctx, "ArgCount test with empty 'argv'.");
@@ -56,7 +75,7 @@ bool testArgCountEmptyArgv(TestContext* ctx)
 
 bool testArgCountZeroArgc(TestContext* ctx)
 {
-    char* argv[] = { (char*)"program" };
+    char* argv[] = { TAP_CHARS("program") };
     const int argc = 0;
 
     ArgParse args;
@@ -67,10 +86,32 @@ bool testArgCountZeroArgc(TestContext* ctx)
     if (!args.errors().size())
         return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
-    if (args.errors()[0].errorCode != ArgParse::ErrorARGVEmpty)
+    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
         return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
-    if (args.errors()[0].type != ArgParse::ArgError::GeneralType)
+    if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
+        return TAP_FAIL(ctx, "Wrong error type!");
+
+    return TAP_PASS(ctx, "ArgCount test with zero 'argc'.");
+}
+
+bool testArgcBiggerSizeOfArgv(TestContext* ctx)
+{
+    char* argv[] = { TAP_CHARS("program") };
+    const int argc = 1985;
+
+    ArgParse args;
+    const bool parseRet = args.parse(argc, argv);
+
+    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet == true));
+
+    if (!args.errors().size())
+        return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
+
+    if (args.errors()[0].code != ArgParse::Errors::ArgCBiggerThanElementsOfArgV)
+        return TAP_FAIL(ctx, std::string("Wrong error code! The code is: ") + std::to_string(args.errors()[0].code));
+
+    if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
         return TAP_FAIL(ctx, "Wrong error type!");
 
     return TAP_PASS(ctx, "ArgCount test with zero 'argc'.");
@@ -78,7 +119,7 @@ bool testArgCountZeroArgc(TestContext* ctx)
 
 bool testArgCountNonEmptyArgv(TestContext* ctx)
 {
-    char* argv[] = { (char*)"program" };
+    char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -93,7 +134,7 @@ bool testArgCountNonEmptyArgv(TestContext* ctx)
 
 bool testErrorCode(TestContext* ctx)
 {
-    char* argv[] = { (char*)"program" };
+    char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
 
     ArgParse args;
@@ -113,12 +154,12 @@ bool testErrorCode(TestContext* ctx)
     TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 2);
 
     for (auto const& e : args.errors()) {
-        switch (e.errorCode) {
-        case ArgParse::ErrorRequiredArgumentMissing:
-            assert(e.arg && "Argument missing!");
-            if (e.type != ArgParse::ArgError::ArgType)
+        switch (e.code) {
+        case ArgParse::Errors::RequiredArgumentMissing:
+            assert(e.suspect.arg && "Argument missing!");
+            if (e.suspect.type != ArgParse::Errors::Suspect::ArgType)
                 return TAP_FAIL(ctx, "Wrong error type!");
-            else if (!e.arg->IsNeeded)
+            else if (!e.suspect.arg->IsNeeded)
                 return TAP_FAIL(ctx, "Wrong argument option!");
             break;
         default:
@@ -134,8 +175,10 @@ bool testErrorCode(TestContext* ctx)
 
 void argErrorTests(TestContext* ctx)
 {
+    ctx->add(testArgArgvIsNullPtr);
     ctx->add(testArgCountEmptyArgv);
     ctx->add(testArgCountZeroArgc);
+    ctx->add(testArgcBiggerSizeOfArgv);
     ctx->add(testArgCountNonEmptyArgv);
     ctx->add(testErrorCode);
 }

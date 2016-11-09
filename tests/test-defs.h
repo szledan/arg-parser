@@ -53,7 +53,7 @@
             msg += std::to_string(args.errors().size()) + ". "; \
             msg += "Error message(s): "; \
             for (auto const& err : args.errors()) \
-                msg += err.errorMessage + " "; \
+                msg += err.message + " "; \
             return TAP_FAIL(ctx, msg);  \
         } \
     } while (false)
