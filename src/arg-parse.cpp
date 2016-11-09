@@ -195,9 +195,15 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             std::string(param.hasNextParam ? argv_[adv + 1] : ""),
         };
 
-#define AP_CHECK_FLAG_EXIST(FLAGS, LONG, SHORT) do { \
+#define AP_IS_LONG (true)
+#define AP_CHECH_VALUE (true)
+#define AP_CHECK_FLAG_EXIST(FLAGS, IS_LONG) do { \
         if (FLAGS.find(param.paramStr) == FLAGS.end()) { \
-            add(Flag(LONG, SHORT)); \
+            if (IS_LONG) \
+                add(Flag(param.paramStr, "")); \
+            else \
+                add(Flag("", param.paramStr)); \
+            FLAGS[param.paramStr]->defined = false; \
             counts.flags.undefined++; \
         } else \
             counts.flags.defined++; \
@@ -234,14 +240,14 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             for (size_t i = 1; i < shortFlags.size(); ++i) {
                 param.paramStr = std::string("-") + shortFlags[i];
                 const bool check = i == (param.paramStr.size() - 1);
-                AP_CHECK_FLAG_EXIST(_shortFlags, "", param.paramStr);
+                AP_CHECK_FLAG_EXIST(_shortFlags, !AP_IS_LONG);
                 AP_SETUP_FLAG(_shortFlags, check);
             }
             break;
         }
         case ParamType::ShortFlagType:
-            AP_CHECK_FLAG_EXIST(_shortFlags, "", param.paramStr);
-            AP_SETUP_FLAG(_shortFlags, true);
+            AP_CHECK_FLAG_EXIST(_shortFlags, !AP_IS_LONG);
+            AP_SETUP_FLAG(_shortFlags, AP_CHECH_VALUE);
             break;
         case ParamType::LongFlagWithEqType: {
             const bool isDefinedFullParam = _longFlags.find(param.paramStr) != _longFlags.end();
@@ -256,15 +262,15 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                     _longFlags[param.paramStr]->value.str = param.valueStr;
                     counts.flags.undefined++;
                 } else {
-                    AP_CHECK_FLAG_EXIST(_longFlags, param.paramStr, "");
+                    AP_CHECK_FLAG_EXIST(_longFlags, AP_IS_LONG);
                 }
             }
-            AP_SETUP_FLAG(_longFlags, true);
+            AP_SETUP_FLAG(_longFlags, AP_CHECH_VALUE);
             break;
         }
         case ParamType::LongFlagWithoutEqType:
-            AP_CHECK_FLAG_EXIST(_longFlags, param.paramStr, "");
-            AP_SETUP_FLAG(_longFlags, true);
+            AP_CHECK_FLAG_EXIST(_longFlags, AP_IS_LONG);
+            AP_SETUP_FLAG(_longFlags, AP_CHECH_VALUE);
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
@@ -273,7 +279,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                 _args[argCount].setArg(param.paramStr);
                 counts.args.defined++;
             } else {
-                _args.push_back(Arg("", "", false, Value(param.paramStr)));
+                _args.push_back(Arg("", "", !Arg::IsNeeded, Value(param.paramStr)));
                 counts.args.undefined++;
             }
             argCount++;
@@ -283,6 +289,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         };
 #undef AP_SETUP_FLAG
+#undef AP_CHECK_FLAG_EXIST
+#undef AP_CHECH_VALUE
+#undef AP_IS_LONG
     }
 
     if (requiredArgs) {
@@ -309,6 +318,7 @@ const std::string ArgParse::help()
     help << "usage: " << options.program.name;
 
     // Print arguments after programname.
+    // TODO: sort args.
     for (auto const& it : _args) {
         const Arg& arg = it;
         if (!arg._name.empty()) {
@@ -324,7 +334,10 @@ const std::string ArgParse::help()
 
     for (auto const& it : _args) {
         const Arg& arg = it;
-        if (!arg._name.empty()) {
+        if (!arg._name.empty()
+            && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
+                || (options.help.show == Options::Help::ShowAllDefined && arg.defined)
+                || options.help.show == Options::Help::ShowAll)) {
             if (arg._isArgNeeded)
                 help << tab << "<" << arg._name << ">";
             else
@@ -357,6 +370,9 @@ const std::string ArgParse::help()
         const Flag& flag = it.second;
         const bool hasShortFlag = !flag._shortFlag.empty();
         const bool hasLongFlag = !flag._longFlag.empty();
+        if ((options.help.show == Options::Help::ShowOnesWithDescription && flag._description.empty())
+            || (options.help.show == Options::Help::ShowAllDefined && !flag.defined))
+            continue;
 
         if (hasShortFlag || hasLongFlag)
             help << tab;
@@ -537,6 +553,7 @@ const std::string Value::_getChoosesStr(const bool full) const
 
 Flag::Flag(const Flag& f)
     : isSet(f.isSet)
+    , defined(f.defined)
     , value(f.value)
     , _longFlag(f._longFlag)
     , _shortFlag(f._shortFlag)
@@ -550,6 +567,7 @@ Flag::Flag(const std::string& lFlag,
            const std::string& dscrptn)
     : isSet(false)
     , hasValue(false)
+    , defined(true)
     , _longFlag(lFlag)
     , _shortFlag(sFlag)
     , _description(dscrptn)
@@ -572,6 +590,7 @@ Flag::Flag(const std::string& lFlag,
 Arg::Arg(const Arg& a)
     : Value((Value)a)
     , isSet(a.isSet)
+    , defined(a.defined)
     , _isArgNeeded(a._isArgNeeded)
     , _callBackFunc(a._callBackFunc)
 {
@@ -583,6 +602,7 @@ Arg::Arg(const std::string& name,
          const Value& defaultValue)
     : Value(defaultValue.str, name, description)
     , isSet(false)
+    , defined(true)
     , _isArgNeeded(isNeeded)
     , _callBackFunc(nullptr)
 {

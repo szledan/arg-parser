@@ -56,7 +56,7 @@ void showHelp()
                    "help.add=false",
                    "tab=\t",
                    "mode.strict=true",
-                   "help.compact=0",
+                   "help.compact=1",
                    "help.show=2"});
 
     args.add(Flag());

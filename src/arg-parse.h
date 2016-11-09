@@ -171,6 +171,7 @@ struct Flag {
 
     bool isSet;
     bool hasValue;
+    bool defined;
     Value value;
 // private:
     std::string _longFlag;
@@ -195,6 +196,7 @@ struct Arg : Value {
     void setArg(const std::string& value);
 
     bool isSet;
+    bool defined;
 // private:
     bool _isArgNeeded;
     CallBackFunc _callBackFunc;
