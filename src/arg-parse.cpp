@@ -57,9 +57,14 @@ const std::string returnValue(const std::string& value, const std::string& def)
 }
 
 template <typename T>
-const T readOption(const ArgParse::OptionList& optionList, const std::string& key, const T& def)
+const T readOption(const std::string& oList, const std::string& key, const T& def)
 {
-    for(auto option : optionList) {
+    if (oList.empty())
+        return def;
+
+    std::stringstream optionList(oList);
+    std::string option;
+    while (std::getline(optionList, option, ',')) {
         const size_t posEq = option.find("=");
         if (posEq != std::string::npos) {
             if (option.substr(0, posEq) == key)
@@ -68,6 +73,14 @@ const T readOption(const ArgParse::OptionList& optionList, const std::string& ke
     }
 
     return def;
+}
+
+const std::string interlacedOptions(const ArgParse::OptionList& oList)
+{
+    std::string interlacedStr;
+    for(auto option : oList)
+        interlacedStr += option + ',';
+    return interlacedStr;
 }
 
 enum ParamType {
@@ -118,7 +131,7 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
 
 // ArgPars
 
-ArgParse::ArgParse(const OptionList& oList)
+ArgParse::ArgParse(const std::string& oList)
 {
 #define AP_SET_OPTION(VALUE, KEY) (VALUE = readOption(oList, KEY, VALUE))
     AP_SET_OPTION(options.program.name, "program.name");
@@ -129,6 +142,11 @@ ArgParse::ArgParse(const OptionList& oList)
     AP_SET_OPTION(options.help.compact, "help.compact");
     AP_SET_OPTION(options.help.show, "help.show");
 #undef AP_SET_OPTION
+}
+
+ArgParse::ArgParse(const OptionList& oList)
+    : ArgParse(interlacedOptions(oList))
+{
 }
 
 const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
@@ -560,9 +578,7 @@ Flag::Flag(const Flag& f)
 {
 }
 
-Flag::Flag(const std::string& lFlag,
-           const std::string& sFlag,
-           const std::string& dscrptn)
+Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string& dscrptn)
     : isSet(false)
     , hasValue(false)
     , defined(!lFlag.empty() || !sFlag.empty())
@@ -573,10 +589,7 @@ Flag::Flag(const std::string& lFlag,
 {
 }
 
-Flag::Flag(const std::string& lFlag,
-           const std::string& sFlag,
-           const std::string& dscrptn,
-           const Value definedValue)
+Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string& dscrptn, const Value definedValue)
     : Flag(lFlag, sFlag, dscrptn)
 {
     hasValue = true;

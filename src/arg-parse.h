@@ -49,7 +49,8 @@ public:
     struct Options;
     struct Errors;
 
-    ArgParse(const OptionList& = {});
+    ArgParse(const std::string& interlacedOptions = "");
+    ArgParse(const OptionList&);
 
     const Flag& add(const Flag&, CallBackFunc = nullptr);
     const Arg& add(const Arg&);

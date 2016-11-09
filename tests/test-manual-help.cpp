@@ -47,17 +47,12 @@ const std::string msg("Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 
 using namespace argparse;
 
-void showHelp()
+void showHelp(TestContext* ctx)
 {
     char sf = 'A';
     char lf = sf;
 
-    ArgParse args({"program.name=show-help",
-                   "help.add=false",
-                   "tab=\t",
-                   "mode.strict=true",
-                   "help.compact=1",
-                   "help.show=2"});
+    ArgParse args(ctx->param.str);
 
     args.add(Flag());
     for (int i = 0; i < 8; ++i) {
@@ -95,7 +90,7 @@ void showHelp()
 
 void manualHelpTest(TestContext* ctx)
 {
-    showHelp();
+    showHelp(ctx);
 }
 
 } // namespace testargparse

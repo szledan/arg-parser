@@ -43,6 +43,11 @@ public:
 
     bool pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
     bool fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+
+    struct Param {
+        std::string str;
+    } param;
+
 private:
     void test(const std::string& file, const std::string& func, const std::string& line);
 

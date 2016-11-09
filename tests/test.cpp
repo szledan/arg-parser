@@ -34,7 +34,8 @@ int main(int argc, char* argv[])
     argparse::ArgParse args;
 
     args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
-    args.add(argparse::Flag("--manual", "-m", "Select manual tests."));
+    args.add(argparse::Flag("--manual", "-m", "Select manual tests.",
+                            argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
     args.add(argparse::Flag("--silent", "-s", "Fails show only."));
 
     if (!args.parse(argc, argv)) {
@@ -68,6 +69,7 @@ int main(int argc, char* argv[])
     }
 
     if (args["--manual"].isSet || all) {
+        ctx.param.str = args["--manual"].value.str;
         testargparse::manualHelpTest(&ctx);
 //        testargparse::manualErrorTest(&ctx);
     }
