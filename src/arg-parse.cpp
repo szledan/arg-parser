@@ -190,7 +190,7 @@ const Arg& ArgParse::add(const Arg& arg)
 const bool ArgParse::parse(const int argc_, char* const argv_[])
 {
     if ((argc_ < 1) || (!argv_) || (!argv_[0])) {
-        addError(Errors::ARGVIsEmpty, "Wrong argument count: 0!", argv_ ? reinterpret_cast<void*>(argv_[0]) : nullptr);
+        addError(Errors::ArgVIsEmpty, "Wrong argument count: 0!", argv_ ? reinterpret_cast<void*>(argv_[0]) : nullptr);
         return false;
     }
     for (int argIndex = 0; argIndex < argc_; ++argIndex) {

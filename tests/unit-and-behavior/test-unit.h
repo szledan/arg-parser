@@ -1,3 +1,6 @@
+#ifndef TEST_UNIT_H
+#define TEST_UNIT_H
+
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -24,22 +27,17 @@
 
 #include "test.h"
 
-#include <assert.h>
-
 namespace testargparse {
-namespace {
 
-using namespace argparse;
-
-const std::string g_shortFlag = "-a";
-const std::string g_longFlag = "--a";
-const std::string g_description = "Simple settable flag without value.";
-
-} // namespace anonymous
-
-void checkFlagTests(TestContext* ctx)
-{
-    TAP_NOT_TESTED(ctx, "Function of checkFlag() test group.");
-}
+void argErrorTests(TestContext*);
+void flagTests(TestContext*);
+void valueTests(TestContext*);
+void parserTests(TestContext*);
+void operatorTests(TestContext*);
+void unitCheckFlagTests(TestContext*);
+void unitCheckFlagAndReadValueTests(TestContext*);
+void countsTests(TestContext*);
 
 } // namespace testargparse
+
+#endif // TEST_UNIT_H

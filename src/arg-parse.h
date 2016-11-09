@@ -45,8 +45,6 @@ struct Flag;
 class ArgParse {
 public:
     typedef std::initializer_list<std::string> OptionList;
-    struct Counters;
-    struct Options;
     struct Errors;
 
     ArgParse(const std::string& interlacedOptions = "");
@@ -94,7 +92,7 @@ public:
             NoError = 0,
             RequiredFlagValueMissing,
             RequiredArgumentMissing,
-            ARGVIsEmpty,
+            ArgVIsEmpty,
             ArgCBiggerThanElementsOfArgV,
         } const code;
         const std::string message;

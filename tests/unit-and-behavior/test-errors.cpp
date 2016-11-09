@@ -42,7 +42,7 @@ TestContext::Return testArgArgvIsNullPtr(TestContext* ctx)
     if (!args.errors().size())
         return TAP_FAIL(ctx, "Missing error logging after 'argv' is 'nullptr'!");
 
-    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
+    if (args.errors()[0].code != ArgParse::Errors::ArgVIsEmpty)
         return TAP_FAIL(ctx, "The 'argv' is 'nullptr', but error codes is wrong!");
 
     if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
@@ -64,7 +64,7 @@ TestContext::Return testArgCountEmptyArgv(TestContext* ctx)
     if (!args.errors().size())
         return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
-    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
+    if (args.errors()[0].code != ArgParse::Errors::ArgVIsEmpty)
         return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
     if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)
@@ -86,7 +86,7 @@ TestContext::Return testArgCountZeroArgc(TestContext* ctx)
     if (!args.errors().size())
         return TAP_FAIL(ctx, "Missing error logging after 'argc' is '0'!");
 
-    if (args.errors()[0].code != ArgParse::Errors::ARGVIsEmpty)
+    if (args.errors()[0].code != ArgParse::Errors::ArgVIsEmpty)
         return TAP_FAIL(ctx, "The 'argv' is empty, but error codes is wrong!");
 
     if (args.errors()[0].suspect.type != ArgParse::Errors::Suspect::GeneralType)

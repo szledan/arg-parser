@@ -1,6 +1,3 @@
-#ifndef TEST_H
-#define TEST_H
-
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -25,43 +22,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
-#include "test-defs.h"
-#include <string>
-#include <sstream>
-#include <set>
+#include "test-api.h"
 
 namespace testargparse {
+namespace {
 
-class TestContext {
-public:
-    enum Return { Fail, Pass, NotTested };
-    typedef Return (*TestInstanceFunc)(TestContext*);
+using namespace argparse;
 
-    TestContext(const bool& = true);
+TestContext::Return testNoInputStr(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check checkFlagAndReadValue(): no input flag string.");
+}
 
-    void add(TestInstanceFunc);
-    int run();
+TestContext::Return testNotDefinedOutputT(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check checkFlagAndReadValue(): no input T*.");
+}
 
-    Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+} // namespace anonymous
 
-    struct Param {
-        std::string str;
-    } param;
-
-private:
-    void test(const std::string& file, const std::string& func, const std::string& line);
-
-    const bool _showPass;
-    std::set<TestInstanceFunc> _tests;
-    std::stringstream _result;
-};
-
-// Manual tests.
-void manualHelpTest(TestContext*);
+void apiCheckFlagAndReadValueTests(TestContext* ctx)
+{
+    ctx->add(testNoInputStr);
+    ctx->add(testNotDefinedOutputT);
+}
 
 } // namespace testargparse
-
-#endif // TEST_H

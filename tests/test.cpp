@@ -27,15 +27,19 @@
 #include "arg-parse.h"
 #include <iostream>
 
+#include "api/test-api.h"
+#include "unit-and-behavior/test-unit.h"
+
 // Configure and run tests.
 
 int main(int argc, char* argv[])
 {
     argparse::ArgParse args;
 
-    args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
+    args.add(argparse::Flag("--api", "-a", "Select api tests."));
     args.add(argparse::Flag("--manual", "-m", "Select manual tests.",
                             argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
+    args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
     args.add(argparse::Flag("--silent", "-s", "Fails show only."));
 
     if (!args.parse(argc, argv)) {
@@ -49,9 +53,21 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    const bool all = args["--all"].isSet || !(args["-u"].isSet || args["-m"].isSet);
+    const bool none = !(args["-a"].isSet || args["-m"].isSet || args["-u"].isSet);
+    const bool all = args["--all"].isSet || none;
 
     testargparse::TestContext ctx(!args["--silent"].isSet);
+
+    if (args["--api"].isSet || all) {
+        testargparse::apiCheckFlagTests(&ctx);
+        testargparse::apiCheckFlagAndReadValueTests(&ctx);
+    }
+
+    if (args["--manual"].isSet || all) {
+        ctx.param.str = args["--manual"].value.str;
+        testargparse::manualHelpTest(&ctx);
+//        testargparse::manualErrorTest(&ctx);
+    }
 
     if (args["--unit"].isSet || all) {
         testargparse::argErrorTests(&ctx);
@@ -59,19 +75,13 @@ int main(int argc, char* argv[])
         testargparse::valueTests(&ctx);
         testargparse::parserTests(&ctx);
         testargparse::operatorTests(&ctx);
-        testargparse::checkFlagTests(&ctx);
-        testargparse::checkFlagAndReadValueTests(&ctx);
+        testargparse::unitCheckFlagTests(&ctx);
+        testargparse::unitCheckFlagAndReadValueTests(&ctx);
         testargparse::countsTests(&ctx);
 //        testargparse::optionsTests(&ctx);
 //        testargparse::argStructTests(&ctx);
 //        testargparse::valueStructTests(&ctx);
 //        testargparse::flagStructTests(&ctx);
-    }
-
-    if (args["--manual"].isSet || all) {
-        ctx.param.str = args["--manual"].value.str;
-        testargparse::manualHelpTest(&ctx);
-//        testargparse::manualErrorTest(&ctx);
     }
 
     return ctx.run();
@@ -97,13 +107,12 @@ TestContext::TestContext(const bool& showPass)
     : _showPass(showPass)
 {
     _result << std::endl << "ArgParse Test Suite created." << std::endl;
-    _result << std::endl << "Ready to collect tests." << std::endl;
-    _result << std::endl;
+    _result << std::endl << "Ready to collecting tests." << std::endl;
 }
 
 void TestContext::add(TestContext::TestInstanceFunc test)
 {
-    _tests.push_back(test);
+    _tests.insert(test);
 }
 
 int TestContext::run()
@@ -140,7 +149,7 @@ TestContext::Return TestContext::pass(const std::string& msg, const std::string&
 {
     if (_showPass) {
         this->test(file, func, line);
-        _result << "\033[32;1m" << "PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+        _result << "\033[32;1m" << "  PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     }
     return Return::Pass;
 }
@@ -148,14 +157,14 @@ TestContext::Return TestContext::pass(const std::string& msg, const std::string&
 TestContext::Return TestContext::fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     this->test(file, func, line);
-    _result << "\033[31;1m" << "FAIL" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+    _result << "\033[31;1m" << "  FAIL" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     return Return::Fail;
 }
 
 TestContext::Return TestContext::nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     this->test(file, func, line);
-    _result << "\033[33;1m" << "NOT TESTED" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+    _result << "\033[33;1m" << "  NOT TESTED" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     return Return::NotTested;
 }
 

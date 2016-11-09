@@ -1,6 +1,3 @@
-#ifndef TEST_H
-#define TEST_H
-
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -25,43 +22,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
-#include "test-defs.h"
-#include <string>
-#include <sstream>
-#include <set>
+#include "test-unit.h"
 
 namespace testargparse {
+namespace {
 
-class TestContext {
-public:
-    enum Return { Fail, Pass, NotTested };
-    typedef Return (*TestInstanceFunc)(TestContext*);
+using namespace argparse;
 
-    TestContext(const bool& = true);
+TestContext::Return testNoFlag(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
+}
 
-    void add(TestInstanceFunc);
-    int run();
+TestContext::Return testNotSetFlag(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
+}
 
-    Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+TestContext::Return testSetFlagNoValue(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
+}
 
-    struct Param {
-        std::string str;
-    } param;
+TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
+}
 
-private:
-    void test(const std::string& file, const std::string& func, const std::string& line);
+} // namespace anonymous
 
-    const bool _showPass;
-    std::set<TestInstanceFunc> _tests;
-    std::stringstream _result;
-};
-
-// Manual tests.
-void manualHelpTest(TestContext*);
+void unitCheckFlagAndReadValueTests(TestContext* ctx)
+{
+    ctx->add(testNoFlag);
+    ctx->add(testNotSetFlag);
+    ctx->add(testSetFlagNoValue);
+    ctx->add(testSetFlagWithValueDifferentTypes);
+}
 
 } // namespace testargparse
-
-#endif // TEST_H
