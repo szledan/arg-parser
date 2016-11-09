@@ -32,7 +32,7 @@ namespace {
 
 using namespace argparse;
 
-bool testArgArgvIsNullPtr(TestContext* ctx)
+TestContext::Return testArgArgvIsNullPtr(TestContext* ctx)
 {
     ArgParse args;
     const bool parseRet = args.parse(1985, nullptr);
@@ -51,7 +51,7 @@ bool testArgArgvIsNullPtr(TestContext* ctx)
     return TAP_PASS(ctx, "ArgCount test with 'argv' is nullptr.");
 }
 
-bool testArgCountEmptyArgv(TestContext* ctx)
+TestContext::Return testArgCountEmptyArgv(TestContext* ctx)
 {
     char* argv[] = { nullptr };
     const int argc = 2;
@@ -73,7 +73,7 @@ bool testArgCountEmptyArgv(TestContext* ctx)
     return TAP_PASS(ctx, "ArgCount test with empty 'argv'.");
 }
 
-bool testArgCountZeroArgc(TestContext* ctx)
+TestContext::Return testArgCountZeroArgc(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = 0;
@@ -95,7 +95,7 @@ bool testArgCountZeroArgc(TestContext* ctx)
     return TAP_PASS(ctx, "ArgCount test with zero 'argc'.");
 }
 
-bool testArgcBiggerSizeOfArgv(TestContext* ctx)
+TestContext::Return testArgcBiggerSizeOfArgv(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = 1985;
@@ -117,7 +117,7 @@ bool testArgcBiggerSizeOfArgv(TestContext* ctx)
     return TAP_PASS(ctx, "ArgCount test with zero 'argc'.");
 }
 
-bool testArgCountNonEmptyArgv(TestContext* ctx)
+TestContext::Return testArgCountNonEmptyArgv(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -132,7 +132,7 @@ bool testArgCountNonEmptyArgv(TestContext* ctx)
     return TAP_PASS(ctx, "ArgCount test with non empty 'argv'.");
 }
 
-bool testErrorCode(TestContext* ctx)
+TestContext::Return testErrorCode(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);

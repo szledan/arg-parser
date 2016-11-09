@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
     return ctx.run();
 }
 
+namespace testargparse {
+
 // TestContext
 
 // Util functions.
@@ -91,15 +93,24 @@ inline float perCent(const size_t& counter, const size_t& denom, const float& pr
 
 } // namespace anonymous
 
-void testargparse::TestContext::add(testargparse::TestContext::TestInstanceFunc test)
+TestContext::TestContext(const bool& showPass)
+    : _showPass(showPass)
+{
+    _result << std::endl << "ArgParse Test Suite created." << std::endl;
+    _result << std::endl << "Ready to collect tests." << std::endl;
+    _result << std::endl;
+}
+
+void TestContext::add(TestContext::TestInstanceFunc test)
 {
     _tests.push_back(test);
 }
 
-int testargparse::TestContext::run()
+int TestContext::run()
 {
     const size_t nums = _tests.size();
     size_t pass = 0;
+    size_t nott = 0;
 
     if (nums) {
         _result << std::endl << "Run " << nums << " collected test(s)!" << std::endl;
@@ -108,12 +119,16 @@ int testargparse::TestContext::run()
         _result << std::endl;
 
         for (auto test : _tests)
-            if (test(this))
-                pass++;
+            switch (test(this)) {
+            case Return::Pass: pass++; break;
+            case Return::NotTested: nott++; break;
+            default: break;
+            }
 
         _result << std::endl << "Results:" << std::endl;
         _result << "  Pass: " << pass << "/" << nums << " (" << perCent(pass, nums) << "%)" << std::endl;
-        _result << "  Fail: " << nums - pass << "/" << nums << " (" << perCent(nums - pass, nums) << "%)" << std::endl;
+        _result << "  Fail: " << nums - (pass + nott) << "/" << nums << " (" << perCent(nums - (pass + nott), nums) << "%)" << std::endl;
+        _result << "  Not tested: " << nott << "/" << nums << " (" << perCent(nott, nums) << "%)" << std::endl;
 
         std::clog << _result.str();
     }
@@ -121,23 +136,32 @@ int testargparse::TestContext::run()
     return pass == nums ? 0 : 1;
 }
 
-bool testargparse::TestContext::pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
+TestContext::Return TestContext::pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     if (_showPass) {
         this->test(file, func, line);
         _result << "\033[32;1m" << "PASS" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     }
-    return true;
+    return Return::Pass;
 }
 
-bool testargparse::TestContext::fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
+TestContext::Return TestContext::fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
 {
     this->test(file, func, line);
     _result << "\033[31;1m" << "FAIL" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
-    return false;
+    return Return::Fail;
 }
 
-inline void testargparse::TestContext::test(const std::string& file, const std::string& func, const std::string& line)
+TestContext::Return TestContext::nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)
+{
+    this->test(file, func, line);
+    _result << "\033[33;1m" << "NOT TESTED" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
+    return Return::NotTested;
+}
+
+inline void TestContext::test(const std::string& file, const std::string& func, const std::string& line)
 {
     _result << "The " << func  << "() at " << file << ":" << line << std::endl;
 }
+
+} // namespace testargparse

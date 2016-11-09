@@ -35,7 +35,7 @@ const std::string g_shortFlag = "-a";
 const std::string g_longFlag = "--a";
 const std::string g_description = "Simple settable flag without value.";
 
-bool testNoArgNoFlag(TestContext* ctx)
+TestContext::Return testNoArgNoFlag(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -66,7 +66,7 @@ bool testNoArgNoFlag(TestContext* ctx)
     return TAP_PASS(ctx, "Test counters when no args and flags.");
 }
 
-bool testDefinedArgs(TestContext* ctx)
+TestContext::Return testDefinedArgs(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS("arg_1"), TAP_CHARS("arg_2"), TAP_CHARS("arg_3") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -99,7 +99,7 @@ bool testDefinedArgs(TestContext* ctx)
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
 }
 
-bool testUndefinedArgs(TestContext* ctx)
+TestContext::Return testUndefinedArgs(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS("arg_1"), TAP_CHARS("arg_2"), TAP_CHARS("arg_3") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -129,7 +129,7 @@ bool testUndefinedArgs(TestContext* ctx)
     return TAP_PASS(ctx, "Test counters when only undefined arguments.");
 }
 
-bool testDefinedFlags(TestContext* ctx)
+TestContext::Return testDefinedFlags(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS(g_longFlag.c_str()), TAP_CHARS(g_shortFlag.c_str()), TAP_CHARS("--other"), TAP_CHARS("value") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -162,7 +162,7 @@ bool testDefinedFlags(TestContext* ctx)
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
 }
 
-bool testUndefinedFlags(TestContext* ctx)
+TestContext::Return testUndefinedFlags(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS(g_longFlag.c_str()), TAP_CHARS(g_shortFlag.c_str()), TAP_CHARS("--other") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -192,7 +192,7 @@ bool testUndefinedFlags(TestContext* ctx)
     return TAP_PASS(ctx, "Test counters when only defined arguments.");
 }
 
-bool testComplex(TestContext* ctx)
+TestContext::Return testComplex(TestContext* ctx)
 {
     char* argv[] = {
         TAP_CHARS("program"),

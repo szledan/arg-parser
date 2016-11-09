@@ -39,6 +39,7 @@ const std::string g_description = "Simple settable flag without value.";
 
 void operatorTests(TestContext* ctx)
 {
+    TAP_NOT_TESTED(ctx, "Operator test group.");
 }
 
 } // namespace testargparse

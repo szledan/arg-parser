@@ -41,6 +41,10 @@
 #define TAP_FAIL(CTX, MSG) CTX->fail(MSG, TAP_FILE_FUNC_LINE)
 #endif // TAP_FAIL
 
+#ifndef TAP_NOT_TESTED
+#define TAP_NOT_TESTED(CTX, MSG) CTX->nott(MSG, TAP_FILE_FUNC_LINE)
+#endif // TAP_NOT_TESTED
+
 #ifndef TAP_CHARS
 #define TAP_CHARS(STR) (char*)STR
 #endif // TAP_CHARS

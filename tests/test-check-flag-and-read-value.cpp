@@ -39,6 +39,7 @@ const std::string g_description = "Simple settable flag without value.";
 
 void checkFlagAndReadValueTests(TestContext* ctx)
 {
+    TAP_NOT_TESTED(ctx, "Function of checkFlagAndReadValue() test group.");
 }
 
 } // namespace testargparse

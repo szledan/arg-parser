@@ -35,14 +35,17 @@ namespace testargparse {
 
 class TestContext {
 public:
-    TestContext(const bool& showPass = true) : _pass(0), _nums(0), _showPass(showPass) {}
-    typedef bool (*TestInstanceFunc)(TestContext*);
+    enum Return { Fail, Pass, NotTested };
+    typedef Return (*TestInstanceFunc)(TestContext*);
+
+    TestContext(const bool& = true);
 
     void add(TestInstanceFunc);
     int run();
 
-    bool pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    bool fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
 
     struct Param {
         std::string str;
@@ -51,8 +54,6 @@ public:
 private:
     void test(const std::string& file, const std::string& func, const std::string& line);
 
-    uint32_t _pass;
-    uint32_t _nums;
     const bool _showPass;
     std::vector<TestInstanceFunc> _tests;
     std::stringstream _result;

@@ -35,7 +35,7 @@ const std::string g_shortFlag = "-a";
 const std::string g_longFlag = "--a";
 const std::string g_description = "Simple settable flag without value.";
 
-bool testShortFlagNotSet(TestContext* ctx)
+TestContext::Return testShortFlagNotSet(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -53,7 +53,7 @@ bool testShortFlagNotSet(TestContext* ctx)
     return TAP_PASS(ctx, "Simple short flag test where flag doesn't set.");
 }
 
-bool testShortFlagOnlySet(TestContext* ctx)
+TestContext::Return testShortFlagOnlySet(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS("-a") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -86,7 +86,7 @@ bool testShortFlagOnlySet(TestContext* ctx)
     return TAP_PASS(ctx, "Simple short flag test.");
 }
 
-bool testLongFlagNotSet(TestContext* ctx)
+TestContext::Return testLongFlagNotSet(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -104,7 +104,7 @@ bool testLongFlagNotSet(TestContext* ctx)
     return TAP_PASS(ctx, "Simple long flag test where flag doesn't set.");
 }
 
-bool testLongFlagOnlySet(TestContext* ctx)
+TestContext::Return testLongFlagOnlySet(TestContext* ctx)
 {
     char* argv[] = { TAP_CHARS("program"), TAP_CHARS("--a") };
     const int argc = TAP_ARRAY_SIZE(argv);
@@ -137,7 +137,7 @@ bool testLongFlagOnlySet(TestContext* ctx)
     return TAP_PASS(ctx, "Simple long flag test.");
 }
 
-bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
+TestContext::Return testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 {
     std::string value("--v");
 
@@ -186,7 +186,7 @@ bool testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
     return TAP_PASS(ctx, "Long and short flag tests with not needed value.");
 }
 
-bool testLongAndShortFlagWithNeededValue(TestContext* ctx)
+TestContext::Return testLongAndShortFlagWithNeededValue(TestContext* ctx)
 {
     std::string value("-v");
 

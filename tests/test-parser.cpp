@@ -35,7 +35,7 @@ const std::string g_shortFlag = "-a";
 const std::string g_longFlag = "--a";
 const std::string g_description = "Simple settable flag with or without value.";
 
-bool testSomeTypicalFlags(TestContext* ctx)
+TestContext::Return testSomeTypicalFlags(TestContext* ctx)
 {
     const std::string value = "--v=.V--";
 
@@ -93,7 +93,7 @@ bool testSomeTypicalFlags(TestContext* ctx)
     return TAP_PASS(ctx, "Parse some typical flags.");
 }
 
-bool testUndefinedFlags(TestContext* ctx)
+TestContext::Return testUndefinedFlags(TestContext* ctx)
 {
     const std::string value = "--v=.V--";
 
@@ -145,7 +145,7 @@ bool testUndefinedFlags(TestContext* ctx)
     return TAP_PASS(ctx, "Parse undefined flags.");
 }
 
-bool testNonTypicalFlags(TestContext* ctx)
+TestContext::Return testNonTypicalFlags(TestContext* ctx)
 {
     struct {
         const std::string givenFlag;

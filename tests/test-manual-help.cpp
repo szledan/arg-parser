@@ -47,7 +47,7 @@ const std::string msg("Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
 
 using namespace argparse;
 
-void showHelp(TestContext* ctx)
+TestContext::Return showHelp(TestContext* ctx)
 {
     char sf = 'A';
     char lf = sf;
@@ -84,6 +84,8 @@ void showHelp(TestContext* ctx)
     }
 
     std::cout  << args.help() << std::endl;
+
+    return TestContext::Return::Pass;
 }
 
 } // namespace anonymous

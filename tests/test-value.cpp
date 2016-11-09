@@ -32,7 +32,7 @@ namespace {
 
 void valueTests(TestContext* ctx)
 {
-    // TODO: Value
+    TAP_NOT_TESTED(ctx, "Value test group.");
 }
 
 } // namespace testargparse

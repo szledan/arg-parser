@@ -22,6 +22,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * TODO LIST:
+ *  [1] More more tests :)
+ *  [2] Implement 'mode.strict'.
+ *  [5] Replace every 'true/false' to const values.
+ *
+ * FIXME LIST:
+ *  [4] The showHelp works buggly: sometimes not show [value]s.
+ *  [3] Update documentation: ./README.md ./doc/* ./demos/README.md ./src/README.md
+ *
+ * FUTURE LIST:
+ *  [6] Extend ArgParse with: argc(), argv() native getter functions to _argc, _argv.
+ *  [7] Extend './demos' with some typical example.
+ */
+
 #include "arg-parse.h"
 
 #include <assert.h>
@@ -33,7 +48,6 @@
 namespace argparse {
 
 // Util functions.
-
 namespace {
 
 template <typename T>
@@ -556,13 +570,12 @@ const std::string Value::_getChoosesStr(const bool full) const
     if (!_chooseList.size())
         return "";
 
-    std::stringstream ss;
+    std::stringstream s;
     std::string end(full ? "" : "|...");
-
     for (size_t i = 0; i < _chooseList.size(); ++i)
-        ss << "|" << _chooseList[i];
+        s << "|" << _chooseList[i];
 
-    return ss.str().substr(1) + end;
+    return s.str().substr(1) + end;
 }
 
 // Flag
@@ -607,10 +620,7 @@ Arg::Arg(const Arg& a)
 {
 }
 
-Arg::Arg(const std::string& name,
-         const std::string& description,
-         const bool isNeeded,
-         const Value& defaultValue)
+Arg::Arg(const std::string& name, const std::string& description, const bool isNeeded, const Value& defaultValue)
     : Value(defaultValue.str, name, description)
     , isSet(false)
     , defined(!name.empty())
