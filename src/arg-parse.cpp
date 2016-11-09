@@ -51,9 +51,9 @@ const bool returnValue(const std::string& value, const bool& def)
     return !(value.empty() || (value == "false") || (value == "off") || (value == "0"));
 }
 
-const std::string returnValue(const std::string& valueStr, const std::string& def)
+const std::string returnValue(const std::string& value, const std::string& def)
 {
-    return valueStr;
+    return value;
 }
 
 template <typename T>
@@ -367,8 +367,11 @@ const std::string ArgParse::help()
                 help << ", ";
             AP_PRINT_FLAG(flag._longFlag, 0);
         }
-        if (hasShortFlag || hasLongFlag)
+        if (hasShortFlag || hasLongFlag) {
+            if (!options.help.compact)
+                help << std::endl << tab;
             help << tab << flag._description << std::endl;
+        }
 
 #undef AP_PRINT_FLAG
 #undef AP_HAS_NAME

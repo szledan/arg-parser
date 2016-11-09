@@ -55,8 +55,8 @@ void showHelp()
     ArgParse args({"program.name=show-help",
                    "help.add=false",
                    "tab=\t",
-                   "mode.strict=true"
-                   "help.compact=on",
+                   "mode.strict=true",
+                   "help.compact=0",
                    "help.show=2"});
 
     args.add(Flag());
