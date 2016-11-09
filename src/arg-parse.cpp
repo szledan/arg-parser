@@ -318,7 +318,6 @@ const std::string ArgParse::help()
     help << "usage: " << options.program.name;
 
     // Print arguments after programname.
-    // TODO: sort args.
     for (auto const& it : _args) {
         const Arg& arg = it;
         if (!arg._name.empty()) {
@@ -447,9 +446,8 @@ const Flag& ArgParse::operator[](const std::string& idx)
     std::string flagStr(idx);
     switch (mapParamType(flagStr)) {
     case ParamType::ArgType:
-        // FIXME: delete this assert, return something.
-        assert(false);
-        break;
+        add(Flag());
+        return *(_longFlags[""]);
     case ParamType::ShortFlagsType:
         flagStr = flagStr.substr(0, 2);
         // Fall through.
@@ -567,7 +565,7 @@ Flag::Flag(const std::string& lFlag,
            const std::string& dscrptn)
     : isSet(false)
     , hasValue(false)
-    , defined(true)
+    , defined(!lFlag.empty() || !sFlag.empty())
     , _longFlag(lFlag)
     , _shortFlag(sFlag)
     , _description(dscrptn)
@@ -602,7 +600,7 @@ Arg::Arg(const std::string& name,
          const Value& defaultValue)
     : Value(defaultValue.str, name, description)
     , isSet(false)
-    , defined(true)
+    , defined(!name.empty())
     , _isArgNeeded(isNeeded)
     , _callBackFunc(nullptr)
 {
