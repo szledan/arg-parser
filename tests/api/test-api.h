@@ -29,8 +29,15 @@
 
 namespace testargparse {
 
-void apiCheckFlagTests(TestContext*);
+void apiAddTests(TestContext*);
+void apiArgStructTests(TestContext*);
 void apiCheckFlagAndReadValueTests(TestContext*);
+void apiCheckFlagTests(TestContext*);
+void apiConstructorsTests(TestContext*);
+void apiFlagStructTests(TestContext*);
+void apiOperatorTests(TestContext*);
+void apiParserTests(TestContext*);
+void apiValueStructTests(TestContext*);
 
 } // namespace testargparse
 

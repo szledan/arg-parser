@@ -38,7 +38,7 @@ TestContext::Return test(TestContext* ctx)
 
 } // namespace anonymous
 
-void apiCheckFlagTests(TestContext* ctx)
+void apiAddTests(TestContext* ctx)
 {
     ctx->add(test);
 }

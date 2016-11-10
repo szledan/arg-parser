@@ -29,8 +29,6 @@
 namespace testargparse {
 namespace {
 
-using namespace argparse;
-
 TestContext::Return test(TestContext* ctx)
 {
     return TAP_NOT_TESTED(ctx, "!!!");
@@ -38,7 +36,7 @@ TestContext::Return test(TestContext* ctx)
 
 } // namespace anonymous
 
-void apiCheckFlagTests(TestContext* ctx)
+void apiValueStructTests(TestContext* ctx)
 {
     ctx->add(test);
 }

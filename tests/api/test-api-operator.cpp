@@ -26,6 +26,7 @@
 
 #include "arg-parse.h"
 
+
 namespace testargparse {
 namespace {
 
@@ -38,7 +39,7 @@ TestContext::Return test(TestContext* ctx)
 
 } // namespace anonymous
 
-void apiCheckFlagTests(TestContext* ctx)
+void apiOperatorTests(TestContext* ctx)
 {
     ctx->add(test);
 }

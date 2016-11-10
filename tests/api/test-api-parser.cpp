@@ -33,12 +33,12 @@ using namespace argparse;
 
 TestContext::Return test(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "!!!");
+    return TAP_PASS(ctx, "!!!");
 }
 
 } // namespace anonymous
 
-void apiCheckFlagTests(TestContext* ctx)
+void apiParserTests(TestContext* ctx)
 {
     ctx->add(test);
 }

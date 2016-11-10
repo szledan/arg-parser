@@ -31,22 +31,16 @@ namespace {
 
 using namespace argparse;
 
-TestContext::Return testNoInputStr(TestContext* ctx)
+TestContext::Return test(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check checkFlagAndReadValue(): no input flag string.");
-}
-
-TestContext::Return testNotDefinedOutputT(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check checkFlagAndReadValue(): no input T*.");
+    return TAP_NOT_TESTED(ctx, "!!!");
 }
 
 } // namespace anonymous
 
 void apiCheckFlagAndReadValueTests(TestContext* ctx)
 {
-    ctx->add(testNoInputStr);
-    ctx->add(testNotDefinedOutputT);
+    ctx->add(test);
 }
 
 } // namespace testargparse

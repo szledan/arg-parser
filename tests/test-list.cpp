@@ -32,8 +32,15 @@ namespace testargparse {
 
 void apiTests(TestContext* ctx)
 {
-    testargparse::apiCheckFlagTests(ctx);
+    testargparse::apiAddTests(ctx);
+    testargparse::apiArgStructTests(ctx);
     testargparse::apiCheckFlagAndReadValueTests(ctx);
+    testargparse::apiCheckFlagTests(ctx);
+    testargparse::apiConstructorsTests(ctx);
+    testargparse::apiFlagStructTests(ctx);
+    testargparse::apiOperatorTests(ctx);
+    testargparse::apiParserTests(ctx);
+    testargparse::apiValueStructTests(ctx);
 }
 
 void manualTests(TestContext* ctx)

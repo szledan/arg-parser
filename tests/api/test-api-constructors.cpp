@@ -31,16 +31,22 @@ namespace {
 
 using namespace argparse;
 
-TestContext::Return test(TestContext* ctx)
+TestContext::Return testInitializerList(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "!!!");
+    return TAP_NOT_TESTED(ctx, "Construct with initializer list.");
+}
+
+TestContext::Return testInterlacedString(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Construct with interlaced string.");
 }
 
 } // namespace anonymous
 
-void apiCheckFlagTests(TestContext* ctx)
+void apiConstructorsTests(TestContext* ctx)
 {
-    ctx->add(test);
+    ctx->add(testInitializerList);
+    ctx->add(testInterlacedString);
 }
 
 } // namespace testargparse
