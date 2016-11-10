@@ -59,8 +59,14 @@ private:
     std::stringstream _result;
 };
 
+// Api tests.
+void apiTests(TestContext*);
+
 // Manual tests.
 void manualHelpTest(TestContext*);
+
+// unit tests.
+void unitAndBehaviorTests(TestContext*);
 
 } // namespace testargparse
 

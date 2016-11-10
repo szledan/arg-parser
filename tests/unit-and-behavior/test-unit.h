@@ -37,6 +37,10 @@ void operatorTests(TestContext*);
 void unitCheckFlagTests(TestContext*);
 void unitCheckFlagAndReadValueTests(TestContext*);
 void countsTests(TestContext*);
+//        testargparse::optionsTests(&ctx);
+//        testargparse::argStructTests(&ctx);
+//        testargparse::valueStructTests(&ctx);
+//        testargparse::flagStructTests(&ctx);
 
 } // namespace testargparse
 
