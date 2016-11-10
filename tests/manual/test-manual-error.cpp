@@ -38,7 +38,7 @@ TestContext::Return showErrors(TestContext* ctx)
 
 } // namespace anonymous
 
-void manualErrorTest(TestContext* ctx)
+void manualErrorTests(TestContext* ctx)
 {
     showErrors(ctx);
 }

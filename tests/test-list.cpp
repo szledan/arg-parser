@@ -46,7 +46,7 @@ void apiTests(TestContext* ctx)
 void manualTests(TestContext* ctx)
 {
     testargparse::manualHelpTests(ctx);
-//    testargparse::manualErrorTests(ctx);
+    testargparse::manualErrorTests(ctx);
 }
 
 void unitAndBehaviorTests(TestContext* ctx)
