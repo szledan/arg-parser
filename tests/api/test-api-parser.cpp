@@ -33,7 +33,7 @@ using namespace argparse;
 
 TestContext::Return test(TestContext* ctx)
 {
-    return TAP_PASS(ctx, "!!!");
+    return TAP_PASS(ctx, "No implemented test cases!!!");
 }
 
 } // namespace anonymous

@@ -31,7 +31,7 @@ namespace {
 
 TestContext::Return test(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "!!!");
+    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
 }
 
 } // namespace anonymous
