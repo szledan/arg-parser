@@ -24,6 +24,8 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+
 #include <assert.h>
 #include <iostream>
 #include <random>
@@ -90,7 +92,7 @@ TestContext::Return showHelp(TestContext* ctx)
 
 } // namespace anonymous
 
-void manualHelpTest(TestContext* ctx)
+void manualHelpTests(TestContext* ctx)
 {
     showHelp(ctx);
 }

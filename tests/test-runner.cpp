@@ -69,8 +69,7 @@ int main(int argc, char* argv[])
     // Run manual tests.
     if (args["--manual"].isSet || all) {
         ctx.param.str = args["--manual"].value.str;
-        testargparse::manualHelpTest(&ctx);
-        // testargparse::manualErrorTest(&ctx);
+        testargparse::manualTests(&ctx);
     }
 
     // Collect api tests.

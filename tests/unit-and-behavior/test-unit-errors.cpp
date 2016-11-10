@@ -24,6 +24,8 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+
 #include <assert.h>
 #include <iostream> // only for testing, delete it!
 
@@ -173,7 +175,7 @@ TestContext::Return testErrorCode(TestContext* ctx)
 
 } // namespace anonymous
 
-void argErrorTests(TestContext* ctx)
+void unitErrorsTests(TestContext* ctx)
 {
     ctx->add(testArgArgvIsNullPtr);
     ctx->add(testArgCountEmptyArgv);

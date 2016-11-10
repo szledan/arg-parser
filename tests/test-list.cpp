@@ -22,43 +22,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test.h"
 
-#include "arg-parse.h"
+#include "api/test-api.h"
+#include "manual/test-manual.h"
+#include "unit-and-behavior/test-unit.h"
 
 namespace testargparse {
-namespace {
 
-using namespace argparse;
-
-TestContext::Return testNoFlag(TestContext* ctx)
+void apiTests(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
+    testargparse::apiCheckFlagTests(ctx);
+    testargparse::apiCheckFlagAndReadValueTests(ctx);
 }
 
-TestContext::Return testNotSetFlag(TestContext* ctx)
+void manualTests(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
+    testargparse::manualHelpTests(ctx);
+//    testargparse::manualErrorTests(ctx);
 }
 
-TestContext::Return testSetFlagNoValue(TestContext* ctx)
+void unitAndBehaviorTests(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
-}
-
-TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
-}
-
-} // namespace anonymous
-
-void unitCheckFlagAndReadValueTests(TestContext* ctx)
-{
-    ctx->add(testNoFlag);
-    ctx->add(testNotSetFlag);
-    ctx->add(testSetFlagNoValue);
-    ctx->add(testSetFlagWithValueDifferentTypes);
+    testargparse::unitAddTests(ctx);
+    testargparse::unitArgStructTests(ctx);
+    testargparse::unitCheckFlagAndReadValueTests(ctx);
+    testargparse::unitCheckFlagTests(ctx);
+    testargparse::unitConstructorsTests(ctx);
+    testargparse::unitCountsTests(ctx);
+    testargparse::unitErrorsTests(ctx);
+    testargparse::unitFlagStructTests(ctx);
+    testargparse::unitOperatorTests(ctx);
+    testargparse::unitOptionsTests(ctx);
+    testargparse::unitParserTests(ctx);
+    testargparse::unitValueStructTests(ctx);
 }
 
 } // namespace testargparse

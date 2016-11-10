@@ -1,3 +1,6 @@
+#ifndef TEST_MANUAL_H
+#define TEST_MANUAL_H
+
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -24,22 +27,11 @@
 
 #include "test.h"
 
-#include <assert.h>
-
 namespace testargparse {
-namespace {
 
-using namespace argparse;
-
-const std::string g_shortFlag = "-a";
-const std::string g_longFlag = "--a";
-const std::string g_description = "Simple settable flag without value.";
-
-} // namespace anonymous
-
-void operatorTests(TestContext* ctx)
-{
-    TAP_NOT_TESTED(ctx, "Operator test group.");
-}
+void manualHelpTests(TestContext*);
+void manualErrorTests(TestContext*);
 
 } // namespace testargparse
+
+#endif // TEST_MANUAL_H

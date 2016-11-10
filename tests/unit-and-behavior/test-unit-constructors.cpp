@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test.h"
 
 #include "arg-parse.h"
 
@@ -31,34 +31,22 @@ namespace {
 
 using namespace argparse;
 
-TestContext::Return testNoFlag(TestContext* ctx)
+TestContext::Return testInitializerList(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
+    return TAP_NOT_TESTED(ctx, "Construct with initializer list.");
 }
 
-TestContext::Return testNotSetFlag(TestContext* ctx)
+TestContext::Return testInterlacedString(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
-}
-
-TestContext::Return testSetFlagNoValue(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
-}
-
-TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
+    return TAP_NOT_TESTED(ctx, "Construct with interlaced string.");
 }
 
 } // namespace anonymous
 
-void unitCheckFlagAndReadValueTests(TestContext* ctx)
+void unitConstructorsTests(TestContext* ctx)
 {
-    ctx->add(testNoFlag);
-    ctx->add(testNotSetFlag);
-    ctx->add(testSetFlagNoValue);
-    ctx->add(testSetFlagWithValueDifferentTypes);
+    ctx->add(testInitializerList);
+    ctx->add(testInterlacedString);
 }
 
 } // namespace testargparse

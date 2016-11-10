@@ -24,15 +24,23 @@
 
 #include "test.h"
 
-namespace testargparse {
+#include "arg-parse.h"
 
+namespace testargparse {
 namespace {
+
+using namespace argparse;
+
+TestContext::Return test(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "!!!");
+}
 
 } // namespace anonymous
 
-void valueTests(TestContext* ctx)
+void unitAddTests(TestContext* ctx)
 {
-    TAP_NOT_TESTED(ctx, "Value test group.");
+    ctx->add(test);
 }
 
 } // namespace testargparse

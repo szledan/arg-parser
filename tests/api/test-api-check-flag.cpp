@@ -24,6 +24,8 @@
 
 #include "test-api.h"
 
+#include "arg-parse.h"
+
 namespace testargparse {
 namespace {
 

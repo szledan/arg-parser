@@ -24,6 +24,8 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+
 #include <assert.h>
 
 namespace testargparse {
@@ -239,7 +241,7 @@ TestContext::Return testComplex(TestContext* ctx)
 
 } // namespace anonymous
 
-void countsTests(TestContext* ctx)
+void unitCountsTests(TestContext* ctx)
 {
     ctx->add(testNoArgNoFlag);
     ctx->add(testDefinedArgs);

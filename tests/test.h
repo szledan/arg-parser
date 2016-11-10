@@ -25,8 +25,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
 #include "test-defs.h"
+
 #include <string>
 #include <sstream>
 #include <set>
@@ -63,9 +63,9 @@ private:
 void apiTests(TestContext*);
 
 // Manual tests.
-void manualHelpTest(TestContext*);
+void manualTests(TestContext* ctx);
 
-// unit tests.
+// Unit tests.
 void unitAndBehaviorTests(TestContext*);
 
 } // namespace testargparse

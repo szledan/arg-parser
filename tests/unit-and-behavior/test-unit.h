@@ -29,18 +29,18 @@
 
 namespace testargparse {
 
-void argErrorTests(TestContext*);
-void flagTests(TestContext*);
-void valueTests(TestContext*);
-void parserTests(TestContext*);
-void operatorTests(TestContext*);
-void unitCheckFlagTests(TestContext*);
+void unitAddTests(TestContext*);
+void unitArgStructTests(TestContext*);
 void unitCheckFlagAndReadValueTests(TestContext*);
-void countsTests(TestContext*);
-//        testargparse::optionsTests(&ctx);
-//        testargparse::argStructTests(&ctx);
-//        testargparse::valueStructTests(&ctx);
-//        testargparse::flagStructTests(&ctx);
+void unitCheckFlagTests(TestContext*);
+void unitConstructorsTests(TestContext*);
+void unitCountsTests(TestContext*);
+void unitErrorsTests(TestContext*);
+void unitFlagStructTests(TestContext*);
+void unitOperatorTests(TestContext*);
+void unitOptionsTests(TestContext*);
+void unitParserTests(TestContext*);
+void unitValueStructTests(TestContext*);
 
 } // namespace testargparse
 

@@ -40,7 +40,7 @@ struct Value;
 struct Arg;
 struct Flag;
 
-// ArgPars
+// ArgParse
 
 class ArgParse {
 public:

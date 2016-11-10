@@ -24,27 +24,9 @@
 
 #include "test.h"
 
-#include "arg-parse.h"
 #include <iostream>
 
-#include "api/test-api.h"
-#include "unit-and-behavior/test-unit.h"
-
 namespace testargparse {
-
-void apiTests(TestContext* ctx)
-{
-    testargparse::apiCheckFlagTests(ctx);
-    testargparse::apiCheckFlagAndReadValueTests(ctx);
-}
-
-void unitAndBehaviorTests(TestContext* ctx)
-{
-    testargparse::unitCheckFlagTests(ctx);
-    testargparse::unitCheckFlagAndReadValueTests(ctx);
-}
-
-// TestContext
 
 // Util functions.
 namespace {
@@ -57,6 +39,8 @@ inline float perCent(const size_t& counter, const size_t& denom, const float& pr
 }
 
 } // namespace anonymous
+
+// TestContext
 
 TestContext::TestContext(const bool& showPass)
     : _showPass(showPass)

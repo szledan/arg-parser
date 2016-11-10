@@ -24,6 +24,8 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+
 #include <assert.h>
 
 namespace testargparse {
@@ -239,7 +241,7 @@ TestContext::Return testLongAndShortFlagWithNeededValue(TestContext* ctx)
 
 } // namespace anonymous
 
-void flagTests(TestContext* ctx)
+void unitFlagStructTests(TestContext* ctx)
 {
     ctx->add(testShortFlagNotSet);
     ctx->add(testShortFlagOnlySet);

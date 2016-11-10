@@ -24,6 +24,8 @@
 
 #include "test-unit.h"
 
+#include "arg-parse.h"
+
 namespace testargparse {
 namespace {
 

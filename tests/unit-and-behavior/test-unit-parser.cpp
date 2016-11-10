@@ -24,6 +24,8 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+
 #include <assert.h>
 
 namespace testargparse {
@@ -211,7 +213,7 @@ TestContext::Return testNonTypicalFlags(TestContext* ctx)
 
 } // namespace anonymous
 
-void parserTests(TestContext* ctx)
+void unitParserTests(TestContext* ctx)
 {
     ctx->add(testSomeTypicalFlags);
     ctx->add(testUndefinedFlags);

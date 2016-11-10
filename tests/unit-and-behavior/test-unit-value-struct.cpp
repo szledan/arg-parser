@@ -22,43 +22,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test.h"
 
 #include "arg-parse.h"
 
 namespace testargparse {
 namespace {
 
-using namespace argparse;
-
-TestContext::Return testNoFlag(TestContext* ctx)
+TestContext::Return testEmptyValue(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
-}
-
-TestContext::Return testNotSetFlag(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
-}
-
-TestContext::Return testSetFlagNoValue(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
-}
-
-TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
+    return TAP_NOT_TESTED(ctx, "Create empty Value.");
 }
 
 } // namespace anonymous
 
-void unitCheckFlagAndReadValueTests(TestContext* ctx)
+void unitValueStructTests(TestContext* ctx)
 {
-    ctx->add(testNoFlag);
-    ctx->add(testNotSetFlag);
-    ctx->add(testSetFlagNoValue);
-    ctx->add(testSetFlagWithValueDifferentTypes);
+    ctx->add(testEmptyValue);
 }
 
 } // namespace testargparse
