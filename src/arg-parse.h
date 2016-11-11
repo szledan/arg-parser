@@ -43,7 +43,7 @@ struct Flag;
 // ArgParse
 
 class ArgParse {
-public:
+public:    
     typedef std::initializer_list<std::string> OptionList;
     struct Errors;
 
@@ -109,6 +109,9 @@ public:
             };
         } const suspect;
     };
+
+    static const Flag WrongFlag;
+    static const Arg WrongArg;
 
 private:
     void addError(const Errors::Codes&, const std::string& errorMsg, const ArgParse::Errors::Suspect& = { Errors::Suspect::GeneralType, nullptr });

@@ -27,6 +27,10 @@
 
 #include "test.h"
 
+#include "arg-parse.h"
+#include "test-defs.h"
+#include <string>
+
 namespace testargparse {
 
 void unitArgStructTests(TestContext*);
@@ -41,6 +45,56 @@ void unitOperatorTests(TestContext*);
 void unitOptionsTests(TestContext*);
 void unitParserTests(TestContext*);
 void unitValueStructTests(TestContext*);
+
+#ifndef TAP_FLAGS_NAME_TEST_CASES
+#define TAP_FLAGS_NAME_TEST_CASES(TEST_CASES, LONG, SHORT) \
+    struct { \
+        const std::string defFlagLong; \
+        const std::string defFlagShort; \
+    } TEST_CASES[] = { \
+        { "", "" }, \
+        { LONG, "" }, \
+        { "", SHORT }, \
+        { LONG, SHORT }, \
+    }
+#endif // TAP_FLAGS_NAME_TEST_CASES
+
+#ifndef TAP_ARG_NAME_TEST_CASES
+#define TAP_ARG_NAME_TEST_CASES(TEST_CASES) \
+    struct { \
+        const std::string defArgName; \
+    } TEST_CASES[] = { \
+        { "" }, \
+        { "arg" }, \
+    }
+#endif // TAP_ARG_NAME_TEST_CASES
+
+#ifndef TAP_ARG_REQUIRED_TEST_CASES
+#define TAP_ARG_REQUIRED_TEST_CASES(TEST_CASES) \
+    struct { \
+        const bool defArgRequired; \
+    } TEST_CASES[] = { \
+        { argparse::Arg::IsNeeded }, \
+        { !argparse::Arg::IsNeeded }, \
+    }
+#endif // TAP_ARG_REQUIRED_TEST_CASES
+
+#ifndef TAP_VALUE_TEST_CASES
+#define TAP_VALUE_TEST_CASES(TEST_CASES, GIVEN_VALUE) \
+    struct { \
+        const argparse::Value defValue; \
+    } TEST_CASES[] = { \
+        { Value() }, \
+        { Value("") }, \
+        { Value(GIVEN_VALUE) }, \
+        { Value("A") }, \
+        { Value(GIVEN_VALUE, { GIVEN_VALUE, "other", "values" }) }, \
+        { Value(GIVEN_VALUE, { "A", "B", "C" }) }, \
+        { Value("", { "A", "B", "C" }) }, \
+        { Value("", { }) }, \
+        { Value(GIVEN_VALUE, { }) }, \
+    }
+#endif // TAP_VALUE_TEST_CASES
 
 } // namespace testargparse
 

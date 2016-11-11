@@ -143,6 +143,9 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
 
 } // namespace anonymous
 
+const Flag ArgParse::WrongFlag = Flag();
+const Arg ArgParse::WrongArg = Arg();
+
 // ArgPars
 
 ArgParse::ArgParse(const std::string& oList)
@@ -183,6 +186,8 @@ const Flag& ArgParse::def(const Flag& flag, CallBackFunc cbf)
 
 const Arg& ArgParse::def(const Arg& arg)
 {
+    if (arg._name.empty())
+        return WrongArg;
     _args.push_back(arg);
     return _args.back();
 }
@@ -510,12 +515,12 @@ Flag const& ArgParse::operator[](const char* idx)
 
 const Arg& ArgParse::operator[](const std::size_t& idx)
 {
-    return _args[idx];
+    return idx < _args.size() ? _args[idx] : WrongArg;
 }
 
 const Arg& ArgParse::operator[](const int idx)
 {
-    return _args[std::size_t(idx)];
+    return operator[](std::size_t(idx));
 }
 
 void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::string& errorMsg, const ArgParse::Errors::Suspect& suspect)
