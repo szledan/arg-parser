@@ -33,8 +33,8 @@ class ArgParse {
     ArgParse(const OptionList& = {});
 
     // Add defination of args and flags.
-    const Arg& add(const Arg&);
-    const Flag& add(const Flag&, CallBackFunc = nullptr);
+    const Arg& def(const Arg&);
+    const Flag& def(const Flag&, CallBackFunc = nullptr);
 
     // Parse parameter list:
     // * setup value of args, flags;

@@ -44,7 +44,7 @@ TestContext::Return testShortFlagNotSet(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag(g_longFlag, g_shortFlag, g_description));
+    args.def(Flag(g_longFlag, g_shortFlag, g_description));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -62,7 +62,7 @@ TestContext::Return testShortFlagOnlySet(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag(g_longFlag, g_shortFlag, g_description));
+    args.def(Flag(g_longFlag, g_shortFlag, g_description));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -95,7 +95,7 @@ TestContext::Return testLongFlagNotSet(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag(g_longFlag, g_shortFlag, g_description));
+    args.def(Flag(g_longFlag, g_shortFlag, g_description));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -113,7 +113,7 @@ TestContext::Return testLongFlagOnlySet(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag(g_longFlag, g_shortFlag, g_description));
+    args.def(Flag(g_longFlag, g_shortFlag, g_description));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -145,8 +145,8 @@ TestContext::Return testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag("", g_shortFlag, g_description, Value("w", "value")));
-    args.add(Flag(g_longFlag, "", g_description, Value("w", "value")));
+    args.def(Flag("", g_shortFlag, g_description, Value("w", "value")));
+    args.def(Flag(g_longFlag, "", g_description, Value("w", "value")));
 
     struct {
         const std::string givenFlag;
@@ -194,8 +194,8 @@ TestContext::Return testLongAndShortFlagWithNeededValue(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Flag("", g_shortFlag, g_description, Value("", "value")));
-    args.add(Flag(g_longFlag, "", g_description, Value("", "value")));
+    args.def(Flag("", g_shortFlag, g_description, Value("", "value")));
+    args.def(Flag(g_longFlag, "", g_description, Value("", "value")));
 
     struct {
         const std::string givenFlag;

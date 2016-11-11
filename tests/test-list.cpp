@@ -32,11 +32,11 @@ namespace testargparse {
 
 void apiTests(TestContext* ctx)
 {
-    testargparse::apiAddTests(ctx);
     testargparse::apiArgStructTests(ctx);
     testargparse::apiCheckFlagAndReadValueTests(ctx);
     testargparse::apiCheckFlagTests(ctx);
     testargparse::apiConstructorsTests(ctx);
+    testargparse::apiDefTests(ctx);
     testargparse::apiFlagStructTests(ctx);
     testargparse::apiOperatorTests(ctx);
     testargparse::apiParserTests(ctx);
@@ -51,12 +51,12 @@ void manualTests(TestContext* ctx)
 
 void unitAndBehaviorTests(TestContext* ctx)
 {
-    testargparse::unitAddTests(ctx);
     testargparse::unitArgStructTests(ctx);
     testargparse::unitCheckFlagAndReadValueTests(ctx);
     testargparse::unitCheckFlagTests(ctx);
     testargparse::unitConstructorsTests(ctx);
     testargparse::unitCountsTests(ctx);
+    testargparse::unitDefTests(ctx);
     testargparse::unitErrorsTests(ctx);
     testargparse::unitFlagStructTests(ctx);
     testargparse::unitOperatorTests(ctx);

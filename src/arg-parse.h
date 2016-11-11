@@ -50,8 +50,8 @@ public:
     ArgParse(const std::string& interlacedOptions = "");
     ArgParse(const OptionList&);
 
-    const Flag& add(const Flag&, CallBackFunc = nullptr);
-    const Arg& add(const Arg&);
+    const Flag& def(const Flag&, CallBackFunc = nullptr);
+    const Arg& def(const Arg&);
 
     const bool parse(const int argc, char* const argv[]);
 

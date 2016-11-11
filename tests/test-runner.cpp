@@ -29,11 +29,11 @@
 
 void defineTestSuiteOptions(argparse::ArgParse& args)
 {
-    args.add(argparse::Flag("--api", "-a", "Select api tests."));
-    args.add(argparse::Flag("--manual", "-m", "Select manual tests.",
+    args.def(argparse::Flag("--api", "-a", "Select api tests."));
+    args.def(argparse::Flag("--manual", "-m", "Select manual tests.",
                             argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
-    args.add(argparse::Flag("--unit", "-u", "Select unit tests."));
-    args.add(argparse::Flag("--silent", "-s", "Fails show only."));
+    args.def(argparse::Flag("--unit", "-u", "Select unit tests."));
+    args.def(argparse::Flag("--silent", "-s", "Fails show only."));
 }
 
 // Configure and run tests.

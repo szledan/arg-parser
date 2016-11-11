@@ -152,7 +152,7 @@ ArgParse::ArgParse(const std::string& oList)
     AP_SET_OPTION(options.tab, "tab");
     AP_SET_OPTION(options.mode.strict, "mode.strict");
     if (AP_SET_OPTION(options.help.add, "help.add"))
-        add(Flag("--help", "-h", "Show this help."));
+        def(Flag("--help", "-h", "Show this help."));
     AP_SET_OPTION(options.help.compact, "help.compact");
     AP_SET_OPTION(options.help.show, "help.show");
 #undef AP_SET_OPTION
@@ -163,7 +163,7 @@ ArgParse::ArgParse(const OptionList& oList)
 {
 }
 
-const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
+const Flag& ArgParse::def(const Flag& flag, CallBackFunc cbf)
 {
     std::string name = flag._shortFlag + flag._longFlag;
 
@@ -181,7 +181,7 @@ const Flag& ArgParse::add(const Flag& flag, CallBackFunc cbf)
     return *flagPtr;
 }
 
-const Arg& ArgParse::add(const Arg& arg)
+const Arg& ArgParse::def(const Arg& arg)
 {
     _args.push_back(arg);
     return _args.back();
@@ -232,9 +232,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 #define AP_CHECK_FLAG_EXIST(FLAGS, IS_LONG) do { \
         if (FLAGS.find(param.paramStr) == FLAGS.end()) { \
             if (IS_LONG) \
-                add(Flag(param.paramStr, "")); \
+                def(Flag(param.paramStr, "")); \
             else \
-                add(Flag("", param.paramStr)); \
+                def(Flag("", param.paramStr)); \
             FLAGS[param.paramStr]->defined = false; \
             counts.flags.undefined++; \
         } else \
@@ -290,7 +290,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
                 if (_longFlags.find(param.paramStr) == _longFlags.end()) {
                     // Add undefined flag with value.
-                    add(Flag(param.paramStr, "", "", Value("_")));
+                    def(Flag(param.paramStr, "", "", Value("_")));
                     _longFlags[param.paramStr]->value.str = param.valueStr;
                     counts.flags.undefined++;
                 } else {
@@ -478,14 +478,14 @@ const Flag& ArgParse::operator[](const std::string& idx)
     std::string flagStr(idx);
     switch (mapParamType(flagStr)) {
     case ParamType::ArgType:
-        add(Flag());
+        def(Flag());
         return *(_longFlags[""]);
     case ParamType::ShortFlagsType:
         flagStr = flagStr.substr(0, 2);
         // Fall through.
     case ParamType::ShortFlagType:
         if (_shortFlags.find(flagStr) == _shortFlags.end())
-            return add(Flag("", flagStr));
+            return def(Flag("", flagStr));
         return *(_shortFlags[flagStr]);
     case ParamType::LongFlagWithEqType:
         if (_longFlags.find(flagStr) == _longFlags.end())
@@ -493,7 +493,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
         // Fall through.
     case ParamType::LongFlagWithoutEqType:
         if (_longFlags.find(flagStr) == _longFlags.end())
-            return add(Flag(flagStr));
+            return def(Flag(flagStr));
         return *(_longFlags[flagStr]);
     default:
         assert(false);

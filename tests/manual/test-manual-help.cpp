@@ -56,7 +56,7 @@ TestContext::Return showHelp(TestContext* ctx)
 
     ArgParse args(ctx->param.str);
 
-    args.add(Flag());
+    args.def(Flag());
     for (int i = 0; i < 8; ++i) {
         Value value;
         switch(i) {
@@ -69,20 +69,20 @@ TestContext::Return showHelp(TestContext* ctx)
             case 7: value = Value("", { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
             default: value = Value(); break;
         }
-        args.add(Flag("", SFLAG, "", value));
-        args.add(Flag("", SFLAG, MSG, value));
-        args.add(Flag(LFLAG, "", "", value));
-        args.add(Flag(LFLAG, SFLAG, "", value));
-        args.add(Flag(LFLAG, "", MSG, value));
-        args.add(Flag(LFLAG, SFLAG, MSG, value));
+        args.def(Flag("", SFLAG, "", value));
+        args.def(Flag("", SFLAG, MSG, value));
+        args.def(Flag(LFLAG, "", "", value));
+        args.def(Flag(LFLAG, SFLAG, "", value));
+        args.def(Flag(LFLAG, "", MSG, value));
+        args.def(Flag(LFLAG, SFLAG, MSG, value));
     }
 
     for (int i = 0; i < 2; ++i)
     for (int v = 0; v < 2; ++v) {
-        args.add(Arg());
-        args.add(Arg("", "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.add(Arg(ARG, "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.add(Arg(ARG, MSG, !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg());
+        args.def(Arg("", "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg(ARG, "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg(ARG, MSG, !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
     }
 
     std::cout  << args.help() << std::endl;

@@ -141,9 +141,9 @@ TestContext::Return testErrorCode(TestContext* ctx)
 
     ArgParse args;
 
-    args.add(Arg("arg1", "this arg needed", Arg::IsNeeded));
-    args.add(Arg("arg2", "this arg needed", Arg::IsNeeded));
-    args.add(Arg("arg3", "this arg not needed", !Arg::IsNeeded));
+    args.def(Arg("arg1", "this arg needed", Arg::IsNeeded));
+    args.def(Arg("arg2", "this arg needed", Arg::IsNeeded));
+    args.def(Arg("arg3", "this arg not needed", !Arg::IsNeeded));
 
     const bool parseRet = args.parse(argc, argv);
 

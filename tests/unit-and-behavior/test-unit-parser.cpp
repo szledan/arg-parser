@@ -67,9 +67,9 @@ TestContext::Return testSomeTypicalFlags(TestContext* ctx)
 
         ArgParse args;
 
-        args.add(Flag("", g_shortFlag, g_description, Value("", "value")));
-        args.add(Flag(g_longFlag, "", g_description, Value("", "value")));
-        args.add(Flag("--value", "-v", "Flag with value.", Value("default", "value")));
+        args.def(Flag("", g_shortFlag, g_description, Value("", "value")));
+        args.def(Flag(g_longFlag, "", g_description, Value("", "value")));
+        args.def(Flag("--value", "-v", "Flag with value.", Value("default", "value")));
 
         const bool parseRet = args.parse(argc, argv);
 
@@ -180,12 +180,12 @@ TestContext::Return testNonTypicalFlags(TestContext* ctx)
 
         ArgParse args;
 
-        args.add(Flag("--b=", "", g_description));
-        args.add(Flag("--b=v", "", g_description));
-        args.add(Flag("--c=", "", g_description, Value("v")));
-        args.add(Flag("--c=v", "", g_description, Value("v")));
-        args.add(Flag("--d", "", g_description, Value("v")));
-        args.add(Flag("--e", "", g_description));
+        args.def(Flag("--b=", "", g_description));
+        args.def(Flag("--b=v", "", g_description));
+        args.def(Flag("--c=", "", g_description, Value("v")));
+        args.def(Flag("--c=v", "", g_description, Value("v")));
+        args.def(Flag("--d", "", g_description, Value("v")));
+        args.def(Flag("--e", "", g_description));
 
         const bool parseRet = args.parse(argc, argv);
 

@@ -29,12 +29,12 @@
 
 namespace testargparse {
 
-void unitAddTests(TestContext*);
 void unitArgStructTests(TestContext*);
 void unitCheckFlagAndReadValueTests(TestContext*);
 void unitCheckFlagTests(TestContext*);
 void unitConstructorsTests(TestContext*);
 void unitCountsTests(TestContext*);
+void unitDefTests(TestContext*);
 void unitErrorsTests(TestContext*);
 void unitFlagStructTests(TestContext*);
 void unitOperatorTests(TestContext*);

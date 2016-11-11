@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test-api.h"
 
 #include "arg-parse.h"
 
@@ -38,7 +38,7 @@ TestContext::Return test(TestContext* ctx)
 
 } // namespace anonymous
 
-void unitAddTests(TestContext* ctx)
+void apiDefTests(TestContext* ctx)
 {
     ctx->add(test);
 }

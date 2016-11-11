@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-api.h"
+#include "test.h"
 
 #include "arg-parse.h"
 
@@ -31,16 +31,40 @@ namespace {
 
 using namespace argparse;
 
-TestContext::Return test(TestContext* ctx)
+TestContext::Return testDefArg(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
+
+TestContext::Return testDefArgWithValue(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
+
+TestContext::Return testDefFlag(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
+
+TestContext::Return testDefFlagWithValue(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
+
+TestContext::Return testDefFlagWithChooserList(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
 }
 
 } // namespace anonymous
 
-void apiAddTests(TestContext* ctx)
+void unitDefTests(TestContext* ctx)
 {
-    ctx->add(test);
+    ctx->add(testDefArg);
+    ctx->add(testDefArgWithValue);
+    ctx->add(testDefFlag);
+    ctx->add(testDefFlagWithValue);
+    ctx->add(testDefFlagWithChooserList);
 }
 
 } // namespace testargparse
