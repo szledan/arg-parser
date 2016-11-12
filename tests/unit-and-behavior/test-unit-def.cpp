@@ -64,10 +64,10 @@ TestContext::Return testDefFlag(TestContext* ctx)
 
         TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-        if (&args[defFlag._longFlag] == &ArgParse::WrongFlag)
+        if (&args[defFlag._longFlag] == &Flag::WrongFlag)
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
-        if (&args[defFlag._shortFlag] == &ArgParse::WrongFlag)
+        if (&args[defFlag._shortFlag] == &Flag::WrongFlag)
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
         if (!(args.counts.flags.defined + args.counts.flags.undefined))
@@ -113,20 +113,20 @@ TestContext::Return testDefArg(TestContext* ctx)
 
         TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-        if (&args[0] == &ArgParse::WrongArg)
+        if (&args[0] == &Arg::WrongArg)
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
         if (!(args.counts.args.defined + args.counts.args.undefined))
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
         if (defArg._name.empty()) {
-            if (&addedArg != &ArgParse::WrongArg)
+            if (&addedArg != &Arg::WrongArg)
                 return TAP_FAIL(ctx, caseName + "Arg with empty name doesn't equal with WrongArg.");
 
             if (args[0].defined || !args.counts.args.undefined || args.counts.args.defined)
                 return TAP_FAIL(ctx, caseName + "The 'given value' added as defined instead of undefined.");
         } else {
-            if (&addedArg == &ArgParse::WrongArg)
+            if (&addedArg == &Arg::WrongArg)
                 return TAP_FAIL(ctx, caseName + "Arg with name is equal with WrongArg.");
 
             if (!args[0].defined || args.counts.args.undefined || !args.counts.args.defined)
@@ -167,20 +167,20 @@ TestContext::Return testDefArgWithValue(TestContext* ctx)
 
         TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-        if (&args[0] == &ArgParse::WrongArg)
+        if (&args[0] == &Arg::WrongArg)
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
         if (!(args.counts.args.defined + args.counts.args.undefined))
             return TAP_FAIL(ctx, caseName + "Args is empty.");
 
         if (defArg._name.empty()) {
-            if (&addedArg != &ArgParse::WrongArg)
+            if (&addedArg != &Arg::WrongArg)
                 return TAP_FAIL(ctx, caseName + "Arg with empty name doesn't equal with WrongArg.");
 
             if (args[0].defined || !args.counts.args.undefined || args.counts.args.defined)
                 return TAP_FAIL(ctx, caseName + "The 'parameter' added as defined instead of undefined.");
         } else {
-            if (&addedArg == &ArgParse::WrongArg)
+            if (&addedArg == &Arg::WrongArg)
                 return TAP_FAIL(ctx, caseName + "Arg with name is equal with WrongArg.");
 
             if (!args[0].defined || args.counts.args.undefined || !args.counts.args.defined)

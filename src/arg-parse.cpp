@@ -143,9 +143,6 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
 
 } // namespace anonymous
 
-const Flag ArgParse::WrongFlag = Flag();
-const Arg ArgParse::WrongArg = Arg();
-
 // ArgPars
 
 ArgParse::ArgParse(const std::string& oList)
@@ -187,7 +184,7 @@ const Flag& ArgParse::def(const Flag& flag, CallBackFunc cbf)
 const Arg& ArgParse::def(const Arg& arg)
 {
     if (arg._name.empty())
-        return WrongArg;
+        return Arg::WrongArg;
     _args.push_back(arg);
     return _args.back();
 }
@@ -483,7 +480,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
     std::string flagStr(idx);
     switch (mapParamType(flagStr)) {
     case ParamType::ArgType:
-        return WrongFlag;
+        return Flag::WrongFlag;
     case ParamType::ShortFlagsType:
         flagStr = flagStr.substr(0, 2);
         // Fall through.
@@ -514,7 +511,7 @@ Flag const& ArgParse::operator[](const char* idx)
 
 const Arg& ArgParse::operator[](const std::size_t& idx)
 {
-    return idx < _args.size() ? _args[idx] : WrongArg;
+    return idx < _args.size() ? _args[idx] : Arg::WrongArg;
 }
 
 const Arg& ArgParse::operator[](const int idx)
@@ -584,6 +581,8 @@ const std::string Value::_getChoosesStr(const bool full) const
 
 // Flag
 
+const Flag Flag::WrongFlag = Flag();
+
 Flag::Flag(const Flag& f)
     : isSet(f.isSet)
     , defined(f.defined)
@@ -614,6 +613,8 @@ Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string
 }
 
 // Arg
+
+const Arg Arg::WrongArg = Arg();
 
 Arg::Arg(const Arg& a)
     : Value((Value)a)

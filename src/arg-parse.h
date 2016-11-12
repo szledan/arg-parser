@@ -110,9 +110,6 @@ public:
         } const suspect;
     };
 
-    static const Flag WrongFlag;
-    static const Arg WrongArg;
-
 private:
     void addError(const Errors::Codes&, const std::string& errorMsg, const ArgParse::Errors::Suspect& = { Errors::Suspect::GeneralType, nullptr });
     void addError(const Errors::Codes&, const std::string& errorMsg, const void*);
@@ -160,6 +157,8 @@ struct Value {
 // Flag
 
 struct Flag {
+    static const Flag WrongFlag;
+
     Flag(const Flag& f);
 
     Flag(const std::string& longFlag = "",
@@ -185,6 +184,8 @@ struct Flag {
 // Arg
 
 struct Arg : Value {
+    static const Arg WrongArg;
+
     static const bool IsNeeded = true;
 
     Arg(const Arg& a);
