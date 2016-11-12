@@ -483,8 +483,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
     std::string flagStr(idx);
     switch (mapParamType(flagStr)) {
     case ParamType::ArgType:
-        def(Flag());
-        return *(_longFlags[""]);
+        return WrongFlag;
     case ParamType::ShortFlagsType:
         flagStr = flagStr.substr(0, 2);
         // Fall through.

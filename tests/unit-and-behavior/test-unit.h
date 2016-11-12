@@ -56,6 +56,9 @@ void unitValueStructTests(TestContext*);
         { LONG, "" }, \
         { "", SHORT }, \
         { LONG, SHORT }, \
+        { "", "-" }, \
+        { "--", "" }, \
+        { "l", "s" }, \
     }
 #endif // TAP_FLAGS_NAME_TEST_CASES
 
