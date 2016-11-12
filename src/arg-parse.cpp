@@ -165,11 +165,9 @@ ArgParse::ArgParse(const OptionList& oList)
 
 const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 {
-    std::string name = flag._shortFlag + flag._longFlag;
+    _flags.push_back(flag);
 
-    _flags[name] = flag;
-
-    Flag* flagPtr = &(_flags[name]);
+    Flag* flagPtr = &(_flags.back());
     if (!flag._longFlag.empty()) {
         _longFlags[flag._longFlag] = flagPtr;
     }
@@ -241,9 +239,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 #define AP_CHECK_FLAG_EXIST(FLAGS, IS_LONG) do { \
         if (FLAGS.find(param.paramStr) == FLAGS.end()) { \
             if (IS_LONG) \
-                def(Flag(param.paramStr, "")); \
+                addFlag(Flag(param.paramStr, "")); \
             else \
-                def(Flag("", param.paramStr)); \
+                addFlag(Flag("", param.paramStr)); \
             FLAGS[param.paramStr]->defined = false; \
             counts.flags.undefined++; \
         } else \
@@ -372,8 +370,7 @@ const std::string ArgParse::help()
     // Print arguments.
     help << std::endl << std::endl << "Arguments:" << std::endl;
 
-    for (auto const& it : _args) {
-        const Arg& arg = it;
+    for (auto const& arg : _args) {
         if (!arg._name.empty()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
                 || (options.help.show == Options::Help::ShowAllDefined && arg.defined)
@@ -391,7 +388,7 @@ const std::string ArgParse::help()
     // Print option flags.
     help << std::endl << "Option flags:" << std::endl;
 
-    for (auto const& it : _flags) {
+    for (auto const& flag : _flags) {
 #define AP_HAS_NAME(CH, VALNAME) do { \
         if (flag.value._isValueNeeded) \
             help << CH << "<" << VALNAME << ">"; \
@@ -407,7 +404,6 @@ const std::string ArgParse::help()
             AP_HAS_NAME(" ", flag.value._name); \
     } while(false)
 
-        const Flag& flag = it.second;
         const bool hasShortFlag = !flag._shortFlag.empty();
         const bool hasLongFlag = !flag._longFlag.empty();
         if ((options.help.show == Options::Help::ShowOnesWithDescription && flag._description.empty())
@@ -472,7 +468,8 @@ const bool ArgParse::checkFlagAndReadValue(const std::string& flagStr, T* value)
     if (!checkFlag(flagStr))
         return false;
 
-    const Flag& flag = _flags[flagStr];
+    // FIXME: long and short flags also
+    const Flag& flag = *_longFlags[flagStr];
     if (!flag.hasValue)
         return false;
 
@@ -508,7 +505,7 @@ const Flag& ArgParse::operator[](const std::string& idx)
         break;
     };
 
-    return _flags[""];
+    return Flag::WrongFlag;
 }
 
 Flag const& ArgParse::operator[](const char* idx)

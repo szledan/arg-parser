@@ -34,7 +34,7 @@ using namespace argparse;
 TestContext::Return testDefFlag(TestContext* ctx)
 {
     const std::string longFlag = "--long";
-    const std::string shortFlag = "--l";
+    const std::string shortFlag = "-s";
     TAP_FLAGS_NAME_TEST_CASES(flagNamesCases, longFlag, shortFlag);
     struct {
         const std::string flag;
