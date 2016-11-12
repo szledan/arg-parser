@@ -50,7 +50,7 @@ public:
     ArgParse(const std::string& interlacedOptions = "");
     ArgParse(const OptionList&);
 
-    const Flag& def(const Flag&, CallBackFunc = nullptr);
+    const Flag& def(const Flag&, const CallBackFunc = nullptr);
     const Arg& def(const Arg&);
 
     const bool parse(const int argc, char* const argv[]);
@@ -111,6 +111,7 @@ public:
     };
 
 private:
+    const Flag& addFlag(const Flag& flag, const CallBackFunc cbf);
     void addError(const Errors::Codes&, const std::string& errorMsg, const ArgParse::Errors::Suspect& = { Errors::Suspect::GeneralType, nullptr });
     void addError(const Errors::Codes&, const std::string& errorMsg, const void*);
     void addError(const Errors::Codes&, const std::string& errorMsg, const Flag*);

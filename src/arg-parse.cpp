@@ -163,7 +163,7 @@ ArgParse::ArgParse(const OptionList& oList)
 {
 }
 
-const Flag& ArgParse::def(const Flag& flag, CallBackFunc cbf)
+const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 {
     std::string name = flag._shortFlag + flag._longFlag;
 
@@ -181,9 +181,16 @@ const Flag& ArgParse::def(const Flag& flag, CallBackFunc cbf)
     return *flagPtr;
 }
 
+const Flag& ArgParse::def(const Flag& flag, const CallBackFunc cbf)
+{
+    if (!flag.defined)
+        return Flag::WrongFlag;
+    return addFlag(flag, cbf);
+}
+
 const Arg& ArgParse::def(const Arg& arg)
 {
-    if (arg._name.empty())
+    if (!arg.defined)
         return Arg::WrongArg;
     _args.push_back(arg);
     return _args.back();
