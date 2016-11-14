@@ -216,7 +216,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     // Calculate number of required arguments.
     int requiredArgs = 0;
     for (auto const& arg : _args)
-        if (arg._isArgNeeded)
+        if (arg._isRequired)
             requiredArgs++;
 
     std::vector<CallBackFunc> callBackFuncs;
@@ -257,9 +257,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         } \
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
-            if (!param.hasNextParam && flag->value._isValueNeeded) { \
+            if (!param.hasNextParam && flag->value._isRequired) { \
                 addError(Errors::RequiredFlagValueMissing, "Missing required value.", flag); \
-            } else if ((flag->value._isValueNeeded) \
+            } else if ((flag->value._isRequired) \
                        && (mapParamType(param.valueStr) != ParamType::ArgType) \
                        && (checkFlag(param.valueStr))) { \
                 addError(Errors::RequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
@@ -313,12 +313,12 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
-                if (_args[argCount]._isArgNeeded)
+                if (_args[argCount]._isRequired)
                     requiredArgs--;
                 _args[argCount].setArg(param.paramStr);
                 counts.args.defined++;
             } else {
-                _args.push_back(Arg("", "", !Arg::IsNeeded, Value(param.paramStr)));
+                _args.push_back(Arg("", "", !Arg::Required, Value(param.paramStr)));
                 counts.args.undefined++;
             }
             argCount++;
@@ -356,11 +356,15 @@ const std::string ArgParse::help()
     // Print program name.
     help << "usage: " << options.program.name;
 
+    // Add '[options]' for usage part.
+    if (counts.flags.defined)
+        help << " [options]";
+
     // Print arguments after programname.
     for (auto const& it : _args) {
         const Arg& arg = it;
         if (!arg._name.empty()) {
-            if (arg._isArgNeeded)
+            if (arg._isRequired)
                 help << " <" << arg._name << "> ";
             else
                 help << " [<" << arg._name << ">] ";
@@ -375,7 +379,7 @@ const std::string ArgParse::help()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
                 || (options.help.show == Options::Help::ShowAllDefined && arg.defined)
                 || options.help.show == Options::Help::ShowAll)) {
-            if (arg._isArgNeeded)
+            if (arg._isRequired)
                 help << tab << "<" << arg._name << ">";
             else
                 help << tab << "[<" << arg._name << ">]";
@@ -390,7 +394,7 @@ const std::string ArgParse::help()
 
     for (auto const& flag : _flags) {
 #define AP_HAS_NAME(CH, VALNAME) do { \
-        if (flag.value._isValueNeeded) \
+        if (flag.value._isRequired) \
             help << CH << "<" << VALNAME << ">"; \
         else \
             help << CH << "[<" << VALNAME << ">]"; \
@@ -551,7 +555,7 @@ Value::Value(const Value& v)
     , _name(v._name)
     , _description(v._description)
     , _chooseList(v._chooseList)
-    , _isValueNeeded(v._isValueNeeded)
+    , _isRequired(v._isRequired)
 {
 }
 
@@ -559,7 +563,7 @@ Value::Value(const std::string& defaultValue, const std::string& name, const std
     : str(defaultValue)
     , _name(name)
     , _description(description)
-    , _isValueNeeded(defaultValue.empty())
+    , _isRequired(defaultValue.empty())
 {
 }
 
@@ -624,17 +628,13 @@ Arg::Arg(const Arg& a)
     : Value((Value)a)
     , isSet(a.isSet)
     , defined(a.defined)
-    , _isArgNeeded(a._isArgNeeded)
-    , _callBackFunc(a._callBackFunc)
 {
 }
 
-Arg::Arg(const std::string& name, const std::string& description, const bool isNeeded, const Value& defaultValue)
+Arg::Arg(const std::string& name, const std::string& description, const bool required, const Value& defaultValue)
     : Value(defaultValue.str, name, description)
     , isSet(false)
     , defined(!name.empty())
-    , _isArgNeeded(isNeeded)
-    , _callBackFunc(nullptr)
 {
 }
 

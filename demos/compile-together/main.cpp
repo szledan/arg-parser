@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
                             argparse::Value("3.14", /* default string of value; if it is not set then value of flag needs to be set. */
                                             "pi", /* name of value of flag, only for help */
                                             "The pi number." /* description of value of flag, only for help */)));
-    args.def(argparse::Arg("first", "This arg needs to be set.", argparse::Arg::IsNeeded));
-    args.def(argparse::Arg("second", "This arg does not need.", !argparse::Arg::IsNeeded));
+    args.def(argparse::Arg("first", "This arg needs to be set.", argparse::Arg::Required));
+    args.def(argparse::Arg("second", "This arg does not need.", !argparse::Arg::Required));
 
     if (!args.parse(argc, argv)) {
         // Show error messages.

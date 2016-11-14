@@ -77,8 +77,8 @@ void unitValueStructTests(TestContext*);
     struct { \
         const bool defArgRequired; \
     } TEST_CASES[] = { \
-        { argparse::Arg::IsNeeded }, \
-        { !argparse::Arg::IsNeeded }, \
+        { argparse::Arg::Required }, \
+        { !argparse::Arg::Required }, \
     }
 #endif // TAP_ARG_REQUIRED_TEST_CASES
 

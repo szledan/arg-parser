@@ -45,7 +45,7 @@ TestContext::Return testNoArgNoFlag(TestContext* ctx)
     ArgParse args;
 
     args.def(Flag(g_longFlag, g_shortFlag, g_description));
-    args.def(Arg("arg", "An arg", !Arg::IsNeeded));
+    args.def(Arg("arg", "An arg", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -76,9 +76,9 @@ TestContext::Return testDefinedArgs(TestContext* ctx)
     ArgParse args;
 
     args.def(Flag(g_longFlag, g_shortFlag, g_description));
-    args.def(Arg("arg1", "An arg 1", Arg::IsNeeded));
-    args.def(Arg("arg2", "An arg 2", Arg::IsNeeded));
-    args.def(Arg("arg3", "An arg 3", !Arg::IsNeeded));
+    args.def(Arg("arg1", "An arg 1", Arg::Required));
+    args.def(Arg("arg2", "An arg 2", Arg::Required));
+    args.def(Arg("arg3", "An arg 3", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -141,7 +141,7 @@ TestContext::Return testDefinedFlags(TestContext* ctx)
     args.def(Flag(g_longFlag, "", g_description));
     args.def(Flag("", g_shortFlag, g_description));
     args.def(Flag("--other", "-o", "Other description.", Value("")));
-    args.def(Arg("arg", "An arg", !Arg::IsNeeded));
+    args.def(Arg("arg", "An arg", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -171,7 +171,7 @@ TestContext::Return testUndefinedFlags(TestContext* ctx)
 
     ArgParse args;
 
-    args.def(Arg("arg", "An arg", !Arg::IsNeeded));
+    args.def(Arg("arg", "An arg", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -214,9 +214,9 @@ TestContext::Return testComplex(TestContext* ctx)
     args.def(Flag(g_longFlag, "", g_description));
     args.def(Flag("", g_shortFlag, g_description, Value("")));
     args.def(Flag("--no", "-n", "Do not call this flag."));
-    args.def(Arg("arg1", "An arg 1", Arg::IsNeeded));
-    args.def(Arg("arg2", "An arg 2", Arg::IsNeeded));
-    args.def(Arg("arg3", "An arg 3", !Arg::IsNeeded));
+    args.def(Arg("arg1", "An arg 1", Arg::Required));
+    args.def(Arg("arg2", "An arg 2", Arg::Required));
+    args.def(Arg("arg3", "An arg 3", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 

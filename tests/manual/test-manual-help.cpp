@@ -80,9 +80,9 @@ TestContext::Return showHelp(TestContext* ctx)
     for (int i = 0; i < 2; ++i)
     for (int v = 0; v < 2; ++v) {
         args.def(Arg());
-        args.def(Arg("", "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.def(Arg(ARG, "", !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
-        args.def(Arg(ARG, MSG, !(i%2)*Arg::IsNeeded, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg("", "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg(ARG, "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
+        args.def(Arg(ARG, MSG, !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
     }
 
     std::cout  << args.help() << std::endl;

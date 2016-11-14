@@ -44,13 +44,17 @@ struct Flag;
 // ArgParse
 
 class ArgParse {
-public:    
+public:
     typedef std::initializer_list<std::string> OptionList;
     struct Errors;
 
     ArgParse(const std::string& interlacedOptions = "");
     ArgParse(const OptionList&);
 
+    /*!
+     * \brief Add definitaion of a 'flag' (aka 'option').
+     * \return  reference of added Flag or Flag::WrongFlag.
+     */
     const Flag& def(const Flag&, const CallBackFunc = nullptr);
     const Arg& def(const Arg&);
 
@@ -131,7 +135,9 @@ inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err);
 
 typedef std::initializer_list<std::string> ChooseList;
 
-struct Value {
+struct Value {    
+    static const bool Required = true;
+
     Value(const Value& v);
 
     Value(const std::string& defaultValue = "",
@@ -153,7 +159,7 @@ struct Value {
     std::string _name;
     std::string _description;
     std::vector<std::string> _chooseList;
-    bool _isValueNeeded;
+    bool _isRequired;
 };
 
 // Flag
@@ -185,16 +191,17 @@ struct Flag {
 
 // Arg
 
+/*!
+ * \brief The Arg is an argument which isn't a Flag (aka option)
+ */
 struct Arg : Value {
     static const Arg WrongArg;
-
-    static const bool IsNeeded = true;
 
     Arg(const Arg& a);
 
     Arg(const std::string& name = "",
         const std::string& description = "",
-        const bool isNeeded = false,
+        const bool required = !Required,
         const Value& defaultValue = Value());
     Arg(const Value& value);
 
@@ -202,9 +209,6 @@ struct Arg : Value {
 
     bool isSet;
     bool defined;
-// private:
-    bool _isArgNeeded;
-    CallBackFunc _callBackFunc;
 };
 
 } // namespace argparse

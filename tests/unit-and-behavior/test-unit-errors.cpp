@@ -141,9 +141,9 @@ TestContext::Return testErrorCode(TestContext* ctx)
 
     ArgParse args;
 
-    args.def(Arg("arg1", "this arg needed", Arg::IsNeeded));
-    args.def(Arg("arg2", "this arg needed", Arg::IsNeeded));
-    args.def(Arg("arg3", "this arg not needed", !Arg::IsNeeded));
+    args.def(Arg("arg1", "this arg needed", Arg::Required));
+    args.def(Arg("arg2", "this arg needed", Arg::Required));
+    args.def(Arg("arg3", "this arg not needed", !Arg::Required));
 
     const bool parseRet = args.parse(argc, argv);
 
@@ -161,7 +161,7 @@ TestContext::Return testErrorCode(TestContext* ctx)
             assert(e.suspect.arg && "Argument missing!");
             if (e.suspect.type != ArgParse::Errors::Suspect::ArgType)
                 return TAP_FAIL(ctx, "Wrong error type!");
-            else if (!e.suspect.arg->IsNeeded)
+            else if (!e.suspect.arg->Required)
                 return TAP_FAIL(ctx, "Wrong argument option!");
             break;
         default:

@@ -98,7 +98,7 @@ TestContext::Return testDefArg(TestContext* ctx)
         const std::string givenValue = "value";
         const Arg defArg(nameCases[nameCase].defArgName, "<descript>", requiredCases[requiredCase].defArgRequired);
         const std::string caseName = givenValue + "|"
-                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg._isArgNeeded) + ")"
+                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg._isRequired) + ")"
                 + " testcase. ";
 
         ArgParse args;
@@ -151,7 +151,7 @@ TestContext::Return testDefArgWithValue(TestContext* ctx)
     {
         const Arg defArg(nameCases[nameCase].defArgName, "description", requiredCases[requiredCase].defArgRequired, valueCases[valueCase].defValue);
         const std::string caseName = givenValue + "|"
-                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg._isArgNeeded)
+                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg._isRequired)
                     + ",Value('" + defArg.str + "')"
                 + ")" + " testcase. ";
 
