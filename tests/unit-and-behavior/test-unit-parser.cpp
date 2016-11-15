@@ -84,8 +84,8 @@ TestContext::Return testSomeTypicalFlags(TestContext* ctx)
             if (!args[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (!args[definedFlag].value._isRequired)
-                return TAP_FAIL(ctx, caseName + "Wrong '_isRequired'!");
+            if (!args[definedFlag].value.isRequired)
+                return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
             if (args[definedFlag].value.str != value)
                 return TAP_FAIL(ctx, caseName + "Different values!");
@@ -136,8 +136,8 @@ TestContext::Return testUndefinedFlags(TestContext* ctx)
             if (!args[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (args[definedFlag].value._isRequired)
-                return TAP_FAIL(ctx, caseName + "Wrong '_isRequired'!");
+            if (args[definedFlag].value.isRequired)
+                return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
             if (args[definedFlag].value.str != value)
                 return TAP_FAIL(ctx, caseName + "Different values!");
@@ -200,8 +200,8 @@ TestContext::Return testNonTypicalFlags(TestContext* ctx)
             if (!args[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (args[definedFlag].value._isRequired)
-                return TAP_FAIL(ctx, caseName + "Wrong '_isRequired'!");
+            if (args[definedFlag].value.isRequired)
+                return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
             if (args[definedFlag].value.str != definedValue)
                 return TAP_FAIL(ctx, caseName + "Different values!");

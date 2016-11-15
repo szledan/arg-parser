@@ -25,20 +25,92 @@
 #include "test.h"
 
 #include "arg-parse.h"
+#include <assert.h>
 
 namespace testargparse {
 namespace {
 
-TestContext::Return testEmptyValue(TestContext* ctx)
+using namespace argparse;
+
+TestContext::Return testConstructors(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "Create empty Value.");
+    const std:: string testStr = "value";
+    const std:: string testName = "name";
+    const std:: string testDescription = "description";
+
+    struct {
+        const bool required;
+    } requiredCases[] = {
+        { !Value::Required },
+        { Value::Required },
+    };
+
+    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase) {
+        const bool required = requiredCases[requiredCase].required;
+
+        struct {
+            Value defined;
+            struct {
+                bool isRequired;
+                bool isSet;
+                std::string str;
+                std::vector<std::string> _chooseList;
+                std::string _name;
+                std::string _description;
+            } expected;
+        }
+        test = { { Value() }, { false, false, "", {}, "", "" } },
+        testCases[] = {
+            { { Value() }, { false, false, "", {}, "", "" } },
+            { { Value(testStr) }, { false, false, testStr, {}, "", "" } },
+            { { Value(testStr, required) }, { required, false, testStr, {}, "", "" } },
+            { { Value(testStr, required, testName) }, { required, false, testStr, {}, testName, "" } },
+            { { Value(testStr, required, testName, testDescription) }, { required, false, testStr, {}, testName, testDescription } },
+            { { Value({ testStr, "A" }) }, { false, false, testStr, { testStr, "A" }, "", "" } },
+            { { Value({ testStr, "A" }, required) }, { required, false, testStr, { testStr, "A" }, "", "" } },
+            { { Value({ testStr, "A" }, required, testName) }, { required, false, testStr, { testStr, "A" }, testName, "" } },
+            { { Value({ testStr, "A" }, required, testName, testDescription) }, { required, false, testStr, { testStr, "A" }, testName, testDescription } },
+        };
+
+        for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
+            assert((sizeof(Value) == sizeof(testCases[0].expected)) && "Value different expected struct");
+            test.defined = testCases[testCase].defined;
+            test.expected = testCases[testCase].expected;
+            const std::string caseName = std::to_string(testCase) + ".(" + std::to_string(required) + ") testcase. ";
+
+            if (test.defined.isRequired != test.expected.isRequired)
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (test.defined.isSet != test.expected.isSet)
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (test.defined.str != test.expected.str)
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (test.defined._chooseList.size() != test.expected._chooseList.size())
+                return TAP_FAIL(ctx, caseName + "!!!");
+            else if (test.defined._chooseList.size()) {
+                for (size_t i = 0; i < test.defined._chooseList.size(); ++i)
+                    if (test.defined._chooseList[i] != test.expected._chooseList[i])
+                        return TAP_FAIL(ctx, caseName + "!!!");
+            }
+
+            if (test.defined._name != test.expected._name)
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (test.defined._description != test.expected._description)
+                return TAP_FAIL(ctx, caseName + "!!!");
+        }
+    }
+
+    return TAP_PASS(ctx, "Empty constructor test.");
 }
 
 } // namespace anonymous
 
 void unitValueStructTests(TestContext* ctx)
 {
-    ctx->add(testEmptyValue);
+    ctx->add(testConstructors);
 }
 
 } // namespace testargparse

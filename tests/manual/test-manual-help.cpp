@@ -51,43 +51,43 @@ using namespace argparse;
 
 TestContext::Return showHelp(TestContext* ctx)
 {
-    char sf = 'A';
-    char lf = sf;
+//    char sf = 'A';
+//    char lf = sf;
 
-    ArgParse args(ctx->param.str);
+//    ArgParse args(ctx->param.str);
 
-    args.def(Flag());
-    for (int i = 0; i < 8; ++i) {
-        Value value;
-        switch(i) {
-            case 1: value = Value(VALUE); break;
-            case 2: value = Value("", ARG, MSG); break;
-            case 3: value = Value(VALUE, "", MSG); break;
-            case 4: value = Value(VALUE, ARG, ""); break;
-            case 5: value = Value(VALUE, "", ""); break;
-            case 6: value = Value(VALUEV("A"), { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
-            case 7: value = Value("", { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
-            default: value = Value(); break;
-        }
-        args.def(Flag("", SFLAG, "", value));
-        args.def(Flag("", SFLAG, MSG, value));
-        args.def(Flag(LFLAG, "", "", value));
-        args.def(Flag(LFLAG, SFLAG, "", value));
-        args.def(Flag(LFLAG, "", MSG, value));
-        args.def(Flag(LFLAG, SFLAG, MSG, value));
-    }
+//    args.def(Flag());
+//    for (int i = 0; i < 8; ++i) {
+//        Value value;
+//        switch(i) {
+//            case 1: value = Value(VALUE); break;
+//            case 2: value = Value("", ARG, MSG); break;
+//            case 3: value = Value(VALUE, "", MSG); break;
+//            case 4: value = Value(VALUE, ARG, ""); break;
+//            case 5: value = Value(VALUE, "", ""); break;
+//            case 6: value = Value(VALUEV("A"), { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
+//            case 7: value = Value("", { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
+//            default: value = Value(); break;
+//        }
+//        args.def(Flag("", SFLAG, "", value));
+//        args.def(Flag("", SFLAG, MSG, value));
+//        args.def(Flag(LFLAG, "", "", value));
+//        args.def(Flag(LFLAG, SFLAG, "", value));
+//        args.def(Flag(LFLAG, "", MSG, value));
+//        args.def(Flag(LFLAG, SFLAG, MSG, value));
+//    }
 
-    for (int i = 0; i < 2; ++i)
-    for (int v = 0; v < 2; ++v) {
-        args.def(Arg());
-        args.def(Arg("", "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-        args.def(Arg(ARG, "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-        args.def(Arg(ARG, MSG, !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-    }
+//    for (int i = 0; i < 2; ++i)
+//    for (int v = 0; v < 2; ++v) {
+//        args.def(Arg());
+//        args.def(Arg("", "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
+//        args.def(Arg(ARG, "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
+//        args.def(Arg(ARG, MSG, !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
+//    }
 
-    std::cout  << args.help() << std::endl;
+//    std::cout  << args.help() << std::endl;
 
-    return TestContext::Return::Pass;
+//    return TestContext::Return::Pass;
 }
 
 } // namespace anonymous

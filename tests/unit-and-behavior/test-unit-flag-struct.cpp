@@ -178,7 +178,7 @@ TestContext::Return testLongAndShortFlagWithValueNotNeeded(TestContext* ctx)
         if (!args[definedFlag].hasValue)
             return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-        if (args[definedFlag].value._isRequired)
+        if (args[definedFlag].value.isRequired)
             return TAP_FAIL(ctx, caseName + "Wrong '_isValueNeeded'!");
 
         if (args[definedFlag].value.str != value)
@@ -229,7 +229,7 @@ TestContext::Return testLongAndShortFlagWithNeededValue(TestContext* ctx)
         if (!args[definedFlag].hasValue)
             return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-        if (!args[definedFlag].value._isRequired)
+        if (!args[definedFlag].value.isRequired)
             return TAP_FAIL(ctx, caseName + "Wrong '_isValueNeeded'!");
 
         if (args[definedFlag].value.str != value)

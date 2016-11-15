@@ -136,30 +136,28 @@ inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err);
 typedef std::initializer_list<std::string> ChooseList;
 
 struct Value {    
-    static const bool Required = true;
+    static const bool Required; // = true
 
     Value(const Value& v);
-
     Value(const std::string& defaultValue = "",
+          const bool& required = !Required,
           const std::string& name = "",
           const std::string& description = "");
-
-    Value(const std::string& defaultValue,
-          const ChooseList& chooseList,
+    Value(const ChooseList& chooseList,
+          const bool& required = !Required,
           const std::string& name = "",
           const std::string& description = "");
 
     const bool empty() const { return str.empty(); }
 
+    bool isRequired;
+    bool isSet;
     std::string str;
 
 // private:
-    const std::string _getChoosesStr(bool full = true) const;
-
+    std::vector<std::string> _chooseList;
     std::string _name;
     std::string _description;
-    std::vector<std::string> _chooseList;
-    bool _isRequired;
 };
 
 // Flag
@@ -168,19 +166,17 @@ struct Flag {
     static const Flag WrongFlag;
 
     Flag(const Flag& f);
-
     Flag(const std::string& longFlag = "",
          const std::string& shortFlag = "",
          const std::string& description = "");
-
     Flag(const std::string& longFlag,
          const std::string& shortFlag,
          const std::string& description,
          const Value value);
 
     bool isSet;
-    bool hasValue;
     bool defined;
+    bool hasValue;
     Value value;
 // private:
     std::string _longFlag;
@@ -198,16 +194,12 @@ struct Arg : Value {
     static const Arg WrongArg;
 
     Arg(const Arg& a);
-
     Arg(const std::string& name = "",
         const std::string& description = "",
         const bool required = !Required,
         const Value& defaultValue = Value());
     Arg(const Value& value);
 
-    void setArg(const std::string& value);
-
-    bool isSet;
     bool defined;
 };
 

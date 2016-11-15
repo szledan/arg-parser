@@ -141,6 +141,25 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
     return false;
 }
 
+const std::string getChoosesStr(const Value& value, const bool full)
+{
+    if (!value._chooseList.size())
+        return "";
+
+    std::stringstream s;
+    std::string end(full ? "" : "|...");
+    for (size_t i = 0; i < value._chooseList.size(); ++i)
+        s << "|" << value._chooseList[i];
+
+    return s.str().substr(1) + end;
+}
+
+void setArg(Arg& arg, const std::string& value)
+{
+    arg.isSet = true;
+    arg.str = value;
+}
+
 } // namespace anonymous
 
 // ArgPars
@@ -216,7 +235,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     // Calculate number of required arguments.
     int requiredArgs = 0;
     for (auto const& arg : _args)
-        if (arg._isRequired)
+        if (arg.isRequired)
             requiredArgs++;
 
     std::vector<CallBackFunc> callBackFuncs;
@@ -257,9 +276,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
         } \
     \
         if ((CHECH_VALUE) && flag->hasValue) { \
-            if (!param.hasNextParam && flag->value._isRequired) { \
+            if (!param.hasNextParam && flag->value.isRequired) { \
                 addError(Errors::RequiredFlagValueMissing, "Missing required value.", flag); \
-            } else if ((flag->value._isRequired) \
+            } else if ((flag->value.isRequired) \
                        && (mapParamType(param.valueStr) != ParamType::ArgType) \
                        && (checkFlag(param.valueStr))) { \
                 addError(Errors::RequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
@@ -313,9 +332,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
-                if (_args[argCount]._isRequired)
+                if (_args[argCount].isRequired)
                     requiredArgs--;
-                _args[argCount].setArg(param.paramStr);
+                setArg(_args[argCount], param.paramStr);
                 counts.args.defined++;
             } else {
                 _args.push_back(Arg("", "", !Arg::Required, Value(param.paramStr)));
@@ -364,7 +383,7 @@ const std::string ArgParse::help()
     for (auto const& it : _args) {
         const Arg& arg = it;
         if (!arg._name.empty()) {
-            if (arg._isRequired)
+            if (arg.isRequired)
                 help << " <" << arg._name << "> ";
             else
                 help << " [<" << arg._name << ">] ";
@@ -379,7 +398,7 @@ const std::string ArgParse::help()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
                 || (options.help.show == Options::Help::ShowAllDefined && arg.defined)
                 || options.help.show == Options::Help::ShowAll)) {
-            if (arg._isRequired)
+            if (arg.isRequired)
                 help << tab << "<" << arg._name << ">";
             else
                 help << tab << "[<" << arg._name << ">]";
@@ -394,7 +413,7 @@ const std::string ArgParse::help()
 
     for (auto const& flag : _flags) {
 #define AP_HAS_NAME(CH, VALNAME) do { \
-        if (flag.value._isRequired) \
+        if (flag.value.isRequired) \
             help << CH << "<" << VALNAME << ">"; \
         else \
             help << CH << "[<" << VALNAME << ">]"; \
@@ -403,7 +422,7 @@ const std::string ArgParse::help()
 #define AP_PRINT_FLAG(FLAG, L) do { \
         help << FLAG; \
         if (flag.value._chooseList.size() > 0) \
-            AP_HAS_NAME(" ", flag.value._getChoosesStr(hasLongFlag ? L : (L ? 0 : 1))); \
+            AP_HAS_NAME(" ", getChoosesStr(flag.value, hasLongFlag ? L : (L ? 0 : 1))); \
         else if (!flag.value._name.empty()) \
             AP_HAS_NAME(" ", flag.value._name); \
     } while(false)
@@ -549,42 +568,32 @@ void ArgParse::addError(const ArgParse::Errors::Codes& errorCode, const std::str
 }
 
 // Value
+const bool Value::Required = true;
 
 Value::Value(const Value& v)
-    : str(v.str)
+    : isRequired(v.isRequired)
+    , isSet(v.isSet)
+    , str(v.str)
+    , _chooseList(v._chooseList)
     , _name(v._name)
     , _description(v._description)
-    , _chooseList(v._chooseList)
-    , _isRequired(v._isRequired)
 {
 }
 
-Value::Value(const std::string& defaultValue, const std::string& name, const std::string& description)
-    : str(defaultValue)
+Value::Value(const std::string& defaultValue, const bool& required, const std::string& name, const std::string& description)
+    : isRequired(required)
+    , isSet(false)
+    , str(defaultValue)
     , _name(name)
     , _description(description)
-    , _isRequired(defaultValue.empty())
 {
 }
 
-Value::Value(const std::string& defaultValue, const ChooseList& chooseList, const std::string& name, const std::string& description)
-    : Value(defaultValue, name, description)
+Value::Value(const ChooseList& chooseList, const bool& required, const std::string& name, const std::string& description)
+    : Value(chooseList.size() ? *(chooseList.begin()) : "", required, name, description)
 {
     for(auto choose : chooseList)
         _chooseList.push_back(choose);
-}
-
-const std::string Value::_getChoosesStr(const bool full) const
-{
-    if (!_chooseList.size())
-        return "";
-
-    std::stringstream s;
-    std::string end(full ? "" : "|...");
-    for (size_t i = 0; i < _chooseList.size(); ++i)
-        s << "|" << _chooseList[i];
-
-    return s.str().substr(1) + end;
 }
 
 // Flag
@@ -594,6 +603,7 @@ const Flag Flag::WrongFlag = Flag();
 Flag::Flag(const Flag& f)
     : isSet(f.isSet)
     , defined(f.defined)
+    , hasValue(f.hasValue)
     , value(f.value)
     , _longFlag(f._longFlag)
     , _shortFlag(f._shortFlag)
@@ -604,8 +614,9 @@ Flag::Flag(const Flag& f)
 
 Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string& dscrptn)
     : isSet(false)
-    , hasValue(false)
     , defined(!lFlag.empty() || !sFlag.empty())
+    , hasValue(false)
+    , value(Value())
     , _longFlag(lFlag)
     , _shortFlag(sFlag)
     , _description(dscrptn)
@@ -626,27 +637,22 @@ const Arg Arg::WrongArg = Arg();
 
 Arg::Arg(const Arg& a)
     : Value((Value)a)
-    , isSet(a.isSet)
     , defined(a.defined)
 {
 }
 
 Arg::Arg(const std::string& name, const std::string& description, const bool required, const Value& defaultValue)
-    : Value(defaultValue.str, name, description)
-    , isSet(false)
+    : Value(defaultValue)
     , defined(!name.empty())
 {
+    isRequired = required;
+    _name = name;
+    _description = description;
 }
 
 Arg::Arg(const Value& value)
     : Arg("", "", false, value)
 {
-}
-
-void Arg::setArg(const std::string& value)
-{
-    isSet = true;
-    str = value;
 }
 
 } // namespace argparse
