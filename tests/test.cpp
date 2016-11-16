@@ -74,10 +74,14 @@ int TestContext::run()
             }
         }
 
+#define TAP_WRITE_RESULT(R, N, C) \
+    R << "/" << N << " (" << perCent(R, N) << "%) where were " << C << "/" << _checks.sum() << " (" << perCent(C, _checks.sum() ? _checks.sum() : 1) << "%) checks."
+
         _result << std::endl << "Results:" << std::endl;
-        _result << "  Pass: " << pass << "/" << nums << " (" << perCent(pass, nums) << "%)" << std::endl;
-        _result << "  Fail: " << nums - (pass + nott) << "/" << nums << " (" << perCent(nums - (pass + nott), nums) << "%)" << std::endl;
-        _result << "  Not tested: " << nott << "/" << nums << " (" << perCent(nott, nums) << "%)" << std::endl;
+        _result << "  Pass: " << TAP_WRITE_RESULT(pass, nums, _checks.pass) << std::endl;
+        _result << "  Fail: " << TAP_WRITE_RESULT(nums - (pass + nott), nums, _checks.fail) << std::endl;
+        _result << "  Not tested: " << TAP_WRITE_RESULT(nott, nums, 0) << std::endl;
+#undef TAP_WRITE_RESULT
 
         std::clog << _result.str();
     }
@@ -99,6 +103,15 @@ TestContext::Return TestContext::fail(const std::string& msg, const std::string&
     this->test(file, func, line);
     _result << "\033[31;1m" << "  FAIL" << "\033[39m\033[22m\033[49m: " << msg << std::endl;
     return Return::Fail;
+}
+
+const bool& TestContext::check(const bool& condition)
+{
+    if (condition)
+        _checks.fail++;
+    else
+        _checks.pass++;
+    return condition;
 }
 
 TestContext::Return TestContext::nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line)

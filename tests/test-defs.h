@@ -45,6 +45,10 @@
 #define TAP_NOT_TESTED(CTX, MSG) CTX->nott(MSG, TAP_FILE_FUNC_LINE)
 #endif // TAP_NOT_TESTED
 
+#ifndef TAP_CHECK
+#define TAP_CHECK(CTX, COND) CTX->check((COND))
+#endif // TAP_CHECK
+
 #ifndef TAP_CHARS
 #define TAP_CHARS(STR) (char*)STR
 #endif // TAP_CHARS

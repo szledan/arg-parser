@@ -46,6 +46,7 @@ public:
     Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
     Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
     Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    const bool& check(const bool& condition);
 
     struct Param {
         std::string str;
@@ -54,6 +55,11 @@ public:
 private:
     void test(const std::string& file, const std::string& func, const std::string& line);
 
+    struct {
+        size_t pass;
+        size_t fail;
+        const size_t sum() const { return pass + fail; }
+    } _checks = { 0, 0 };
     const bool _showPass;
     std::set<TestInstanceFunc> _tests;
     std::stringstream _result;

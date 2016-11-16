@@ -200,14 +200,14 @@ const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 
 const Flag& ArgParse::def(const Flag& flag, const CallBackFunc cbf)
 {
-    if (!flag.defined)
+    if (!flag.isDefined)
         return Flag::WrongFlag;
     return addFlag(flag, cbf);
 }
 
 const Arg& ArgParse::def(const Arg& arg)
 {
-    if (!arg.defined)
+    if (!arg.isDefined)
         return Arg::WrongArg;
     _args.push_back(arg);
     return _args.back();
@@ -261,7 +261,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                 addFlag(Flag(param.paramStr, "")); \
             else \
                 addFlag(Flag("", param.paramStr)); \
-            FLAGS[param.paramStr]->defined = false; \
+            FLAGS[param.paramStr]->isDefined = false; \
             counts.flags.undefined++; \
         } else \
             counts.flags.defined++; \
@@ -396,7 +396,7 @@ const std::string ArgParse::help()
     for (auto const& arg : _args) {
         if (!arg._name.empty()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
-                || (options.help.show == Options::Help::ShowAllDefined && arg.defined)
+                || (options.help.show == Options::Help::ShowAllDefined && arg.isDefined)
                 || options.help.show == Options::Help::ShowAll)) {
             if (arg.isRequired)
                 help << tab << "<" << arg._name << ">";
@@ -430,7 +430,7 @@ const std::string ArgParse::help()
         const bool hasShortFlag = !flag._shortFlag.empty();
         const bool hasLongFlag = !flag._longFlag.empty();
         if ((options.help.show == Options::Help::ShowOnesWithDescription && flag._description.empty())
-            || (options.help.show == Options::Help::ShowAllDefined && !flag.defined))
+            || (options.help.show == Options::Help::ShowAllDefined && !flag.isDefined))
             continue;
 
         if (hasShortFlag || hasLongFlag)
@@ -580,8 +580,8 @@ Value::Value(const Value& v)
 {
 }
 
-Value::Value(const std::string& defaultValue, const bool& required, const std::string& name, const std::string& description)
-    : isRequired(required)
+Value::Value(const std::string& defaultValue, const bool& require, const std::string& name, const std::string& description)
+    : isRequired(require)
     , isSet(false)
     , str(defaultValue)
     , _name(name)
@@ -589,8 +589,8 @@ Value::Value(const std::string& defaultValue, const bool& required, const std::s
 {
 }
 
-Value::Value(const ChooseList& chooseList, const bool& required, const std::string& name, const std::string& description)
-    : Value(chooseList.size() ? *(chooseList.begin()) : "", required, name, description)
+Value::Value(const ChooseList& chooseList, const bool& require, const std::string& name, const std::string& description)
+    : Value(chooseList.size() ? *(chooseList.begin()) : "", require, name, description)
 {
     for(auto choose : chooseList)
         _chooseList.push_back(choose);
@@ -602,7 +602,7 @@ const Flag Flag::WrongFlag = Flag();
 
 Flag::Flag(const Flag& f)
     : isSet(f.isSet)
-    , defined(f.defined)
+    , isDefined(f.isDefined)
     , hasValue(f.hasValue)
     , value(f.value)
     , _longFlag(f._longFlag)
@@ -614,7 +614,7 @@ Flag::Flag(const Flag& f)
 
 Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string& dscrptn)
     : isSet(false)
-    , defined(!lFlag.empty() || !sFlag.empty())
+    , isDefined(!lFlag.empty() || !sFlag.empty())
     , hasValue(false)
     , value(Value())
     , _longFlag(lFlag)
@@ -637,15 +637,15 @@ const Arg Arg::WrongArg = Arg();
 
 Arg::Arg(const Arg& a)
     : Value((Value)a)
-    , defined(a.defined)
+    , isDefined(a.isDefined)
 {
 }
 
-Arg::Arg(const std::string& name, const std::string& description, const bool required, const Value& defaultValue)
+Arg::Arg(const std::string& name, const std::string& description, const bool require, const Value& defaultValue)
     : Value(defaultValue)
-    , defined(!name.empty())
+    , isDefined(!name.empty())
 {
-    isRequired = required;
+    isRequired = require;
     _name = name;
     _description = description;
 }

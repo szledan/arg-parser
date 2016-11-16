@@ -45,24 +45,26 @@ Plan of ArgParse 1.0
       = { isRequired=required; isSet=false; str="default"; _chooseList={ "default", "A" }; _name="name"; _desciprtion="desciprtion"; };
 
 #### Flag
-    Flag = { isSet=false; defined=false; hasValue=false; value=Value(); _longFlag=""; _shortFlag=""; _desciprtion=""; _callBackFunc=nullptr; };
+    Flag = { isSet=false; isDefined=false; hasValue=false; value=Value(); _longFlag=""; _shortFlag=""; _desciprtion=""; _callBackFunc=nullptr; };
 
     Flag()
-      = { isSet=false; defined=false; hasValue=false; value=Value(); _longFlag=""; _shortFlag=""; _desciprtion=""; _callBackFunc=nullptr; };
-    Flag("--long" -> (_longFlag,defined), "-s" -> (_shortFlag,defined), "desciprtion" -> (_description))
-      = { isSet=false; defined=!_longFlag.empty() || !_shortFlag.empty(); hasValue=false; value=Value(); _longFlag="--long"; _shortFlag="-s"; _desciprtion="desciprtion"; _callBackFunc=nullptr; };
-    Flag("--long" -> (_longFlag,defined), "-s" -> (_shortFlag,defined), "desciprtion" -> (_description), value -> (hasValue,value))
-      = { isSet=false; defined=!_longFlag.empty() || !_shortFlag.empty(); hasValue=true; value=value; _longFlag="--long"; _shortFlag="-s"; _desciprtion="desciprtion"; _callBackFunc=nullptr; };
+      = { isSet=false; isDefined=false; hasValue=false; value=Value(); _longFlag=""; _shortFlag=""; _desciprtion=""; _callBackFunc=nullptr; };
+    Flag("--long" -> (_longFlag,isDefined), "-s" -> (_shortFlag,isDefined), "desciprtion" -> (_description))
+      = { isSet=false; isDefined=!_longFlag.empty() || !_shortFlag.empty(); hasValue=false; value=Value(); _longFlag="--long"; _shortFlag="-s"; _desciprtion="desciprtion"; _callBackFunc=nullptr; };
+    Flag("--long" -> (_longFlag,isDefined), "-s" -> (_shortFlag,isDefined), "desciprtion" -> (_description), value -> (hasValue,value))
+      = { isSet=false; isDefined=!_longFlag.empty() || !_shortFlag.empty(); hasValue=true; value=value; _longFlag="--long"; _shortFlag="-s"; _desciprtion="desciprtion"; _callBackFunc=nullptr; };
 
 #### Arg
-    Arg : Value = { { Value }; defined=false; };
+    Arg : Value = { { Value }; isDefined=false; };
 
     Arg()
-      = { Value(); defined=false; };
-    Arg("name" -> (_name,defined), "desciprtion" -> (_description), required -> (isRequired), value -> (str|str,_chooseList))
-      = { isRequired=required; isSet=false; str=value.str; _chooseList={}|value._chooseList; _name="name"; _desciprtion="desciprtion"; defined=!name.empty(); };
+      = { Value(); isDefined=false; };
+    Arg("name" -> (_name,isDefined), "desciprtion" -> (_description), required -> (isRequired), value -> (str|str,_chooseList))
+      = { isRequired=required; isSet=false; str=value.str; _chooseList={}|value._chooseList; _name="name"; _desciprtion="desciprtion"; isDefined=!name.empty(); };
     Arg(value -> (str|str,_chooseList))
-      = { str=value.str; isRequired=false; _name=""; _desciprtion=""; _chooseList={}|value._chooseList; isSet=false; defined=false; };
+      = { str=value.str; isRequired=false; _name=""; _desciprtion=""; _chooseList={}|value._chooseList; isSet=false; isDefined=false; };
+
+# Under construction
 
 ### ArgParse API
 

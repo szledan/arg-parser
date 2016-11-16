@@ -27,15 +27,6 @@
 #include "arg-parse.h"
 #include <iostream>
 
-void defineTestSuiteOptions(argparse::ArgParse& args)
-{
-    args.def(argparse::Flag("--api", "-a", "Select api tests."));
-    args.def(argparse::Flag("--manual", "-m", "Select manual tests.",
-                            argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
-    args.def(argparse::Flag("--unit", "-u", "Select unit tests."));
-    args.def(argparse::Flag("--silent", "-s", "Fails show only."));
-}
-
 // Configure and run tests.
 
 int main(int argc, char* argv[])
@@ -44,7 +35,11 @@ int main(int argc, char* argv[])
 
     {
         // Define options.
-        defineTestSuiteOptions(args);
+        args.def(argparse::Flag("--api", "-a", "Select api tests."));
+        args.def(argparse::Flag("--manual", "-m", "Select manual tests.",
+                                argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
+        args.def(argparse::Flag("--unit", "-u", "Select unit tests."));
+        args.def(argparse::Flag("--silent", "-s", "Fails show only."));
 
         // Parse argv and argc and check errors.
         if (!args.parse(argc, argv)) {

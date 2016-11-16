@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test-unit.h"
 
 #include "arg-parse.h"
 #include <assert.h>
@@ -34,19 +34,15 @@ using namespace argparse;
 
 TestContext::Return testConstructors(TestContext* ctx)
 {
-    const std:: string testStr = "value";
-    const std:: string testName = "name";
-    const std:: string testDescription = "description";
+    TAP_REQUIRED_TEST_CASES(requiredCases);
+    TAP_VALUE_STR_TEST_CASES(valueStrCases);
 
-    struct {
-        const bool required;
-    } requiredCases[] = {
-        { !Value::Required },
-        { Value::Required },
-    };
-
-    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase) {
+    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
+    for (size_t valueStrCase = 0; valueStrCase < TAP_ARRAY_SIZE(valueStrCases); ++valueStrCase) {
         const bool required = requiredCases[requiredCase].required;
+        const std:: string testStr = valueStrCases[valueStrCase].str;
+        const std:: string testName = "name";
+        const std:: string testDescription = "description";
 
         struct {
             Value defined;
@@ -73,7 +69,7 @@ TestContext::Return testConstructors(TestContext* ctx)
         };
 
         for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
-            assert((sizeof(Value) == sizeof(testCases[0].expected)) && "Value different expected struct");
+            assert((sizeof(testCases[0].defined) == sizeof(testCases[0].expected)) && "Structs size are differents.");
             test.defined = testCases[testCase].defined;
             test.expected = testCases[testCase].expected;
             const std::string caseName = std::to_string(testCase) + ".(" + std::to_string(required) + ") testcase. ";
@@ -85,6 +81,9 @@ TestContext::Return testConstructors(TestContext* ctx)
                 return TAP_FAIL(ctx, caseName + "!!!");
 
             if (test.defined.str != test.expected.str)
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (test.defined.empty() != test.expected.str.empty())
                 return TAP_FAIL(ctx, caseName + "!!!");
 
             if (test.defined._chooseList.size() != test.expected._chooseList.size())

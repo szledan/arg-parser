@@ -140,11 +140,11 @@ struct Value {
 
     Value(const Value& v);
     Value(const std::string& defaultValue = "",
-          const bool& required = !Required,
+          const bool& require = !Required,
           const std::string& name = "",
           const std::string& description = "");
     Value(const ChooseList& chooseList,
-          const bool& required = !Required,
+          const bool& require = !Required,
           const std::string& name = "",
           const std::string& description = "");
 
@@ -175,7 +175,7 @@ struct Flag {
          const Value value);
 
     bool isSet;
-    bool defined;
+    bool isDefined;
     bool hasValue;
     Value value;
 // private:
@@ -196,11 +196,11 @@ struct Arg : Value {
     Arg(const Arg& a);
     Arg(const std::string& name = "",
         const std::string& description = "",
-        const bool required = !Required,
+        const bool isRequired = !Required,
         const Value& defaultValue = Value());
     Arg(const Value& value);
 
-    bool defined;
+    bool isDefined;
 };
 
 } // namespace argparse

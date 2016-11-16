@@ -46,6 +46,57 @@ void unitOptionsTests(TestContext*);
 void unitParserTests(TestContext*);
 void unitValueStructTests(TestContext*);
 
+
+#ifndef TAP_VALUE_STR_TEST_CASES
+#define TAP_VALUE_STR_TEST_CASES(TEST_CASES) \
+    struct { \
+        const std::string str; \
+    } TEST_CASES[] = { \
+        { "str" }, \
+        { "" }, \
+    }
+#endif // TAP_VALUE_STR_TEST_CASES
+
+#ifndef TAP_REQUIRED_TEST_CASES
+#define TAP_REQUIRED_TEST_CASES(TEST_CASES) \
+    struct { \
+        const bool required; \
+    } TEST_CASES[] = { \
+        { !argparse::Value::Required }, \
+        { argparse::Value::Required }, \
+    }
+#endif // TAP_REQUIRED_TEST_CASES
+
+#ifndef TAP_VALUE_TEST_CASES
+#define TAP_VALUE_TEST_CASES(TEST_CASES, DEFAULT_VALUE, REQUIRED, NAME, DESCRIPTION) \
+    struct { \
+        Value value; \
+    } TEST_CASES[] = { \
+        { Value() }, \
+        { Value(DEFAULT_VALUE) }, \
+        { Value(DEFAULT_VALUE, REQUIRED) }, \
+        { Value(DEFAULT_VALUE, REQUIRED, NAME) }, \
+        { Value(DEFAULT_VALUE, REQUIRED, NAME, DESCRIPTION) }, \
+        { Value({ DEFAULT_VALUE, "A" }) }, \
+        { Value({ DEFAULT_VALUE, "A" }, REQUIRED) }, \
+        { Value({ DEFAULT_VALUE, "A" }, REQUIRED, NAME) }, \
+        { Value({ DEFAULT_VALUE, "A" }, REQUIRED, NAME, DESCRIPTION) }, \
+    } \
+/*struct { \
+    const argparse::Value defValue; \
+} TEST_CASES[] = { \
+    { Value() }, \
+    { Value("") }, \
+    { Value(GIVEN_VALUE) }, \
+    { Value("A") }, \
+    { Value(GIVEN_VALUE, { GIVEN_VALUE, "other", "values" }) }, \
+    { Value(GIVEN_VALUE, { "A", "B", "C" }) }, \
+    { Value("", { "A", "B", "C" }) }, \
+    { Value("", { }) }, \
+    { Value(GIVEN_VALUE, { }) }, \
+}*/
+#endif // TAP_VALUE_TEST_CASES
+
 #ifndef TAP_FLAGS_NAME_TEST_CASES
 #define TAP_FLAGS_NAME_TEST_CASES(TEST_CASES, LONG, SHORT) \
     struct { \
@@ -61,43 +112,6 @@ void unitValueStructTests(TestContext*);
         { "l", "s" }, \
     }
 #endif // TAP_FLAGS_NAME_TEST_CASES
-
-#ifndef TAP_ARG_NAME_TEST_CASES
-#define TAP_ARG_NAME_TEST_CASES(TEST_CASES) \
-    struct { \
-        const std::string defArgName; \
-    } TEST_CASES[] = { \
-        { "" }, \
-        { "arg" }, \
-    }
-#endif // TAP_ARG_NAME_TEST_CASES
-
-#ifndef TAP_ARG_REQUIRED_TEST_CASES
-#define TAP_ARG_REQUIRED_TEST_CASES(TEST_CASES) \
-    struct { \
-        const bool defArgRequired; \
-    } TEST_CASES[] = { \
-        { argparse::Arg::Required }, \
-        { !argparse::Arg::Required }, \
-    }
-#endif // TAP_ARG_REQUIRED_TEST_CASES
-
-#ifndef TAP_VALUE_TEST_CASES
-#define TAP_VALUE_TEST_CASES(TEST_CASES, GIVEN_VALUE) \
-    struct { \
-        const argparse::Value defValue; \
-    } TEST_CASES[] = { \
-        { Value() }, \
-        { Value("") }, \
-        { Value(GIVEN_VALUE) }, \
-        { Value("A") }, \
-        { Value(GIVEN_VALUE, { GIVEN_VALUE, "other", "values" }) }, \
-        { Value(GIVEN_VALUE, { "A", "B", "C" }) }, \
-        { Value("", { "A", "B", "C" }) }, \
-        { Value("", { }) }, \
-        { Value(GIVEN_VALUE, { }) }, \
-    }
-#endif // TAP_VALUE_TEST_CASES
 
 } // namespace testargparse
 
