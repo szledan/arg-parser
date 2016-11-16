@@ -25,35 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TAP_ARRAY_SIZE
-#define TAP_ARRAY_SIZE(A) (sizeof(A) ? sizeof(A) / sizeof(A[0]) : 0)
+#ifdef TAP_ARRAY_SIZE
+#undef TAP_ARRAY_SIZE
 #endif // TAP_ARRAY_SIZE
+#define TAP_ARRAY_SIZE(A) (sizeof(A) ? sizeof(A) / sizeof(A[0]) : 0)
 
-#ifndef TAP_FILE_FUNC_LINE
-#define TAP_FILE_FUNC_LINE std::string(__FILE__), std::string(__func__), std::to_string(__LINE__)
+#ifdef TAP_FILE_FUNC_LINE
+#undef TAP_FILE_FUNC_LINE
 #endif // TAP_FILE_FUNC_LINE
+#define TAP_FILE_FUNC_LINE std::string(__FILE__), std::string(__func__), std::to_string(__LINE__)
 
-#ifndef TAP_PASS
-#define TAP_PASS(CTX, MSG) CTX->pass(MSG, TAP_FILE_FUNC_LINE)
+#ifdef TAP_PASS
+#undef TAP_PASS
 #endif // TAP_PASS
+#define TAP_PASS(CTX, MSG) CTX->pass(MSG, TAP_FILE_FUNC_LINE)
 
-#ifndef TAP_FAIL
-#define TAP_FAIL(CTX, MSG) CTX->fail(MSG, TAP_FILE_FUNC_LINE)
+#ifdef TAP_FAIL
+#undef TAP_FAIL
 #endif // TAP_FAIL
+#define TAP_FAIL(CTX, MSG) CTX->fail(MSG, TAP_FILE_FUNC_LINE)
 
-#ifndef TAP_NOT_TESTED
-#define TAP_NOT_TESTED(CTX, MSG) CTX->nott(MSG, TAP_FILE_FUNC_LINE)
+#ifdef TAP_NOT_TESTED
+#undef TAP_NOT_TESTED
 #endif // TAP_NOT_TESTED
+#define TAP_NOT_TESTED(CTX, MSG) CTX->nott(MSG, TAP_FILE_FUNC_LINE)
 
-#ifndef TAP_CHECK
-#define TAP_CHECK(CTX, COND) CTX->check((COND))
+#ifdef TAP_CHECK
+#undef TAP_CHECK
 #endif // TAP_CHECK
+#define TAP_CHECK(CTX, COND) CTX->check((COND))
 
-#ifndef TAP_CHARS
-#define TAP_CHARS(STR) (char*)STR
+#ifdef TAP_CHARS
+#undef TAP_CHARS
 #endif // TAP_CHARS
+#define TAP_CHARS(STR) (char*)STR
 
-#ifndef TAP_CHECK_NON_REQUIRED_ERRORS
+#ifdef TAP_CHECK_NON_REQUIRED_ERRORS
+#undef TAP_CHECK_NON_REQUIRED_ERRORS
+#endif // TAP_CHECK_NON_REQUIRED_ERRORS
 #define TAP_CHECK_NON_REQUIRED_ERRORS(CTX, ARGS, NUMS) do { \
         if (args.errors().size() != NUMS) { \
             std::string msg("Generated non required error(s)! Number Of required errors: "); \
@@ -66,15 +75,13 @@
         } \
     } while (false)
 
-#endif // TAP_CHECK_NON_REQUIRED_ERRORS
-
-#ifndef TAP_CHECK_PARSER_EXPECTED_RETURN
+#ifdef TAP_CHECK_PARSER_EXPECTED_RETURN
+#undef TAP_CHECK_PARSER_EXPECTED_RETURN
+#endif // TAP_CHECK_PARSER_EXPECTED_RETURN
 #define TAP_CHECK_PARSER_EXPECTED_RETURN(CTX, CONDITION) do { \
         if (CONDITION) { \
             return TAP_FAIL(ctx, "The parse() returns wrong value! The wrong condition is: " #CONDITION "."); \
         } \
     } while (false)
-
-#endif // TAP_NON_REQUIRED_ERRORS
 
 #endif // TEST_DEFS_H
