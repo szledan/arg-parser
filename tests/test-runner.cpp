@@ -31,15 +31,29 @@
 
 int main(int argc, char* argv[])
 {
-    argparse::ArgParse args;
+    struct {
+        const bool nonSpecified() const { return !api && !unit && ! manual; }
+        bool all = false;
+        bool api = false;
+        bool silent = false;
+        bool unit = false;
+        bool manual = false;
+        std::string manualValue = "";
+    } options;
 
+    // Parse arguments.
     {
+        using namespace argparse;
+        ArgParse args;
+
         // Define options.
-        args.def(argparse::Flag("--api", "-a", "Select api tests."));
-        args.def(argparse::Flag("--manual", "-m", "Select manual tests.",
-                                argparse::Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2", "options")));
-        args.def(argparse::Flag("--unit", "-u", "Select unit tests."));
-        args.def(argparse::Flag("--silent", "-s", "Fails show only."));
+        args.def(Flag("--api", "-a", "Select api tests."));
+        Value helpTestConfigs = Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2" /*!< Default value.*/,
+                                      "options" /*!< Name of value.*/,
+                                      "This value is interlaced, see more: ArgParse Api Reference." /*!< Description of value.*/);
+        args.def(Flag("--manual", "-m", "Select manual tests.", helpTestConfigs));
+        args.def(Flag("--unit", "-u", "Select unit tests."));
+        args.def(Flag("--silent", "-s", "Fails show only."));
 
         // Parse argv and argc and check errors.
         if (!args.parse(argc, argv)) {
@@ -53,27 +67,34 @@ int main(int argc, char* argv[])
             std::cout << args.help() << std::endl;
             return 0;
         }
+
+        // Collect options.
+        options.all = args["--all"].isSet;
+        options.api = args["--api"].isSet;
+        options.silent = args["--silent"].isSet;
+        options.unit = args["--unit"].isSet;
+        if ((options.manual = args["--manual"].isSet))
+            options.manualValue = args["--manual"].value.str;
     }
 
-    // Collect running options.
-    const bool none = !(args["-a"].isSet || args["-m"].isSet || args["-u"].isSet);
-    const bool all = args["--all"].isSet || none;
+    // Create test context.
+    testargparse::TestContext ctx(!options.silent);
 
-    testargparse::TestContext ctx(!args["--silent"].isSet);
+    const bool all = options.all || options.nonSpecified();
 
     // Run manual tests.
-    if (args["--manual"].isSet || all) {
-        ctx.param.str = args["--manual"].value.str;
+    if (options.manual || all) {
+        ctx.param.str = options.manualValue;
         testargparse::manualTests(&ctx);
     }
 
     // Collect api tests.
-    if (args["--api"].isSet || all) {
+    if (options.api || all) {
         testargparse::apiTests(&ctx);
     }
 
     // Collect unit and behavior tests.
-    if (args["--unit"].isSet || all) {
+    if (options.unit || all) {
         testargparse::unitAndBehaviorTests(&ctx);
     }
 
