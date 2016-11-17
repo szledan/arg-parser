@@ -38,24 +38,24 @@ using namespace argparse;
 //    TAP_FLAGS_NAME_TEST_CASES(flagNamesCases, longFlag, shortFlag);
 //    struct {
 //        const std::string flag;
-//    } givens[] = {
+//    } recieves[] = {
 //        { longFlag },
 //        { shortFlag },
 //    };
 
-//    for (size_t given = 0; given < TAP_ARRAY_SIZE(givens); ++given)
+//    for (size_t recieve = 0; recieve < TAP_ARRAY_SIZE(recieves); ++recieve)
 //    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(flagNamesCases); ++nameCase)
 //    {
-//        const std::string& givenFlag = givens[given].flag;
+//        const std::string& recieveFlag = recieves[recieve].flag;
 //        const Flag defFlag(flagNamesCases[nameCase].defFlagLong, flagNamesCases[nameCase].defFlagShort, "<descript>");
-//        const std::string caseName = givenFlag + "|"
+//        const std::string caseName = recieveFlag + "|"
 //                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + "," + defFlag._description + ")"
 //                + " testcase. ";
 
 //        ArgParse args;
 //        /*const Flag& addedFlag = */args.def(defFlag);
 
-//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()) };
+//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveFlag.c_str()) };
 //        const int argc = TAP_ARRAY_SIZE(argv);
 
 //        const bool parseRet = args.parse(argc, argv);
@@ -89,22 +89,22 @@ using namespace argparse;
 
 //TestContext::Return testDefArg(TestContext* ctx)
 //{
-//    TAP_ARG_NAME_TEST_CASES(nameCases);
-//    TAP_ARG_REQUIRED_TEST_CASES(requiredCases);
+//    TAP_VALUE_STR_TEST_CASES(nameCases);
+//    TAP_REQUIRED_TEST_CASES(requiredCases);
 
 //    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
 //    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(nameCases); ++nameCase)
 //    {
-//        const std::string givenValue = "value";
+//        const std::string recieveValue = "value";
 //        const Arg defArg(nameCases[nameCase].defArgName, "<descript>", requiredCases[requiredCase].defArgRequired);
-//        const std::string caseName = givenValue + "|"
+//        const std::string caseName = recieveValue + "|"
 //                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg.isRequired) + ")"
 //                + " testcase. ";
 
 //        ArgParse args;
 //        const Arg& addedArg = args.def(defArg);
 
-//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenValue.c_str()) };
+//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveValue.c_str()) };
 //        const int argc = TAP_ARRAY_SIZE(argv);
 
 //        const bool parseRet = args.parse(argc, argv);
@@ -141,9 +141,9 @@ using namespace argparse;
 //{
 //    const std::string givenValue = "value";
 
-//    TAP_ARG_NAME_TEST_CASES(nameCases);
-//    TAP_ARG_REQUIRED_TEST_CASES(requiredCases);
-//    TAP_VALUE_TEST_CASES(valueCases, givenValue);
+//    TAP_VALUE_STR_TEST_CASES(nameCases);
+//    TAP_REQUIRED_TEST_CASES(requiredCases);
+//    TAP_VALUE_TEST_CASES(valueCases);
 
 //    for (size_t valueCase = 0; valueCase < TAP_ARRAY_SIZE(valueCases); ++valueCase)
 //    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)

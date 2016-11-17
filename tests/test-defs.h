@@ -64,7 +64,7 @@
 #undef TAP_CHECK_NON_REQUIRED_ERRORS
 #endif // TAP_CHECK_NON_REQUIRED_ERRORS
 #define TAP_CHECK_NON_REQUIRED_ERRORS(CTX, ARGS, NUMS) do { \
-        if (args.errors().size() != NUMS) { \
+        if (TAP_CHECK(CTX, (args.errors().size() != NUMS))) { \
             std::string msg("Generated non required error(s)! Number Of required errors: "); \
             msg += std::to_string(NUMS) + ", but have: "; \
             msg += std::to_string(args.errors().size()) + ". "; \
@@ -79,7 +79,7 @@
 #undef TAP_CHECK_PARSER_EXPECTED_RETURN
 #endif // TAP_CHECK_PARSER_EXPECTED_RETURN
 #define TAP_CHECK_PARSER_EXPECTED_RETURN(CTX, CONDITION) do { \
-        if (CONDITION) { \
+        if (TAP_CHECK(CTX, (CONDITION))) { \
             return TAP_FAIL(ctx, "The parse() returns wrong value! The wrong condition is: " #CONDITION "."); \
         } \
     } while (false)

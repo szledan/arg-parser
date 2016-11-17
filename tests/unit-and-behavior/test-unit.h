@@ -46,8 +46,9 @@ void unitOptionsTests(TestContext*);
 void unitParserTests(TestContext*);
 void unitValueStructTests(TestContext*);
 
-
-#ifndef TAP_VALUE_STR_TEST_CASES
+#ifdef TAP_VALUE_STR_TEST_CASES
+#undef TAP_VALUE_STR_TEST_CASES
+#endif // TAP_VALUE_STR_TEST_CASES
 #define TAP_VALUE_STR_TEST_CASES(TEST_CASES) \
     struct { \
         const std::string str; \
@@ -55,7 +56,17 @@ void unitValueStructTests(TestContext*);
         { "str" }, \
         { "" }, \
     }
-#endif // TAP_VALUE_STR_TEST_CASES
+
+#ifdef TAP_BOOL_TEST_CASES
+#undef TAP_BOOL_TEST_CASES
+#endif // TAP_BOOL_TEST_CASES
+#define TAP_BOOL_TEST_CASES(TEST_CASES) \
+    struct { \
+        const bool value; \
+    } TEST_CASES[] = { \
+        { false }, \
+        { true }, \
+    }
 
 #ifndef TAP_REQUIRED_TEST_CASES
 #define TAP_REQUIRED_TEST_CASES(TEST_CASES) \
