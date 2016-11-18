@@ -25,184 +25,181 @@
 #include "test-unit.h"
 
 #include "arg-parse.h"
+#include <assert.h>
 
 namespace testargparse {
 namespace {
 
 using namespace argparse;
 
+void testCallBackFunc(void)
+{
+    assert(false);
+}
+
 TestContext::Return testDefFlag(TestContext* ctx)
 {
-    const std::string longFlag = "--long";
-    const std::string shortFlag = "-s";
-    TAP_FLAGS_NAME_TEST_CASES(flagNamesCases, longFlag, shortFlag);
+    const std::string longFlagStr = "--long";
+    const std::string shortFlagStr = "-s";
+    const std::string valueStr = "value";
+
     struct {
-        const std::string flag;
-    } recieves[] = {
-        { longFlag },
-        { shortFlag },
+        CallBackFunc func;
+    } callBackFuncCases[] = {
+        { nullptr },
+        { testCallBackFunc },
     };
 
-    for (size_t recieve = 0; recieve < TAP_ARRAY_SIZE(recieves); ++recieve)
-    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(flagNamesCases); ++nameCase)
-    {
-        const std::string& recieveFlag = recieves[recieve].flag;
-        const Flag defFlag(flagNamesCases[nameCase].defFlagLong, flagNamesCases[nameCase].defFlagShort, "descript");
-        const std::string caseName = recieveFlag + "|"
-                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + "," + defFlag._description + ")"
+    struct {
+        const Flag flag;
+        struct {
+            const bool valid;
+            const bool hasLong;
+            const bool hasShort;
+        } const expected;
+    } testCases[] = {
+        { Flag(longFlagStr, ""), { true, true, false } },
+        { Flag("", shortFlagStr), { true, false, true } },
+        { Flag(longFlagStr, shortFlagStr), { true, true, true } },
+        { Flag(longFlagStr + "=" + valueStr, ""), { true, true, false } },
+        { Flag(longFlagStr + "=" + valueStr, shortFlagStr), { true, true, true } },
+        { Flag(longFlagStr + " " + valueStr, ""), { true, true, false } },
+        // Not valid testcases.
+        { Flag(), { false, false, false } },
+        { Flag("", ""), { false, false, false } },
+        { Flag(" ", " "), { false, true, true } },
+        { Flag("", longFlagStr), { false, false, true } },
+        { Flag(shortFlagStr, ""), { false, true, false } },
+        { Flag(shortFlagStr, longFlagStr), { false, true, true } },
+        { Flag("", "-s "), { false, false, true } },
+        { Flag("", " -s"), { false, false, true } },
+        { Flag(" --long", "s"), { false, true, true } },
+        { Flag("-abc", "ab"), { false, true, true } },
+        { Flag("abc", "s "), { false, true, true } },
+    };
+
+    for (size_t callBackFuncCase = 0; callBackFuncCase < TAP_ARRAY_SIZE(callBackFuncCases); ++callBackFuncCase)
+    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
+        const CallBackFunc callBackFunc = callBackFuncCases[callBackFuncCase].func;
+        const Flag defFlag = testCases[testCase].flag;
+        const std::string caseName = std::to_string(testCase) + "|"
+                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + ")"
                 + " testcase. ";
 
-        ArgParse args;
-        /*const Flag& addedFlag = */args.def(defFlag);
+        ArgParse ap;
+        const Flag& addedFlag = ap.def(defFlag, callBackFunc);
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveFlag.c_str()) };
-        const int argc = TAP_ARRAY_SIZE(argv);
+        const std::string validStr = std::string("valid=") + std::to_string(testCases[testCase].expected.valid);
 
-        const bool parseRet = args.parse(argc, argv);
+        if (!testCases[testCase].expected.valid) {
+            if (TAP_CHECK(ctx, &addedFlag != &Flag::WrongFlag))
+                return TAP_FAIL(ctx, caseName + "Expected:" + validStr);
+            continue;
+        };
 
-        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+        assert(testCases[testCase].expected.valid);
 
-        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        if (TAP_CHECK(ctx, &addedFlag == &Flag::WrongFlag))
+            return TAP_FAIL(ctx, caseName + "Expected:" + validStr);
 
-        if (&args[defFlag._longFlag] == &Flag::WrongFlag)
-            return TAP_FAIL(ctx, caseName + "Args is empty.");
+        if (TAP_CHECK(ctx, addedFlag._longFlag.empty() && addedFlag._shortFlag.empty()))
+            return TAP_FAIL(ctx, caseName + "!!!");
 
-        if (&args[defFlag._shortFlag] == &Flag::WrongFlag)
-            return TAP_FAIL(ctx, caseName + "Args is empty.");
+        if (!addedFlag._longFlag.empty()) {
+            if (TAP_CHECK(ctx, &(ap[addedFlag._longFlag]) != &addedFlag))
+                return TAP_FAIL(ctx, caseName + "!!!");
 
-        if (!(args.counts.flags.defined + args.counts.flags.undefined))
-            return TAP_FAIL(ctx, caseName + "Args is empty.");
+            if (TAP_CHECK(ctx, ap[addedFlag._longFlag]._callBackFunc != callBackFunc))
+                return TAP_FAIL(ctx, caseName + "!!!");
+        }
+
+        if (!addedFlag._shortFlag.empty()) {
+            if (TAP_CHECK(ctx, &(ap[addedFlag._shortFlag]) != &addedFlag))
+                return TAP_FAIL(ctx, caseName + "!!!");
+
+            if (TAP_CHECK(ctx, ap[addedFlag._shortFlag]._callBackFunc != callBackFunc))
+                return TAP_FAIL(ctx, caseName + "!!!");
+        }
     }
 
-    return TAP_PASS(ctx, "Define arguments.");
+    return TAP_PASS(ctx, "The ArgParse::def(Flag(LONG, SHORT), C_B_FUNC) test.");
 }
 
-TestContext::Return testDefFlagWithValue(TestContext* ctx)
+TestContext::Return testDefArg(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+    TAP_VALUE_STR_TEST_CASES(nameCases);
+    TAP_REQUIRED_TEST_CASES(requiredCases);
+    TAP_VALUE_STR_TEST_CASES(valueStrCases);
+
+    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(nameCases); ++nameCase)
+    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
+    for (size_t valueStrCase = 0; valueStrCase < TAP_ARRAY_SIZE(valueStrCases); ++valueStrCase) {
+        const bool required = requiredCases[requiredCase].required;
+        const std:: string testStr = valueStrCases[valueStrCase].str;
+        const std:: string testValueName = "value-name";
+        const std:: string testValueDescription = "value-description";
+
+        TAP_VALUE_TEST_CASES(valueCases, testStr, required, testValueName, testValueDescription);
+
+        for (size_t valueCase = 0; valueCase < TAP_ARRAY_SIZE(valueCases); ++valueCase) {
+            const Value value = valueCases[valueCase].value;
+            const std::string testName = nameCases[nameCase].str;
+            const std::string testDescription = "description";
+
+            TAP_ARG_TEST_CASES(testCases, testName, testDescription, required, value);
+
+            for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
+                const Arg& arg  = testCases[testCase].arg;
+                const std::string caseName = std::to_string(testCase) + ".(test-name:" + arg._name + ",value-case:" + std::to_string(valueCase) + ") testcase. ";
+
+                ArgParse ap;
+                const Arg& addedArg = ap.def(arg);
+
+                if (!arg._name.empty()) {
+                    if (TAP_CHECK(ctx, !addedArg.isDefined))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, &addedArg == &Arg::WrongArg))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, &(ap[0]) == &Arg::WrongArg))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, addedArg._name.empty()))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, addedArg.isRequired != arg.isRequired))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+                } else {
+                    assert(arg._name.empty());
+                    if (TAP_CHECK(ctx, addedArg.isDefined))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, &addedArg != &Arg::WrongArg))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, &(ap[0]) != &Arg::WrongArg))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, !addedArg._name.empty()))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, addedArg.isRequired))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+                }
+            }
+        }
+    }
+
+    return TAP_PASS(ctx, "The ArgParse::def(Arg(NAME, '', REQUIRE, VALUE)) test.");
 }
-
-TestContext::Return testDefFlagWithCallBackFunction(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
-}
-
-//TestContext::Return testDefArg(TestContext* ctx)
-//{
-//    TAP_VALUE_STR_TEST_CASES(nameCases);
-//    TAP_REQUIRED_TEST_CASES(requiredCases);
-
-//    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
-//    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(nameCases); ++nameCase)
-//    {
-//        const std::string recieveValue = "value";
-//        const Arg defArg(nameCases[nameCase].defArgName, "<descript>", requiredCases[requiredCase].defArgRequired);
-//        const std::string caseName = recieveValue + "|"
-//                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg.isRequired) + ")"
-//                + " testcase. ";
-
-//        ArgParse args;
-//        const Arg& addedArg = args.def(defArg);
-
-//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveValue.c_str()) };
-//        const int argc = TAP_ARRAY_SIZE(argv);
-
-//        const bool parseRet = args.parse(argc, argv);
-
-//        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-//        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-//        if (&args[0] == &Arg::WrongArg)
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
-
-//        if (!(args.counts.args.defined + args.counts.args.undefined))
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
-
-//        if (defArg._name.empty()) {
-//            if (&addedArg != &Arg::WrongArg)
-//                return TAP_FAIL(ctx, caseName + "Arg with empty name doesn't equal with WrongArg.");
-
-//            if (args[0].defined || !args.counts.args.undefined || args.counts.args.defined)
-//                return TAP_FAIL(ctx, caseName + "The 'given value' added as defined instead of undefined.");
-//        } else {
-//            if (&addedArg == &Arg::WrongArg)
-//                return TAP_FAIL(ctx, caseName + "Arg with name is equal with WrongArg.");
-
-//            if (!args[0].defined || args.counts.args.undefined || !args.counts.args.defined)
-//                return TAP_FAIL(ctx, caseName + "The 'given value' added as undefined instead of defined.");
-//        }
-//    }
-
-//    return TAP_PASS(ctx, "Define arguments.");
-//}
-
-//TestContext::Return testDefArgWithValue(TestContext* ctx)
-//{
-//    const std::string givenValue = "value";
-
-//    TAP_VALUE_STR_TEST_CASES(nameCases);
-//    TAP_REQUIRED_TEST_CASES(requiredCases);
-//    TAP_VALUE_TEST_CASES(valueCases);
-
-//    for (size_t valueCase = 0; valueCase < TAP_ARRAY_SIZE(valueCases); ++valueCase)
-//    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
-//    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(nameCases); ++nameCase)
-//    {
-//        const Arg defArg(nameCases[nameCase].defArgName, "description", requiredCases[requiredCase].defArgRequired, valueCases[valueCase].defValue);
-//        const std::string caseName = givenValue + "|"
-//                + "Arg(" + defArg._name + "," + defArg._description + "," + std::to_string(defArg.isRequired)
-//                    + ",Value('" + defArg.str + "')"
-//                + ")" + " testcase. ";
-
-//        ArgParse args;
-//        const Arg& addedArg = args.def(defArg);
-
-//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenValue.c_str()) };
-//        const int argc = TAP_ARRAY_SIZE(argv);
-
-//        const bool parseRet = args.parse(argc, argv);
-
-//        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-//        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-//        if (&args[0] == &Arg::WrongArg)
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
-
-//        if (!(args.counts.args.defined + args.counts.args.undefined))
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
-
-//        if (defArg._name.empty()) {
-//            if (&addedArg != &Arg::WrongArg)
-//                return TAP_FAIL(ctx, caseName + "Arg with empty name doesn't equal with WrongArg.");
-
-//            if (args[0].defined || !args.counts.args.undefined || args.counts.args.defined)
-//                return TAP_FAIL(ctx, caseName + "The 'parameter' added as defined instead of undefined.");
-//        } else {
-//            if (&addedArg == &Arg::WrongArg)
-//                return TAP_FAIL(ctx, caseName + "Arg with name is equal with WrongArg.");
-
-//            if (!args[0].defined || args.counts.args.undefined || !args.counts.args.defined)
-//                return TAP_FAIL(ctx, caseName + "The 'parameter' added as undefined instead of defined.");
-
-//            if (addedArg.str != givenValue)
-//                return TAP_FAIL(ctx, caseName + "The value string of defined arg didn't set to given value.");
-//        }
-//    }
-
-//    return TAP_PASS(ctx, "Define arguments with vlaues.");
-//}
 
 } // namespace anonymous
 
 void unitDefTests(TestContext* ctx)
 {
     ctx->add(testDefFlag);
-    ctx->add(testDefFlagWithValue);
-    ctx->add(testDefFlagWithCallBackFunction);
-//    ctx->add(testDefArg);
-//    ctx->add(testDefArgWithValue);
+    ctx->add(testDefArg);
 }
 
 } // namespace testargparse

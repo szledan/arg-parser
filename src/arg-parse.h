@@ -86,9 +86,13 @@ public:
 
     /*!
      * \brief  Add definitaion of a 'flag' (aka 'option')
-     * \return  reference of added Flag or Flag::WrongFlag.
+     * \return  !!!
      */
     const Flag& def(const Flag&, const CallBackFunc = nullptr);
+    /*!
+     * \brief  !!!
+     * \return  !!!
+     */
     const Arg& def(const Arg&);
 
     const bool parse(const int argc, char* const argv[]);
@@ -155,7 +159,7 @@ private:
     void addError(const Errors::Codes&, const std::string& errorMsg, const Flag*);
     void addError(const Errors::Codes&, const std::string& errorMsg, const Arg*);
 
-    std::list<Flag> _flags;
+    std::map<std::string, Flag> _flags;
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<Arg> _args;

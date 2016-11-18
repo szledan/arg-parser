@@ -48,9 +48,10 @@ int main(int argc, char* argv[])
 
         // Define options.
         args.def(Flag("--api", "-a", "Select api tests."));
-        Value helpTestConfigs = Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2" /*!< Default value.*/,
-                                      "options" /*!< Name of value.*/,
-                                      "This value is interlaced, see more: ArgParse Api Reference." /*!< Description of value.*/);
+        Value helpTestConfigs = Value("program.name=show-help,help.add=true,tab=\t,mode.strict=true,help.compact=on,help.show=2" /*!< Default value. */,
+                                      !Value::Required, /*!< Set non required. */
+                                      "options" /*!< Name of value. */,
+                                      "This value is interlaced, see more: ArgParse Api Reference." /*!< Description of value. */);
         args.def(Flag("--manual", "-m", "Select manual tests.", helpTestConfigs));
         args.def(Flag("--unit", "-u", "Select unit tests."));
         args.def(Flag("--silent", "-s", "Fails show only."));

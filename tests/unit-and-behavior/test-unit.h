@@ -68,7 +68,9 @@ void unitValueStructTests(TestContext*);
         { true }, \
     }
 
-#ifndef TAP_REQUIRED_TEST_CASES
+#ifdef TAP_REQUIRED_TEST_CASES
+#undef TAP_REQUIRED_TEST_CASES
+#endif // TAP_REQUIRED_TEST_CASES
 #define TAP_REQUIRED_TEST_CASES(TEST_CASES) \
     struct { \
         const bool required; \
@@ -76,9 +78,10 @@ void unitValueStructTests(TestContext*);
         { !argparse::Value::Required }, \
         { argparse::Value::Required }, \
     }
-#endif // TAP_REQUIRED_TEST_CASES
 
-#ifndef TAP_VALUE_TEST_CASES
+#ifdef TAP_VALUE_TEST_CASES
+#undef TAP_VALUE_TEST_CASES
+#endif // TAP_VALUE_TEST_CASES
 #define TAP_VALUE_TEST_CASES(TEST_CASES, DEFAULT_VALUE, REQUIRED, NAME, DESCRIPTION) \
     struct { \
         Value value; \
@@ -92,23 +95,11 @@ void unitValueStructTests(TestContext*);
         { Value({ DEFAULT_VALUE, "A" }, REQUIRED) }, \
         { Value({ DEFAULT_VALUE, "A" }, REQUIRED, NAME) }, \
         { Value({ DEFAULT_VALUE, "A" }, REQUIRED, NAME, DESCRIPTION) }, \
-    } \
-/*struct { \
-    const argparse::Value defValue; \
-} TEST_CASES[] = { \
-    { Value() }, \
-    { Value("") }, \
-    { Value(GIVEN_VALUE) }, \
-    { Value("A") }, \
-    { Value(GIVEN_VALUE, { GIVEN_VALUE, "other", "values" }) }, \
-    { Value(GIVEN_VALUE, { "A", "B", "C" }) }, \
-    { Value("", { "A", "B", "C" }) }, \
-    { Value("", { }) }, \
-    { Value(GIVEN_VALUE, { }) }, \
-}*/
-#endif // TAP_VALUE_TEST_CASES
+    }
 
 #ifndef TAP_FLAGS_NAME_TEST_CASES
+#undef TAP_FLAGS_NAME_TEST_CASES
+#endif // TAP_FLAGS_NAME_TEST_CASES
 #define TAP_FLAGS_NAME_TEST_CASES(TEST_CASES, LONG, SHORT) \
     struct { \
         const std::string defFlagLong; \
@@ -122,7 +113,21 @@ void unitValueStructTests(TestContext*);
         { "--", "" }, \
         { "l", "s" }, \
     }
-#endif // TAP_FLAGS_NAME_TEST_CASES
+
+#ifdef TAP_ARG_TEST_CASES
+#undef TAP_ARG_TEST_CASES
+#endif // TAP_ARG_TEST_CASES
+#define TAP_ARG_TEST_CASES(TEST_CASES, NAME, DESCRIPTION, REQUIRED, VALUE) \
+    struct { \
+        Arg arg; \
+    } TEST_CASES[] = { \
+        { Arg() }, \
+        { Arg(NAME) }, \
+        { Arg(NAME, DESCRIPTION) }, \
+        { Arg(NAME, DESCRIPTION, REQUIRED) }, \
+        { Arg(NAME, DESCRIPTION, REQUIRED, VALUE) }, \
+        { Arg(VALUE) }, \
+    }
 
 } // namespace testargparse
 

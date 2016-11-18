@@ -146,7 +146,7 @@ TestContext::Return testIsValidFunc(TestContext* ctx)
         const bool validLong;
         const bool validShort;
     } const flagStrCases[] = {
-        { "", true, true },
+        { "", false, false },
         { "--long", true, false },
         { "--long long", true, false },
         { "--long\tlong", true, false },

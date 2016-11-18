@@ -184,9 +184,12 @@ ArgParse::ArgParse(const OptionList& oList)
 
 const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 {
-    _flags.push_back(flag);
+    const std::string name = flag._longFlag + flag._shortFlag;
+    assert(!name.empty());
 
-    Flag* flagPtr = &(_flags.back());
+    Flag* flagPtr = &(_flags[name] = flag);
+    assert(flagPtr == &(_flags[name]));
+
     if (!flag._longFlag.empty()) {
         _longFlags[flag._longFlag] = flagPtr;
     }
@@ -411,7 +414,7 @@ const std::string ArgParse::help()
     // Print option flags.
     help << std::endl << "Option flags:" << std::endl;
 
-    for (auto const& flag : _flags) {
+    for (auto const& it : _flags) {
 #define AP_HAS_NAME(CH, VALNAME) do { \
         if (flag.value.isRequired) \
             help << CH << "<" << VALNAME << ">"; \
@@ -427,6 +430,7 @@ const std::string ArgParse::help()
             AP_HAS_NAME(" ", flag.value._name); \
     } while(false)
 
+        const Flag& flag = it.second;
         const bool hasShortFlag = !flag._shortFlag.empty();
         const bool hasLongFlag = !flag._longFlag.empty();
         if ((options.help.show == Options::Help::ShowOnesWithDescription && flag._description.empty())
@@ -636,8 +640,8 @@ const bool Flag::isValid() const
     if (_longFlag.empty() && _shortFlag.empty())
         return false;
 
-    const bool longFlagValid = (!_longFlag.size()) || ((_longFlag.size() > 2) && (_longFlag[0] == '-') && (_longFlag[1] == '-'));
-    const bool shortFlagValid = (!_shortFlag.size()) || ((_shortFlag.size() == 2) && (_shortFlag[0] == '-'));
+    const bool longFlagValid = (_longFlag.size() > 2) && (_longFlag[0] == '-') && (_longFlag[1] == '-');
+    const bool shortFlagValid = (_shortFlag.size() == 2) && (_shortFlag[0] == '-');
 
     if (longFlagValid || shortFlagValid)
         return true;
