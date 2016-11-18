@@ -136,7 +136,51 @@ TestContext::Return testConstructors(TestContext* ctx)
         }
     }
 
-    return TAP_PASS(ctx, "Empty constructor test.");
+    return TAP_PASS(ctx, "The Flag::Flag(...) constructor test.");
+}
+
+TestContext::Return testIsValidFunc(TestContext* ctx)
+{
+    struct {
+        const std::string flagStr;
+        const bool validLong;
+        const bool validShort;
+    } const flagStrCases[] = {
+        { "", true, true },
+        { "--long", true, false },
+        { "--long long", true, false },
+        { "--long\tlong", true, false },
+        { "---", true, false },
+        { "--long=long=long", true, false },
+        { "--long=long=long long", true, false },
+        { "-s", false, true },
+        { "--", false, true },
+        // Both invalid test cases.
+        { " ", false, false },
+        { " -s", false, false },
+        { "-s ", false, false },
+        { "- -", false, false },
+        { "abcd", false, false },
+        { "-abcd", false, false },
+    };
+
+    for (size_t longFlagStrCase = 0; longFlagStrCase < TAP_ARRAY_SIZE(flagStrCases); ++longFlagStrCase)
+    for (size_t shortFlagStrCase = 0; shortFlagStrCase < TAP_ARRAY_SIZE(flagStrCases); ++shortFlagStrCase) {
+        const std::string longFlagName = flagStrCases[longFlagStrCase].flagStr;
+        const std::string shortFlagName = flagStrCases[shortFlagStrCase].flagStr;
+
+        const bool longFlagValid = flagStrCases[longFlagStrCase].validLong;
+        const bool shortFlagValid = flagStrCases[shortFlagStrCase].validShort;
+
+        const bool expectValid = (!longFlagName.empty() || !shortFlagName.empty()) ? (longFlagValid || shortFlagValid) : false;
+
+        const std::string caseName = longFlagName + "," + shortFlagName + ":" + std::to_string((int)expectValid);
+
+        if (TAP_CHECK(ctx, Flag(longFlagName, shortFlagName, caseName).isValid() != expectValid))
+            return TAP_FAIL(ctx, caseName + "!!!");
+    }
+
+    return TAP_PASS(ctx, "The Flag::isValid() function test.");
 }
 
 } // namespace anonymous
@@ -144,6 +188,7 @@ TestContext::Return testConstructors(TestContext* ctx)
 void unitFlagStructTests(TestContext* ctx)
 {
     ctx->add(testConstructors);
+    ctx->add(testIsValidFunc);
 }
 
 } // namespace testargparse

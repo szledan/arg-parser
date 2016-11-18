@@ -631,6 +631,20 @@ Flag::Flag(const std::string& lFlag, const std::string& sFlag, const std::string
     value = definedValue;
 }
 
+const bool Flag::isValid() const
+{
+    if (_longFlag.empty() && _shortFlag.empty())
+        return false;
+
+    const bool longFlagValid = (!_longFlag.size()) || ((_longFlag.size() > 2) && (_longFlag[0] == '-') && (_longFlag[1] == '-'));
+    const bool shortFlagValid = (!_shortFlag.size()) || ((_shortFlag.size() == 2) && (_shortFlag[0] == '-'));
+
+    if (longFlagValid || shortFlagValid)
+        return true;
+
+    return false;
+}
+
 // Arg
 
 const Arg Arg::WrongArg = Arg();

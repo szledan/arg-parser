@@ -174,6 +174,21 @@ struct Flag {
          const std::string& description,
          const Value value);
 
+    /*!
+     * \brief Validate the flag.
+     *
+     * Rules:
+     *  * Invalid a Flag if both _longFlag and _shortFlag strings are empty.
+     *  * Valid a Flag if _longFlag size bigger than 2 and first two
+     *    characters equal to the '-' char.
+     *  * Valid a Flag if _shortFlag size equals to the 2 and first character
+     *    is the '-'.
+     *  * Otherwise the Flag is invalide.
+     *
+     * \return  result of validation
+     */
+    const bool isValid() const;
+
     bool isSet;
     bool isDefined;
     bool hasValue;
