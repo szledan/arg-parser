@@ -48,11 +48,44 @@ public:
     typedef std::initializer_list<std::string> OptionList;
     struct Errors;
 
+    /*!
+     * \brief  Main constructor
+     * \param interlacedOptions  options split by commas witout spaces
+     *
+     * * Examples
+     * \code{.cpp}
+     * ArgParse::ArgParse ap("program.name=my program name,tab=  ,help.show=2,help.add=false");
+     * ap.options.program.name  == "my program name"; // Use this program name in generated help.
+     * ap.options.tab           == "  "; // The 'tab' is two spaces.
+     * ap.options.help.show     == 2; // The '2' means to ShowAll.
+     * ap.options.help.add      == false; // Doesn't add to help flag with default.
+     * \endcode
+     *
+     * \see ArgParse::Options
+     */
     ArgParse(const std::string& interlacedOptions = "");
-    ArgParse(const OptionList&);
+    /*!
+     * \brief  Constructor with initializer list
+     * \param options a list of option strings
+     *
+     * * Examples
+     * \code{.cpp}
+     * ArgParse::ArgParse ap( { "program.name=my program name",
+     *                          "tab=\t",
+     *                          "help.show=2",
+     *                          "help.add=0" } );
+     * ap.options.program.name  == "my program name"; // Use this program name in generated help.
+     * ap.options.tab           == "\t"; // The 'tab' is a char of TAB.
+     * ap.options.help.show     == 2; // The '2' means to ShowAll.
+     * ap.options.help.add      == false; // Doesn't add to help flag with default.
+     * \endcode
+     *
+     * \see ArgParse::Options
+     */
+    ArgParse(const OptionList& options);
 
     /*!
-     * \brief Add definitaion of a 'flag' (aka 'option').
+     * \brief  Add definitaion of a 'flag' (aka 'option')
      * \return  reference of added Flag or Flag::WrongFlag.
      */
     const Flag& def(const Flag&, const CallBackFunc = nullptr);

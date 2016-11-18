@@ -200,7 +200,7 @@ const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 
 const Flag& ArgParse::def(const Flag& flag, const CallBackFunc cbf)
 {
-    if (!flag.isDefined)
+    if (!flag.isDefined || !flag.isValid())
         return Flag::WrongFlag;
     return addFlag(flag, cbf);
 }

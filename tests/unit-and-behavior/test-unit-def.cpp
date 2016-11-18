@@ -31,61 +31,61 @@ namespace {
 
 using namespace argparse;
 
-//TestContext::Return testDefFlag(TestContext* ctx)
-//{
-//    const std::string longFlag = "--long";
-//    const std::string shortFlag = "-s";
-//    TAP_FLAGS_NAME_TEST_CASES(flagNamesCases, longFlag, shortFlag);
-//    struct {
-//        const std::string flag;
-//    } recieves[] = {
-//        { longFlag },
-//        { shortFlag },
-//    };
+TestContext::Return testDefFlag(TestContext* ctx)
+{
+    const std::string longFlag = "--long";
+    const std::string shortFlag = "-s";
+    TAP_FLAGS_NAME_TEST_CASES(flagNamesCases, longFlag, shortFlag);
+    struct {
+        const std::string flag;
+    } recieves[] = {
+        { longFlag },
+        { shortFlag },
+    };
 
-//    for (size_t recieve = 0; recieve < TAP_ARRAY_SIZE(recieves); ++recieve)
-//    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(flagNamesCases); ++nameCase)
-//    {
-//        const std::string& recieveFlag = recieves[recieve].flag;
-//        const Flag defFlag(flagNamesCases[nameCase].defFlagLong, flagNamesCases[nameCase].defFlagShort, "<descript>");
-//        const std::string caseName = recieveFlag + "|"
-//                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + "," + defFlag._description + ")"
-//                + " testcase. ";
+    for (size_t recieve = 0; recieve < TAP_ARRAY_SIZE(recieves); ++recieve)
+    for (size_t nameCase = 0; nameCase < TAP_ARRAY_SIZE(flagNamesCases); ++nameCase)
+    {
+        const std::string& recieveFlag = recieves[recieve].flag;
+        const Flag defFlag(flagNamesCases[nameCase].defFlagLong, flagNamesCases[nameCase].defFlagShort, "descript");
+        const std::string caseName = recieveFlag + "|"
+                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + "," + defFlag._description + ")"
+                + " testcase. ";
 
-//        ArgParse args;
-//        /*const Flag& addedFlag = */args.def(defFlag);
+        ArgParse args;
+        /*const Flag& addedFlag = */args.def(defFlag);
 
-//        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveFlag.c_str()) };
-//        const int argc = TAP_ARRAY_SIZE(argv);
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recieveFlag.c_str()) };
+        const int argc = TAP_ARRAY_SIZE(argv);
 
-//        const bool parseRet = args.parse(argc, argv);
+        const bool parseRet = args.parse(argc, argv);
 
-//        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+        TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-//        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
 
-//        if (&args[defFlag._longFlag] == &Flag::WrongFlag)
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
+        if (&args[defFlag._longFlag] == &Flag::WrongFlag)
+            return TAP_FAIL(ctx, caseName + "Args is empty.");
 
-//        if (&args[defFlag._shortFlag] == &Flag::WrongFlag)
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
+        if (&args[defFlag._shortFlag] == &Flag::WrongFlag)
+            return TAP_FAIL(ctx, caseName + "Args is empty.");
 
-//        if (!(args.counts.flags.defined + args.counts.flags.undefined))
-//            return TAP_FAIL(ctx, caseName + "Args is empty.");
-//    }
+        if (!(args.counts.flags.defined + args.counts.flags.undefined))
+            return TAP_FAIL(ctx, caseName + "Args is empty.");
+    }
 
-//    return TAP_PASS(ctx, "Define arguments.");
-//}
+    return TAP_PASS(ctx, "Define arguments.");
+}
 
-//TestContext::Return testDefFlagWithValue(TestContext* ctx)
-//{
-//    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
-//}
+TestContext::Return testDefFlagWithValue(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
 
-//TestContext::Return testDefFlagWithCallBackFunction(TestContext* ctx)
-//{
-//    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
-//}
+TestContext::Return testDefFlagWithCallBackFunction(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test case!!!");
+}
 
 //TestContext::Return testDefArg(TestContext* ctx)
 //{
@@ -198,9 +198,9 @@ using namespace argparse;
 
 void unitDefTests(TestContext* ctx)
 {
-//    ctx->add(testDefFlag);
-//    ctx->add(testDefFlagWithValue);
-//    ctx->add(testDefFlagWithCallBackFunction);
+    ctx->add(testDefFlag);
+    ctx->add(testDefFlagWithValue);
+    ctx->add(testDefFlagWithCallBackFunction);
 //    ctx->add(testDefArg);
 //    ctx->add(testDefArgWithValue);
 }
