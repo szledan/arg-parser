@@ -22,6 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if 0
 /*
  * TODO LIST:
  *  [1] More more tests :)
@@ -36,6 +37,7 @@
  *  [6] Extend ArgParse with: argc(), argv() native getter functions to _argc, _argv.
  *  [7] Extend './demos' with some typical example.
  */
+#endif
 
 #include "arg-parse.h"
 

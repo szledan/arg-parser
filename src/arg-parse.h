@@ -49,7 +49,7 @@ public:
     struct Errors;
 
     /*!
-     * \brief  Main constructor
+     * \brief  Main constructor.
      * \param interlacedOptions  options split by commas witout spaces
      *
      * * Examples
@@ -64,9 +64,10 @@ public:
      * \see ArgParse::Options
      */
     ArgParse(const std::string& interlacedOptions = "");
+
     /*!
-     * \brief  Constructor with initializer list
-     * \param options a list of option strings
+     * \brief  Constructor with initializer list.
+     * \param options  a list of option strings
      *
      * * Examples
      * \code{.cpp}
@@ -85,15 +86,24 @@ public:
     ArgParse(const OptionList& options);
 
     /*!
-     * \brief  Add definitaion of a 'flag' (aka 'option')
-     * \return  !!!
+     * \brief  Add definitaion of a Flag (aka 'option').
+     * \param flag  defined valid Flag
+     * \param func  a call back function, which call the ArgParse::parse() if recieve in 'argv'
+     * \return  reference of the added Flag, otherwise returns the reference of the Flag::WrongFlag.
+     *
+     * \see Flag::isValid()
+     * \see Flag (Falg::WrongFlag)
      */
-    const Flag& def(const Flag&, const CallBackFunc = nullptr);
+    const Flag& def(const Flag& flag, const CallBackFunc func= nullptr);
+
     /*!
-     * \brief  !!!
-     * \return  !!!
+     * \brief  Add definitaion of an Arg (aka 'argument').
+     * \param arg  defined valid Arg
+     * \return  reference of defined Arg, otherwise returns the reference of Arg::WrongArg.
+     *
+     * \see Arg (Arg::WrongArg)
      */
-    const Arg& def(const Arg&);
+    const Arg& def(const Arg& arg);
 
     const bool parse(const int argc, char* const argv[]);
 
@@ -215,14 +225,14 @@ struct Flag {
      * \brief Validate the flag.
      *
      * Rules:
-     *  * Invalid a Flag if both _longFlag and _shortFlag strings are empty.
-     *  * Valid a Flag if _longFlag size bigger than 2 and first two
-     *    characters equal to the '-' char.
-     *  * Valid a Flag if _shortFlag size equals to the 2 and first character
-     *    is the '-'.
+     *  * Invalid a Flag if both \c _longFlag and \c _shortFlag strings are empty.
+     *  * Valid a Flag if \c _longFlag size bigger than \c 2 and first two
+     *    characters equal to the \c '-' char.
+     *  * Valid a Flag if \c _shortFlag size equals to the \c 2 and first character
+     *    is the \c '-'.
      *  * Otherwise the Flag is invalide.
      *
-     * \return  result of validation
+     * \return  result of validation.
      */
     const bool isValid() const;
 
