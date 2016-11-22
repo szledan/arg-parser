@@ -285,7 +285,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                 addError(Errors::RequiredFlagValueMissing, "Missing required value.", flag); \
             } else if ((flag->value.isRequired) \
                        && (mapParamType(param.valueStr) != ParamType::ArgType) \
-                       && (checkFlag(param.valueStr))) { \
+                       && (check(param.valueStr))) { \
                 addError(Errors::RequiredFlagValueMissing, "Missing required value, next is a defined flag.", flag); \
             } else if (!findValue(param.valueStr, flag->value._chooseList)) { \
                     addError(Errors::RequiredFlagValueMissing, "Did not find choose in list.", flag); \
@@ -302,9 +302,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             const std::string shortFlags = param.paramStr;
             for (size_t i = 1; i < shortFlags.size(); ++i) {
                 param.paramStr = std::string("-") + shortFlags[i];
-                const bool check = i == (param.paramStr.size() - 1);
+                const bool checkValue = i == (param.paramStr.size() - 1);
                 AP_CHECK_FLAG_EXIST(_shortFlags, !AP_IS_LONG);
-                AP_SETUP_FLAG(_shortFlags, check);
+                AP_SETUP_FLAG(_shortFlags, checkValue);
             }
             break;
         }
@@ -486,7 +486,7 @@ const std::vector<ArgParse::Errors>&ArgParse::errors() const
     return _errors;
 }
 
-const bool ArgParse::checkFlag(const std::string& flagStr)
+const bool ArgParse::check(const std::string& flagStr)
 {
     return (_longFlags.find(flagStr) != _longFlags.end()) || (_shortFlags.find(flagStr) != _shortFlags.end());
 }
@@ -494,7 +494,7 @@ const bool ArgParse::checkFlag(const std::string& flagStr)
 template<typename T>
 const bool ArgParse::checkFlagAndReadValue(const std::string& flagStr, T* value)
 {
-    if (!checkFlag(flagStr))
+    if (!check(flagStr))
         return false;
 
     // FIXME: long and short flags also

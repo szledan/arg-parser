@@ -35,7 +35,7 @@ namespace testargparse {
 
 void unitArgStructTests(TestContext*);
 void unitCheckFlagAndReadValueTests(TestContext*);
-void unitCheckFlagTests(TestContext*);
+void unitCheckTests(TestContext*);
 void unitConstructorsTests(TestContext*);
 void unitCountsTests(TestContext*);
 void unitDefTests(TestContext*);
@@ -45,6 +45,33 @@ void unitOperatorTests(TestContext*);
 void unitOptionsTests(TestContext*);
 void unitParserTests(TestContext*);
 void unitValueStructTests(TestContext*);
+
+#ifdef TAP_CASE_NAME
+#undef TAP_CASE_NAME
+#endif // TAP_CASE_NAME
+#define TAP_CASE_NAME(CASE_INDEX, SPEC_STR) std::to_string(CASE_INDEX) + ". testcase " + std::string(SPEC_STR) + ". "
+
+#ifdef TAP_VALUE_TO_STR
+#undef TAP_VALUE_TO_STR
+#endif // TAP_VALUE_TO_STR
+#define TAP_VALUE_TO_STR(VALUE) std::string("Value(") \
+    + (VALUE._chooseList.size() > 0 \
+        ? std::string("|{") + VALUE.str + ",...}|=" + std::to_string(VALUE._chooseList.size()) \
+        : VALUE.str) \
+    + "," + std::to_string((int)VALUE.isRequired) \
+    + "," + VALUE._name \
+    + "," + VALUE._description \
+    + ")"
+
+#ifdef TAP_FLAG_TO_STR
+#undef TAP_FLAG_TO_STR
+#endif // TAP_FLAG_TO_STR
+#define TAP_FLAG_TO_STR(FLAG) std::string("Flag(") \
+    + FLAG._longFlag \
+    + "," + FLAG._shortFlag \
+    + "," + FLAG._description \
+    + "," + TAP_VALUE_TO_STR(FLAG.value) \
+    + ")"
 
 #ifdef TAP_VALUE_STR_TEST_CASES
 #undef TAP_VALUE_STR_TEST_CASES

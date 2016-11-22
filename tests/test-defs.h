@@ -64,12 +64,12 @@
 #undef TAP_CHECK_NON_REQUIRED_ERRORS
 #endif // TAP_CHECK_NON_REQUIRED_ERRORS
 #define TAP_CHECK_NON_REQUIRED_ERRORS(CTX, ARGS, NUMS) do { \
-        if (TAP_CHECK(CTX, (args.errors().size() != NUMS))) { \
+        if (TAP_CHECK(CTX, (ARGS.errors().size() != NUMS))) { \
             std::string msg("Generated non required error(s)! Number Of required errors: "); \
             msg += std::to_string(NUMS) + ", but have: "; \
-            msg += std::to_string(args.errors().size()) + ". "; \
+            msg += std::to_string(ARGS.errors().size()) + ". "; \
             msg += "Error message(s): "; \
-            for (auto const& err : args.errors()) \
+            for (auto const& err : ARGS.errors()) \
                 msg += err.message + " "; \
             return TAP_FAIL(ctx, msg);  \
         } \

@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test-unit.h"
 
 #include "arg-parse.h"
 
@@ -42,7 +42,7 @@ TestContext::Return testSomeTypicalFlags(TestContext* ctx)
     const std::string value = "--v=.V--";
 
     struct {
-        const std::string givenFlag;
+        const std::string recievedFlag;
         const std::string definedFlag;
         const std::string definedValue;
         const bool hasValue;
@@ -57,37 +57,37 @@ TestContext::Return testSomeTypicalFlags(TestContext* ctx)
 
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
-        const std::string givenFlag = testCases[testCase].givenFlag;
+        const std::string recievedFlag = testCases[testCase].recievedFlag;
         const std::string definedFlag = testCases[testCase].definedFlag;
         const std::string definedValue = testCases[testCase].definedValue;
-        const std::string caseName = givenFlag + "|" + definedFlag + " testcase. ";
+        const std::string caseName = recievedFlag + "|" + definedFlag + " testcase. ";
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recievedFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
-        ArgParse args;
+        ArgParse ap;
 
-        args.def(Flag("", g_shortFlag, g_description, Value("", "value")));
-        args.def(Flag(g_longFlag, "", g_description, Value("", "value")));
-        args.def(Flag("--value", "-v", "Flag with value.", Value("default", "value")));
+        ap.def(Flag("", g_shortFlag, g_description, Value("", "value")));
+        ap.def(Flag(g_longFlag, "", g_description, Value("", "value")));
+        ap.def(Flag("--value", "-v", "Flag with value.", Value("default", "value")));
 
-        const bool parseRet = args.parse(argc, argv);
+        const bool parseRet = ap.parse(argc, argv);
 
         TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, ap, 0);
 
-        if (!args[definedFlag].isSet)
+        if (!ap[definedFlag].isSet)
             return TAP_FAIL(ctx, caseName + "The flag is not set!");
 
         if (testCases[testCase].hasValue) {
-            if (!args[definedFlag].hasValue)
+            if (!ap[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (!args[definedFlag].value.isRequired)
+            if (!ap[definedFlag].value.isRequired)
                 return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
-            if (args[definedFlag].value.str != value)
+            if (ap[definedFlag].value.str != value)
                 return TAP_FAIL(ctx, caseName + "Different values!");
         }
     }
@@ -100,7 +100,7 @@ TestContext::Return testUndefinedFlags(TestContext* ctx)
     const std::string value = "--v=.V--";
 
     struct {
-        const std::string givenFlag;
+        const std::string recievedFlag;
         const std::string definedFlag;
         const std::string definedValue;
         const bool hasValue;
@@ -113,33 +113,33 @@ TestContext::Return testUndefinedFlags(TestContext* ctx)
 
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
-        const std::string givenFlag = testCases[testCase].givenFlag;
+        const std::string recievedFlag = testCases[testCase].recievedFlag;
         const std::string definedFlag = testCases[testCase].definedFlag;
         const std::string definedValue = testCases[testCase].definedValue;
-        const std::string caseName = givenFlag + "|" + definedFlag + " testcase. ";
+        const std::string caseName = recievedFlag + "|" + definedFlag + " testcase. ";
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recievedFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
-        ArgParse args;
+        ArgParse ap;
 
-        const bool parseRet = args.parse(argc, argv);
+        const bool parseRet = ap.parse(argc, argv);
 
         TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, ap, 0);
 
-        if (!args[definedFlag].isSet)
+        if (!ap[definedFlag].isSet)
             return TAP_FAIL(ctx, caseName + "The flag is not set!");
 
         if (testCases[testCase].hasValue) {
-            if (!args[definedFlag].hasValue)
+            if (!ap[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (args[definedFlag].value.isRequired)
+            if (ap[definedFlag].value.isRequired)
                 return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
-            if (args[definedFlag].value.str != value)
+            if (ap[definedFlag].value.str != value)
                 return TAP_FAIL(ctx, caseName + "Different values!");
         }
     }
@@ -150,7 +150,7 @@ TestContext::Return testUndefinedFlags(TestContext* ctx)
 TestContext::Return testNonTypicalFlags(TestContext* ctx)
 {
     struct {
-        const std::string givenFlag;
+        const std::string recievedFlag;
         const std::string definedFlag;
         const std::string definedValue;
         const bool hasValue;
@@ -170,45 +170,106 @@ TestContext::Return testNonTypicalFlags(TestContext* ctx)
 
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase)
     {
-        const std::string givenFlag = testCases[testCase].givenFlag;
+        const std::string recievedFlag = testCases[testCase].recievedFlag;
         const std::string definedFlag = testCases[testCase].definedFlag;
         const std::string definedValue = testCases[testCase].definedValue;
-        const std::string caseName = givenFlag + "|" + definedFlag + " testcase. ";
+        const std::string caseName = recievedFlag + "|" + definedFlag + " testcase. ";
 
-        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(givenFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recievedFlag.c_str()), TAP_CHARS(definedValue.c_str()) };
         const int argc = TAP_ARRAY_SIZE(argv);
 
-        ArgParse args;
+        ArgParse ap;
 
-        args.def(Flag("--b=", "", g_description));
-        args.def(Flag("--b=v", "", g_description));
-        args.def(Flag("--c=", "", g_description, Value("v")));
-        args.def(Flag("--c=v", "", g_description, Value("v")));
-        args.def(Flag("--d", "", g_description, Value("v")));
-        args.def(Flag("--e", "", g_description));
+        ap.def(Flag("--b=", "", g_description));
+        ap.def(Flag("--b=v", "", g_description));
+        ap.def(Flag("--c=", "", g_description, Value("v")));
+        ap.def(Flag("--c=v", "", g_description, Value("v")));
+        ap.def(Flag("--d", "", g_description, Value("v")));
+        ap.def(Flag("--e", "", g_description));
 
-        const bool parseRet = args.parse(argc, argv);
+        const bool parseRet = ap.parse(argc, argv);
 
         TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
 
-        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+        TAP_CHECK_NON_REQUIRED_ERRORS(ctx, ap, 0);
 
-        if (!args[definedFlag].isSet)
+        if (!ap[definedFlag].isSet)
             return TAP_FAIL(ctx, caseName + "The flag is not set!");
 
         if (testCases[testCase].hasValue) {
-            if (!args[definedFlag].hasValue)
+            if (!ap[definedFlag].hasValue)
                 return TAP_FAIL(ctx, caseName + "Wrong set of 'hasValue'!");
 
-            if (args[definedFlag].value.isRequired)
+            if (ap[definedFlag].value.isRequired)
                 return TAP_FAIL(ctx, caseName + "Wrong 'isRequired'!");
 
-            if (args[definedFlag].value.str != definedValue)
+            if (ap[definedFlag].value.str != definedValue)
                 return TAP_FAIL(ctx, caseName + "Different values!");
         }
     }
 
     return TAP_PASS(ctx, "Parse non typical flags.");
+}
+
+TestContext::Return testParserFunc(TestContext* ctx)
+{
+    TAP_VALUE_STR_TEST_CASES(defaultValueCases);
+    TAP_REQUIRED_TEST_CASES(requiredCases);
+    TAP_FLAGS_NAME_TEST_CASES(flagStrCases, "--long", "-s");
+
+    for (size_t defaultValueCase = 0; defaultValueCase < TAP_ARRAY_SIZE(defaultValueCases); ++defaultValueCase)
+    for (size_t requiredCase = 0; requiredCase < TAP_ARRAY_SIZE(requiredCases); ++requiredCase)
+    for (size_t flagStrCase = 0; flagStrCase < TAP_ARRAY_SIZE(flagStrCases); ++flagStrCase) {
+        const std::string defaultValueStr = defaultValueCases[defaultValueCase].str;
+        const bool required = requiredCases[requiredCase].required;
+
+        TAP_VALUE_TEST_CASES(valueCases, defaultValueStr, required, "value", "Test value.");
+
+        for (size_t valueCase = 0; valueCase < TAP_ARRAY_SIZE(valueCases); ++valueCase) {
+            const std::string longFlagStr = flagStrCases[flagStrCase].defFlagLong;
+            const std::string shortFlagStr = flagStrCases[flagStrCase].defFlagShort;
+            const Value value = valueCases[valueCase].value;
+
+            struct {
+                 const Flag flag;
+            } testCases[] = {
+                { Flag(longFlagStr, shortFlagStr, "") },
+                { Flag(longFlagStr, shortFlagStr, "", value) },
+            };
+
+            for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
+                const Flag testFlag = testCases[testCase].flag;
+                const std::string caseName = TAP_CASE_NAME(testCase, TAP_FLAG_TO_STR(testFlag));
+
+                const std::string recievedFlag = testFlag._longFlag.size() ? testFlag._longFlag : testFlag._shortFlag;
+                const std::string recievedValue = testFlag.value.str;
+                char* argv[] = { TAP_CHARS("program"), TAP_CHARS(recievedFlag.c_str()), TAP_CHARS(recievedValue.c_str()) };
+                const int argc = TAP_ARRAY_SIZE(argv);
+
+                ArgParse ap;
+
+                const Flag& resultFlag = ap.def(Flag(testFlag));
+
+                const bool parseRet = ap.parse(argc, argv);
+
+                if (testFlag.isValid()) {
+                    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+                    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, ap, 0);
+
+                    if (TAP_CHECK(ctx, &resultFlag == &Flag::WrongFlag))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+
+                    if (TAP_CHECK(ctx, !ap[recievedFlag].isSet))
+                        return TAP_FAIL(ctx, caseName + "The flag is not set!");
+                }  else {
+                    if (TAP_CHECK(ctx, &resultFlag != &Flag::WrongFlag))
+                        return TAP_FAIL(ctx, caseName + "!!!");
+                }
+            }
+        }
+    }
+
+    return TAP_PASS(ctx, "The ArgParse::parse(ARGC, ARGV) test.");
 }
 
 } // namespace anonymous
@@ -218,6 +279,7 @@ void unitParserTests(TestContext* ctx)
     ctx->add(testSomeTypicalFlags);
     ctx->add(testUndefinedFlags);
     ctx->add(testNonTypicalFlags);
+    ctx->add(testParserFunc);
 }
 
 } // namespace testargparse

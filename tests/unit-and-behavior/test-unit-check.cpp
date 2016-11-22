@@ -43,7 +43,7 @@ TestContext::Return testNotSetFlag(TestContext* ctx)
 
 } // namespace anonymous
 
-void unitCheckFlagTests(TestContext* ctx)
+void unitCheckTests(TestContext* ctx)
 {
     ctx->add(testNoFlag);
     ctx->add(testNotSetFlag);

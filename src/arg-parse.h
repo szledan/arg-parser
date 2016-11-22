@@ -94,7 +94,7 @@ public:
      * \see Flag::isValid()
      * \see Flag (Falg::WrongFlag)
      */
-    const Flag& def(const Flag& flag, const CallBackFunc func= nullptr);
+    const Flag& def(const Flag& flag, const CallBackFunc func = nullptr);
 
     /*!
      * \brief  Add definitaion of an Arg (aka 'argument').
@@ -105,13 +105,26 @@ public:
      */
     const Arg& def(const Arg& arg);
 
+    /*!
+     * \brief  Parse recieved arguments.
+     * \param argc  size of \c argv[]
+     * \param argv  array of arguments
+     * \return  true if has not errors.
+     *
+     * \see ArgParse::Errors
+     */
     const bool parse(const int argc, char* const argv[]);
 
     const std::string help();
     const std::string error();
     const std::vector<Errors>& errors() const;
 
-    const bool checkFlag(const std::string& flagStr);
+    /*!
+     * \brief  Check the setting of Flag.
+     * \param flagStr  long or short flag
+     * \return  \c true if Flag::isSet is \c true, otherwise returns \c false.
+     */
+    const bool check(const std::string& flagStr);
     template<typename T>
     const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
 

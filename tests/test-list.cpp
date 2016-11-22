@@ -53,7 +53,7 @@ void unitAndBehaviorTests(TestContext* ctx)
 {
     testargparse::unitArgStructTests(ctx);
     testargparse::unitCheckFlagAndReadValueTests(ctx);
-    testargparse::unitCheckFlagTests(ctx);
+    testargparse::unitCheckTests(ctx);
     testargparse::unitConstructorsTests(ctx);
     testargparse::unitCountsTests(ctx);
     testargparse::unitDefTests(ctx);
