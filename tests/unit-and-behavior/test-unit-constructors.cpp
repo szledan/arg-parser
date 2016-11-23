@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test-unit.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 
 namespace testargparse {
 namespace {
@@ -54,10 +54,10 @@ TestContext::Return testInterlacedString(TestContext* ctx)
     for (size_t programNameCase = 0; programNameCase < TAP_ARRAY_SIZE(programNameCases); ++programNameCase) {
         const std::string interlacedOptionString =
                 std::string("program.name=") + programNameCases[programNameCase].str
-                + ","+ std::string("tab=") + tabCases[tabCase].str
-                + ","+ std::string("mode.strict=") + std::to_string((int)modeStrictCases[modeStrictCase].value)
-                + ","+ std::string("help.add=") + std::to_string((int)helpAddCases[helpAddCase].value)
-                + ","+ std::string("help.compact=") + std::to_string((int)helpCompactCases[helpCompactCase].value)
+                + "," + std::string("tab=") + tabCases[tabCase].str
+                + "," + std::string("mode.strict=") + std::to_string((int)modeStrictCases[modeStrictCase].value)
+                + "," + std::string("help.add=") + std::to_string((int)helpAddCases[helpAddCase].value)
+                + "," + std::string("help.compact=") + std::to_string((int)helpCompactCases[helpCompactCase].value)
                 + "," + std::string("help.show=") + std::to_string(helpShowCases[helpShowCase].helpShow);
         ArgParse args(interlacedOptionString);
 

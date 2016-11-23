@@ -1,5 +1,5 @@
-#ifndef ARG_PARSE_H
-#define ARG_PARSE_H
+#ifndef ARG_PARSE_HPP
+#define ARG_PARSE_HPP
 
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
@@ -64,7 +64,6 @@ public:
      * \see ArgParse::Options
      */
     ArgParse(const std::string& interlacedOptions = "");
-
     /*!
      * \brief  Constructor with initializer list.
      * \param options  a list of option strings
@@ -95,7 +94,6 @@ public:
      * \see Flag (Falg::WrongFlag)
      */
     const Flag& def(const Flag& flag, const CallBackFunc func = nullptr);
-
     /*!
      * \brief  Add definitaion of an Arg (aka 'argument').
      * \param arg  defined valid Arg
@@ -120,19 +118,51 @@ public:
     const std::vector<Errors>& errors() const;
 
     /*!
-     * \brief  Check the setting of Flag.
-     * \param flagStr  long or short flag
+     * \brief  Check settings of a Flag.
+     * \param flagStr  long or short flag string
      * \return  \c true if Flag::isSet is \c true, otherwise returns \c false.
      */
     const bool check(const std::string& flagStr);
+    /*!
+     * \brief  Check setting of a Flag and read Value.
+     * \param flagStr  long or short flag string
+     * \param value  pointer of result value
+     * \return  \c true if Flag::isSet is \c true and reading is succesful, otherwise returns \c false.
+     */
     template<typename T>
-    const bool checkFlagAndReadValue(const std::string& flagStr, T* value);
+    const bool checkAndRead(const std::string& flagStr, T* value);
 
+    /*!
+     * \brief  Operator to get a Flag.
+     * \param idx  long or short flag string
+     * \return  const reference of a Flag or Flag::WrongFlag.
+     */
     Flag const& operator[](const std::string& idx);
+    /*!
+     * \brief  Operator to get a Flag.
+     * \param idx  long or short flag string
+     * \return  const reference of Flag or Flag::WrongFlag.
+     */
     Flag const& operator[](const char* idx);
+
+    /*!
+     * \brief  Operator to get an Arg.
+     * \param idx  unsigned int index of argument
+     * \return  const reference of Arg or Arg::WrongArg
+     */
     Arg const& operator[](const std::size_t& idx);
+    /*!
+     * \brief  Operator to get an Arg.
+     * \param idx  unsigned int index of argument
+     * \return  const reference of Arg or Arg::WrongArg
+     */
     Arg const& operator[](const int idx);
 
+    /*!
+     * \brief  The Counts struct.
+     *
+     * Collection of numbers of defined/undefined flags/args during of parsing \c argv[].
+     */
     struct Counts {
         struct {
             size_t defined;
@@ -140,6 +170,9 @@ public:
         } flags, args;
     } counts = { { 0u, 0u, }, { 0u, 0u } };
 
+    /*!
+     * \brief  The Options struct.
+     */
     struct Options {
         struct { std::string name; } program = { "" };
         std::string tab = "    ";
@@ -152,6 +185,11 @@ public:
         } help = { true, true, Help::ShowAllDefined };
     } options;
 
+    /*!
+     * \brief  The Errors struct.
+     *
+     * Collection of errors during of parsing \c argv[].
+     */
     struct Errors {
         enum Codes {
             NoError = 0,
@@ -195,7 +233,7 @@ inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err);
 
 typedef std::initializer_list<std::string> ChooseList;
 
-struct Value {    
+struct Value {
     static const bool Required; // = true
 
     Value(const Value& v);
@@ -280,4 +318,4 @@ struct Arg : Value {
 
 } // namespace argparse
 
-#endif // ARG_PARSE_H
+#endif // ARG_PARSE_HPP

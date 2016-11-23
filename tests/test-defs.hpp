@@ -1,5 +1,5 @@
-#ifndef TEST_DEFS_H
-#define TEST_DEFS_H
+#ifndef TEST_DEFS_HPP
+#define TEST_DEFS_HPP
 
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
@@ -84,4 +84,4 @@
         } \
     } while (false)
 
-#endif // TEST_DEFS_H
+#endif // TEST_DEFS_HPP

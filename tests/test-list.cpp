@@ -22,19 +22,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test.hpp"
 
-#include "api/test-api.h"
-#include "manual/test-manual.h"
-#include "unit-and-behavior/test-unit.h"
+#include "api/test-api.hpp"
+#include "manual/test-manual.hpp"
+#include "unit-and-behavior/test-unit.hpp"
 
 namespace testargparse {
 
 void apiTests(TestContext* ctx)
 {
     testargparse::apiArgStructTests(ctx);
-    testargparse::apiCheckFlagAndReadValueTests(ctx);
-    testargparse::apiCheckFlagTests(ctx);
+    testargparse::apiCheckAndReadTests(ctx);
+    testargparse::apiCheckTests(ctx);
     testargparse::apiConstructorsTests(ctx);
     testargparse::apiDefTests(ctx);
     testargparse::apiFlagStructTests(ctx);
@@ -52,7 +52,7 @@ void manualTests(TestContext* ctx)
 void unitAndBehaviorTests(TestContext* ctx)
 {
     testargparse::unitArgStructTests(ctx);
-    testargparse::unitCheckFlagAndReadValueTests(ctx);
+    testargparse::unitCheckAndReadTests(ctx);
     testargparse::unitCheckTests(ctx);
     testargparse::unitConstructorsTests(ctx);
     testargparse::unitCountsTests(ctx);

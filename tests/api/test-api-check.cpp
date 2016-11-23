@@ -1,6 +1,3 @@
-#ifndef TEST_API_H
-#define TEST_API_H
-
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -25,20 +22,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test-api.hpp"
+
+#include "arg-parse.hpp"
 
 namespace testargparse {
+namespace {
 
-void apiArgStructTests(TestContext*);
-void apiCheckFlagAndReadValueTests(TestContext*);
-void apiCheckFlagTests(TestContext*);
-void apiConstructorsTests(TestContext*);
-void apiDefTests(TestContext*);
-void apiFlagStructTests(TestContext*);
-void apiOperatorTests(TestContext*);
-void apiParserTests(TestContext*);
-void apiValueStructTests(TestContext*);
+using namespace argparse;
+
+TestContext::Return test(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
+}
+
+} // namespace anonymous
+
+void apiCheckTests(TestContext* ctx)
+{
+    ctx->add(test);
+}
 
 } // namespace testargparse
-
-#endif // TEST_API_H

@@ -22,25 +22,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-api.h"
+#include "test-unit.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 
 namespace testargparse {
 namespace {
 
 using namespace argparse;
 
-TestContext::Return test(TestContext* ctx)
+TestContext::Return testNoFlag(TestContext* ctx)
 {
-    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
+    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
+}
+
+TestContext::Return testNotSetFlag(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
+}
+
+TestContext::Return testSetFlagNoValue(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
+}
+
+TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
 }
 
 } // namespace anonymous
 
-void apiCheckFlagAndReadValueTests(TestContext* ctx)
+void unitCheckAndReadTests(TestContext* ctx)
 {
-    ctx->add(test);
+    ctx->add(testNoFlag);
+    ctx->add(testNotSetFlag);
+    ctx->add(testSetFlagNoValue);
+    ctx->add(testSetFlagWithValueDifferentTypes);
 }
 
 } // namespace testargparse

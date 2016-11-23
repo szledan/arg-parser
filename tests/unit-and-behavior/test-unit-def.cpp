@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test-unit.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 #include <assert.h>
 
 namespace testargparse {
@@ -82,9 +82,7 @@ TestContext::Return testDefFlag(TestContext* ctx)
     for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
         const CallBackFunc callBackFunc = callBackFuncCases[callBackFuncCase].func;
         const Flag defFlag = testCases[testCase].flag;
-        const std::string caseName = std::to_string(testCase) + "|"
-                + "Flag(" + defFlag._longFlag + "," + defFlag._shortFlag + ")"
-                + " testcase. ";
+        const std::string caseName = TAP_CASE_NAME(testCase, TAP_FLAG_TO_STR(defFlag));
 
         ArgParse ap;
         const Flag& addedFlag = ap.def(defFlag, callBackFunc);
@@ -150,7 +148,7 @@ TestContext::Return testDefArg(TestContext* ctx)
 
             for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
                 const Arg& arg  = testCases[testCase].arg;
-                const std::string caseName = std::to_string(testCase) + ".(test-name:" + arg._name + ",value-case:" + std::to_string(valueCase) + ") testcase. ";
+                const std::string caseName = TAP_CASE_NAME(testCase, TAP_ARG_TO_STR(arg));
 
                 ArgParse ap;
                 const Arg& addedArg = ap.def(arg);

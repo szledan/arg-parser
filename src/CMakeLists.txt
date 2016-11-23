@@ -1,3 +1,3 @@
 file(GLOB SOURCES *.cpp)
 add_library(arg-parse SHARED ${SOURCES})
-file(COPY arg-parse.h DESTINATION ${INCLUDE_OUTPUT_DIR})
+file(COPY arg-parse.hpp DESTINATION ${INCLUDE_OUTPUT_DIR})

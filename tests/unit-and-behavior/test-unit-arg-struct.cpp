@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test-unit.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 #include <assert.h>
 
 namespace testargparse {
@@ -79,7 +79,7 @@ TestContext::Return testConstructors(TestContext* ctx)
                 assert((sizeof(testCases[0].defined) == sizeof(testCases[0].expected)) && "Structs size are differents.");
                 test.defined = testCases[testCase].defined;
                 test.expected = testCases[testCase].expected;
-                const std::string caseName = std::to_string(testCase) + ".(" + std::to_string(required) + ",value case:" + std::to_string(valueCase) + ") testcase. ";
+                const std::string caseName = TAP_CASE_NAME(testCase, TAP_ARG_TO_STR(test.defined));
 
                 if (TAP_CHECK(ctx, test.defined.isRequired != test.expected.isRequired))
                     return TAP_FAIL(ctx, caseName + "!!!");
@@ -110,7 +110,7 @@ TestContext::Return testConstructors(TestContext* ctx)
         }
     }
 
-    return TAP_PASS(ctx, "Empty constructor test.");
+    return TAP_PASS(ctx, "The Arg::Arg(...) constructors test.");
 }
 
 } // namespace anonymous

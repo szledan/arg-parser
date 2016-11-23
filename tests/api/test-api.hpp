@@ -1,5 +1,5 @@
-#ifndef TEST_MANUAL_H
-#define TEST_MANUAL_H
+#ifndef TEST_API_HPP
+#define TEST_API_HPP
 
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
@@ -25,13 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test.hpp"
 
 namespace testargparse {
 
-void manualHelpTests(TestContext*);
-void manualErrorTests(TestContext*);
+void apiArgStructTests(TestContext*);
+void apiCheckAndReadTests(TestContext*);
+void apiCheckTests(TestContext*);
+void apiConstructorsTests(TestContext*);
+void apiDefTests(TestContext*);
+void apiFlagStructTests(TestContext*);
+void apiOperatorTests(TestContext*);
+void apiParserTests(TestContext*);
+void apiValueStructTests(TestContext*);
 
 } // namespace testargparse
 
-#endif // TEST_MANUAL_H
+#endif // TEST_API_HPP

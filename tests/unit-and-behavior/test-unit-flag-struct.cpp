@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test-unit.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 #include <assert.h>
 
 namespace testargparse {
@@ -194,9 +194,9 @@ void unitFlagStructTests(TestContext* ctx)
 } // namespace testargparse
 
 #if 0
-#include "test.h"
+#include "test.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 
 #include <assert.h>
 

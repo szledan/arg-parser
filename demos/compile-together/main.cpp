@@ -22,7 +22,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[])

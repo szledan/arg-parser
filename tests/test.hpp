@@ -1,3 +1,6 @@
+#ifndef TEST_HPP
+#define TEST_HPP
+
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -22,43 +25,55 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-unit.h"
+#include "test-defs.hpp"
 
-#include "arg-parse.h"
+#include <string>
+#include <sstream>
+#include <set>
 
 namespace testargparse {
-namespace {
 
-using namespace argparse;
+class TestContext {
+public:
+    enum Return { Fail, Pass, NotTested };
+    typedef Return (*TestInstanceFunc)(TestContext*);
 
-TestContext::Return testNoFlag(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check no flag in 'args'.");
-}
+    TestContext(const bool& = true);
 
-TestContext::Return testNotSetFlag(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check not setted flag.");
-}
+    void add(TestInstanceFunc);
+    int run();
 
-TestContext::Return testSetFlagNoValue(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag without Value.");
-}
+    Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
+    const bool& check(const bool& condition);
 
-TestContext::Return testSetFlagWithValueDifferentTypes(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "Check setted flag with different values.");
-}
+    struct Param {
+        std::string str;
+    } param;
 
-} // namespace anonymous
+private:
+    void test(const std::string& file, const std::string& func, const std::string& line);
 
-void unitCheckFlagAndReadValueTests(TestContext* ctx)
-{
-    ctx->add(testNoFlag);
-    ctx->add(testNotSetFlag);
-    ctx->add(testSetFlagNoValue);
-    ctx->add(testSetFlagWithValueDifferentTypes);
-}
+    struct {
+        size_t pass;
+        size_t fail;
+        const size_t sum() const { return pass + fail; }
+    } _checks = { 0, 0 };
+    const bool _showPass;
+    std::set<TestInstanceFunc> _tests;
+    std::stringstream _result;
+};
+
+// Api tests.
+void apiTests(TestContext*);
+
+// Manual tests.
+void manualTests(TestContext* ctx);
+
+// Unit tests.
+void unitAndBehaviorTests(TestContext*);
 
 } // namespace testargparse
+
+#endif // TEST_HPP

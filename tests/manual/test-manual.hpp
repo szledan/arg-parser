@@ -1,3 +1,6 @@
+#ifndef TEST_MANUAL_HPP
+#define TEST_MANUAL_HPP
+
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -22,25 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-api.h"
-
-#include "arg-parse.h"
+#include "test.hpp"
 
 namespace testargparse {
-namespace {
 
-using namespace argparse;
-
-TestContext::Return test(TestContext* ctx)
-{
-    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
-}
-
-} // namespace anonymous
-
-void apiCheckFlagTests(TestContext* ctx)
-{
-    ctx->add(test);
-}
+void manualHelpTests(TestContext*);
+void manualErrorTests(TestContext*);
 
 } // namespace testargparse
+
+#endif // TEST_MANUAL_HPP

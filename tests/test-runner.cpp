@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 #include <iostream>
 
 // Configure and run tests.

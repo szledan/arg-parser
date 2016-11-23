@@ -30,7 +30,7 @@
  *  [5] Replace every 'true/false' to const values.
  *
  * FIXME LIST:
- *  [4] The showHelp works buggly: sometimes not show [value]s.
+ *  [4] The 'help()' works buggly: sometimes doeasn't show [value]s.
  *  [3] Update documentation: ./README.md ./doc/api-references.md ./demos/README.md ./src/README.md
  *
  * FUTURE LIST:
@@ -39,7 +39,7 @@
  */
 #endif
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 
 #include <assert.h>
 #include <iostream>
@@ -492,9 +492,9 @@ const bool ArgParse::check(const std::string& flagStr)
 }
 
 template<typename T>
-const bool ArgParse::checkFlagAndReadValue(const std::string& flagStr, T* value)
+const bool ArgParse::checkAndRead(const std::string& flagStr, T* value)
 {
-    if (!check(flagStr))
+    if (!check(flagStr) || !value)
         return false;
 
     // FIXME: long and short flags also

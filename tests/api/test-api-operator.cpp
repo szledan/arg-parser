@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-api.h"
+#include "test-api.hpp"
 
-#include "arg-parse.h"
+#include "arg-parse.hpp"
 
 
 namespace testargparse {

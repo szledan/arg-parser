@@ -1,6 +1,3 @@
-#ifndef TEST_H
-#define TEST_H
-
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
  *
@@ -25,55 +22,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test-defs.h"
+#include "test-api.hpp"
 
-#include <string>
-#include <sstream>
-#include <set>
+#include "arg-parse.hpp"
 
 namespace testargparse {
+namespace {
 
-class TestContext {
-public:
-    enum Return { Fail, Pass, NotTested };
-    typedef Return (*TestInstanceFunc)(TestContext*);
+using namespace argparse;
 
-    TestContext(const bool& = true);
+TestContext::Return test(TestContext* ctx)
+{
+    return TAP_NOT_TESTED(ctx, "No implemented test cases!!!");
+}
 
-    void add(TestInstanceFunc);
-    int run();
+} // namespace anonymous
 
-    Return pass(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return fail(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    Return nott(const std::string& msg, const std::string& file, const std::string& func, const std::string& line);
-    const bool& check(const bool& condition);
-
-    struct Param {
-        std::string str;
-    } param;
-
-private:
-    void test(const std::string& file, const std::string& func, const std::string& line);
-
-    struct {
-        size_t pass;
-        size_t fail;
-        const size_t sum() const { return pass + fail; }
-    } _checks = { 0, 0 };
-    const bool _showPass;
-    std::set<TestInstanceFunc> _tests;
-    std::stringstream _result;
-};
-
-// Api tests.
-void apiTests(TestContext*);
-
-// Manual tests.
-void manualTests(TestContext* ctx);
-
-// Unit tests.
-void unitAndBehaviorTests(TestContext*);
+void apiCheckAndReadTests(TestContext* ctx)
+{
+    ctx->add(test);
+}
 
 } // namespace testargparse
-
-#endif // TEST_H

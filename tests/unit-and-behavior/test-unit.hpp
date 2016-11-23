@@ -1,5 +1,5 @@
-#ifndef TEST_UNIT_H
-#define TEST_UNIT_H
+#ifndef TEST_UNIT_HPP
+#define TEST_UNIT_HPP
 
 /* Copyright (C) 2016, Szilard Ledan <szledan@gmail.com>
  * All rights reserved.
@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.h"
+#include "test.hpp"
 
-#include "arg-parse.h"
-#include "test-defs.h"
+#include "arg-parse.hpp"
+#include "test-defs.hpp"
 #include <string>
 
 namespace testargparse {
 
 void unitArgStructTests(TestContext*);
-void unitCheckFlagAndReadValueTests(TestContext*);
+void unitCheckAndReadTests(TestContext*);
 void unitCheckTests(TestContext*);
 void unitConstructorsTests(TestContext*);
 void unitCountsTests(TestContext*);
@@ -49,7 +49,7 @@ void unitValueStructTests(TestContext*);
 #ifdef TAP_CASE_NAME
 #undef TAP_CASE_NAME
 #endif // TAP_CASE_NAME
-#define TAP_CASE_NAME(CASE_INDEX, SPEC_STR) std::to_string(CASE_INDEX) + ". testcase " + std::string(SPEC_STR) + ". "
+#define TAP_CASE_NAME(CASE_INDEX, SPEC_STR) std::to_string(CASE_INDEX) + ". testcase: " + std::string(SPEC_STR) + ". "
 
 #ifdef TAP_VALUE_TO_STR
 #undef TAP_VALUE_TO_STR
@@ -71,6 +71,16 @@ void unitValueStructTests(TestContext*);
     + "," + FLAG._shortFlag \
     + "," + FLAG._description \
     + "," + TAP_VALUE_TO_STR(FLAG.value) \
+    + ")"
+
+#ifdef TAP_ARG_TO_STR
+#undef TAP_ARG_TO_STR
+#endif // TAP_ARG_TO_STR
+#define TAP_ARG_TO_STR(ARG) std::string("Arg(") \
+    + ARG._name \
+    + "," + ARG._description \
+    + "," + std::to_string((int)ARG.isRequired) \
+    + "," + TAP_VALUE_TO_STR(ARG) \
     + ")"
 
 #ifdef TAP_VALUE_STR_TEST_CASES
@@ -158,4 +168,4 @@ void unitValueStructTests(TestContext*);
 
 } // namespace testargparse
 
-#endif // TEST_UNIT_H
+#endif // TEST_UNIT_HPP
