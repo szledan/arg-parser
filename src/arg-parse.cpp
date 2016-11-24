@@ -26,7 +26,7 @@
 /*
  * TODO LIST:
  *  [1] More more tests :)
- *  [2] Implement 'mode.strict'.
+ *  [2] Implement 'mode.strict', and 'help.lexicographic'
  *  [5] Replace every 'true/false' to const values.
  *
  * FIXME LIST:
@@ -186,7 +186,7 @@ ArgParse::ArgParse(const OptionList& oList)
 
 const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
 {
-    const std::string name = flag._longFlag + flag._shortFlag;
+    const std::string name = flag._longFlag + "-" + flag._shortFlag;
     assert(!name.empty());
 
     Flag* flagPtr = &(_flags[name] = flag);
@@ -658,6 +658,12 @@ const Arg Arg::WrongArg = Arg();
 Arg::Arg(const Arg& a)
     : Value((Value)a)
     , isDefined(a.isDefined)
+{
+}
+
+Arg::Arg(const std::string& name, const std::string& description)
+    : Value(Value("", !name.empty(), name, description))
+    , isDefined(!name.empty())
 {
 }
 

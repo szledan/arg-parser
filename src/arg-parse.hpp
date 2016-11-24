@@ -191,9 +191,12 @@ struct Arg : Value {
 
     Arg(const Arg& a);
     Arg(const std::string& name = "",
-        const std::string& description = "",
-        const bool isRequired = !Required,
+        const std::string& description = "");
+    Arg(const std::string& name,
+        const std::string& description,
+        const bool isRequired,
         const Value& defaultValue = Value());
+
     Arg(const Value& value);
 
     bool isDefined;

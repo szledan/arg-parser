@@ -46,11 +46,6 @@ void unitOptionsTests(TestContext*);
 void unitParserTests(TestContext*);
 void unitValueStructTests(TestContext*);
 
-#ifdef TAP_CASE_NAME
-#undef TAP_CASE_NAME
-#endif // TAP_CASE_NAME
-#define TAP_CASE_NAME(CASE_INDEX, SPEC_STR) std::to_string(CASE_INDEX) + ". testcase: " + std::string(SPEC_STR) + ". "
-
 #ifdef TAP_VALUE_TO_STR
 #undef TAP_VALUE_TO_STR
 #endif // TAP_VALUE_TO_STR

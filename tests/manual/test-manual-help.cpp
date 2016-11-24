@@ -25,69 +25,54 @@
 #include "test-manual.hpp"
 
 #include "arg-parse.hpp"
-
-#include <assert.h>
 #include <iostream>
-#include <random>
 
 namespace testargparse {
 namespace {
-
-const std::string msg("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec non odio dignissim, dignissim lorem vitae, auctor dolor. Ut eu lacus ut mi finibus finibus. Donec eget condimentum elit, ut facilisis massa. Donec quis erat nulla. Maecenas a pretium nibh. Aliquam pulvinar varius mauris, id feugiat ligula sagittis non. Mauris sit amet convallis ipsum. Etiam accumsan id lorem eu tempus. In rhoncus semper maximus. Nulla quis leo vitae lacus mollis laoreet. Integer in sagittis ligula. Cras eu lacinia enim. Quisque a elit ante. Phasellus tincidunt, ipsum id tempor auctor, quam ex gravida elit, auctor porta elit dolor sit amet lorem. Ut lobortis ante lacus, quis dictum nisi condimentum nec.");
-
-#define ARRAY_SIZE(A) (sizeof(A) ? sizeof(A) / sizeof(A[0]) : 0)
-#define STR(S) const_cast<char*>(std::string(S).c_str())
-
-#define LINE std::string("_" + std::to_string(__LINE__))
-
-#define ARG ("A" + LINE)
-#define MSG (msg.substr(std::rand() % (msg.size() / 20), std::rand() % (msg.size() / 10)))
-#define VALUEV(VL) (VL + LINE)
-#define VALUE ("V" + LINE)
-#define SFLAG (std::string("-") + (sf++))
-#define LFLAG (std::string("--") + (lf++) + LINE)
 
 using namespace argparse;
 
 TestContext::Return showHelp(TestContext* ctx)
 {
-//    char sf = 'A';
-//    char lf = sf;
+    struct {
+        const std::string option;
+    } testCases[] {
+        "help.show=0",
+        "help.show=1,tab=\t",
+        "help.show=2,program.name=show-all",
+        ctx->param.str
+    };
 
-//    ArgParse args(ctx->param.str);
+    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase){
+        const std::string& interlacedOption = testCases[testCase].option;
+        const std::string caseName = TAP_CASE_NAME(testCase, interlacedOption);
 
-//    args.def(Flag());
-//    for (int i = 0; i < 8; ++i) {
-//        Value value;
-//        switch(i) {
-//            case 1: value = Value(VALUE); break;
-//            case 2: value = Value("", ARG, MSG); break;
-//            case 3: value = Value(VALUE, "", MSG); break;
-//            case 4: value = Value(VALUE, ARG, ""); break;
-//            case 5: value = Value(VALUE, "", ""); break;
-//            case 6: value = Value(VALUEV("A"), { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
-//            case 7: value = Value("", { VALUEV("A"), VALUEV("B"), VALUEV("C") }); break;
-//            default: value = Value(); break;
-//        }
-//        args.def(Flag("", SFLAG, "", value));
-//        args.def(Flag("", SFLAG, MSG, value));
-//        args.def(Flag(LFLAG, "", "", value));
-//        args.def(Flag(LFLAG, SFLAG, "", value));
-//        args.def(Flag(LFLAG, "", MSG, value));
-//        args.def(Flag(LFLAG, SFLAG, MSG, value));
-//    }
+        ArgParse ap(interlacedOption);
+        ap.def(Flag("", "-s", "Only 'short' flag def, is a setter == without value."));
+        ap.def(Flag("--only-long", "", "Only 'long' flag def, is a setter == without value."));
+        ap.def(Flag("--long", "-l", "Both 'long' and 'short' flag def, is a setter == without value."));
+        ap.def(Flag("", "-o", "Only 'short' flag def, with value.", Value("default", Value::Required)));
+        ap.def(Flag("--only-long-with", "", "Only 'long' flag def, with value.", Value("default", !Value::Required)));
+        ap.def(Flag("--long-with", "-L", "Both 'long' and 'short' flag def, with value.", Value("default", Value::Required, "value", "This value is required.")));
+        ap.def(Flag("", "-c", "Only 'short' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, Value::Required)));
+        ap.def(Flag("--only-long-chooser", "", "Only 'long' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, !Value::Required)));
+        ap.def(Flag("--long-chooser", "-C", "Both 'long' and 'short' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, Value::Required, "choose", "This chooser is required.")));
 
-//    for (int i = 0; i < 2; ++i)
-//    for (int v = 0; v < 2; ++v) {
-//        args.def(Arg());
-//        args.def(Arg("", "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-//        args.def(Arg(ARG, "", !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-//        args.def(Arg(ARG, MSG, !(i%2)*Arg::Required, (v%2) ? Value(VALUE) : Value()));
-//    }
+        ap.def(Arg("first"));
+        ap.def(Arg("second", "Has description."));
+        ap.def(Arg("third", "", Arg::Required));
+        ap.def(Arg("fourth", "", Arg::Required, Value("3.14")));
+        ap.def(Arg("fifth", "Has description with default value", Arg::Required, Value("last", !Value::Required, "The value description.")));
+        ap.def(Arg("sixth", "With chooser value", Arg::Required, Value( { "D", "A", "B", "C", "E" } )));
+        ap.def(Arg("seventh", "", !Arg::Required, Value("1")));
+        ap.def(Arg("eighth", "Has description with default value", !Arg::Required, Value("true", Value::Required, "The value description.")));
+        ap.def(Arg("nineth", "With chooser value", !Arg::Required, Value( { "D", "A", "B", "C", "E" } )));
 
-//    std::cout  << args.help() << std::endl;
+        std::cout << "--- " << caseName << " ---" << std::endl;
+        std::cout << ap.help() << std::endl;
+    }
 
-//    return TestContext::Return::Pass;
+    return TestContext::Return::Pass;
 }
 
 } // namespace anonymous

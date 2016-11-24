@@ -60,6 +60,11 @@
 #endif // TAP_CHARS
 #define TAP_CHARS(STR) (char*)STR
 
+#ifdef TAP_CASE_NAME
+#undef TAP_CASE_NAME
+#endif // TAP_CASE_NAME
+#define TAP_CASE_NAME(CASE_INDEX, SPEC_STR) std::to_string(CASE_INDEX) + ". testcase: " + std::string(SPEC_STR) + ". "
+
 #ifdef TAP_CHECK_NON_REQUIRED_ERRORS
 #undef TAP_CHECK_NON_REQUIRED_ERRORS
 #endif // TAP_CHECK_NON_REQUIRED_ERRORS
