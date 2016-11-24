@@ -68,8 +68,8 @@ TestContext::Return testConstructors(TestContext* ctx)
             test = { { Arg() }, { false, false, "", {}, "", "", false } },
             testCases[] = {
                 { { Arg() }, { false, false, "", {}, "", "", false } },
-                { { Arg(testName) }, { false, false, "", {}, testName, "", !testName.empty() } },
-                { { Arg(testName, testDescription) }, { false, false, "", {}, testName, testDescription, !testName.empty() } },
+                { { Arg(testName) }, { !testName.empty(), false, "", {}, testName, "", !testName.empty() } },
+                { { Arg(testName, testDescription) }, { !testName.empty(), false, "", {}, testName, testDescription, !testName.empty() } },
                 { { Arg(testName, testDescription, required) }, { required, false, "", {}, testName, testDescription, !testName.empty() } },
                 { { Arg(testName, testDescription, required, value) }, { required, false, value.str, value._chooseList, testName, testDescription, !testName.empty() } },
                 { { Arg(value) }, { false, false, value.str, value._chooseList, "", "", false } },
