@@ -115,10 +115,6 @@ public:
 
 private:
     const Flag& addFlag(const Flag& flag, const CallBackFunc cbf = nullptr);
-    void addError(const Errors::Codes&, const std::string& errorMsg, const ArgParse::Errors::Suspect& = { Errors::Suspect::GeneralType, nullptr });
-    void addError(const Errors::Codes&, const std::string& errorMsg, const void*);
-    void addError(const Errors::Codes&, const std::string& errorMsg, const Flag*);
-    void addError(const Errors::Codes&, const std::string& errorMsg, const Arg*);
 
     std::map<std::string, Flag> _flags;
     std::map<std::string, Flag*> _longFlags;
