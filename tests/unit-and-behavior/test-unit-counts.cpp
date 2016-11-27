@@ -22,233 +22,124 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "test.hpp"
+#include "test-unit.hpp"
 
 #include "arg-parse.hpp"
-
 #include <assert.h>
+#include <vector>
 
 namespace testargparse {
 namespace {
 
 using namespace argparse;
 
-const std::string g_shortFlag = "-a";
-const std::string g_longFlag = "--a";
-const std::string g_description = "Simple settable flag without value.";
+#define TAP_TEST_COUNTS_DEF(CTX, COUNTS_DEF, EXPECTED_DEF) do { \
+        if (TAP_CHECK(CTX, COUNTS_DEF.flags != EXPECTED_DEF.flags)) \
+            return TAP_FAIL(ctx, "!!!"); \
+        if (TAP_CHECK(CTX, COUNTS_DEF.args.required != EXPECTED_DEF.args.required)) \
+            return TAP_FAIL(ctx, "!!!"); \
+        if (TAP_CHECK(CTX, COUNTS_DEF.args.nonRequired != EXPECTED_DEF.args.nonRequired)) \
+            return TAP_FAIL(ctx, "!!!"); \
+        if (TAP_CHECK(CTX, COUNTS_DEF.args.all() != EXPECTED_DEF.args.required + EXPECTED_DEF.args.nonRequired)) \
+            return TAP_FAIL(ctx, "!!!"); \
+        if (TAP_CHECK(CTX, COUNTS_DEF.all() != EXPECTED_DEF.flags + EXPECTED_DEF.args.all())) \
+            return TAP_FAIL(ctx, "!!!"); \
+    } while (false)
+
+#define TAP_TEST_COUNTS(CTX, AP, EXPECTED) do { \
+        TAP_TEST_COUNTS_DEF(CTX, AP.counts.defined, EXPECTED.defined); \
+        TAP_TEST_COUNTS_DEF(CTX, AP.counts.parsed.defined, EXPECTED.parsed.defined); \
+        TAP_TEST_COUNTS_DEF(CTX, AP.counts.parsed.undefined, EXPECTED.parsed.undefined); \
+    } while (false)
 
 TestContext::Return testNoArgNoFlag(TestContext* ctx)
 {
-    char* argv[] = { TAP_CHARS("program") };
+    ArgParse::Counts expected;
+
+    char* argv[] = { nullptr };
     const int argc = TAP_ARRAY_SIZE(argv);
 
-    ArgParse args;
+    ArgParse ap("help.add=0");
 
-    args.def(Flag(g_longFlag, g_shortFlag, g_description));
-    args.def(Arg("arg", "An arg", !Arg::Required));
+    ap.parse(argc, argv);
 
-    const bool parseRet = args.parse(argc, argv);
+    TAP_TEST_COUNTS(ctx, ap, expected);
 
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-    if (args.counts.args.defined)
-        return TAP_FAIL(ctx, "Defined argument counts not null.");
-
-    if (args.counts.args.undefined)
-        return TAP_FAIL(ctx, "Undefined argument counts not null.");
-
-    if (args.counts.flags.defined)
-        return TAP_FAIL(ctx, "Defined flag counts not null.");
-
-    if (args.counts.flags.undefined)
-        return TAP_FAIL(ctx, "Undefined flag counts not null.");
-
-    return TAP_PASS(ctx, "Test counters when no args and flags.");
+    return TAP_PASS(ctx, "Test counters when no args and no flags.");
 }
 
-TestContext::Return testDefinedArgs(TestContext* ctx)
+TestContext::Return testDefined(TestContext* ctx)
 {
-    char* argv[] = { TAP_CHARS("program"), TAP_CHARS("arg_1"), TAP_CHARS("arg_2"), TAP_CHARS("arg_3") };
-    const int argc = TAP_ARRAY_SIZE(argv);
+    ArgParse::Counts expected;
 
-    ArgParse args;
+    expected.defined.flags++; // Initial adding of '--help'.
+    ArgParse ap;
 
-    args.def(Flag(g_longFlag, g_shortFlag, g_description));
-    args.def(Arg("arg1", "An arg 1", Arg::Required));
-    args.def(Arg("arg2", "An arg 2", Arg::Required));
-    args.def(Arg("arg3", "An arg 3", !Arg::Required));
+    ap.def(Flag());
+    expected.defined.flags++; ap.def(Flag("--long", "-l", "Simple Flag"));
+    ap.def(Flag("--long", "-l", "Double defination of a Flag"));
+    expected.defined.flags++; ap.def(Flag("--LONG", "-L", "Flag with value", Value("value")));
 
-    const bool parseRet = args.parse(argc, argv);
+    ap.def(Arg());
+    expected.defined.args.required++; ap.def(Arg("arg", "Simple Arg"));
+    expected.defined.args.required++; ap.def(Arg("arg", "Required Arg with value", Arg::Required, Value("value")));
+    expected.defined.args.required++; ap.def(Arg("arg", "Required Arg without value", Arg::Required));
+    expected.defined.args.nonRequired++; ap.def(Arg("arg", "Non required Arg with value", !Arg::Required, Value("value")));
+    expected.defined.args.nonRequired++; ap.def(Arg("arg", "Non required Arg without value", !Arg::Required));
 
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    TAP_TEST_COUNTS(ctx, ap, expected);
 
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-    if (args.counts.args.defined != 3)
-        return TAP_FAIL(ctx, "Defined argument counts wrong.");
-
-    if (args.counts.args.undefined)
-        return TAP_FAIL(ctx, "Undefined argument counts not null.");
-
-    if (args.counts.flags.defined)
-        return TAP_FAIL(ctx, "Defined flag counts not null.");
-
-    if (args.counts.flags.undefined)
-        return TAP_FAIL(ctx, "Undefined flag counts not null.");
-
-    return TAP_PASS(ctx, "Test counters when only defined arguments.");
+    return TAP_PASS(ctx, "Test struct of counter.defined.");
 }
 
-TestContext::Return testUndefinedArgs(TestContext* ctx)
+TestContext::Return testParsed(TestContext* ctx)
 {
-    char* argv[] = { TAP_CHARS("program"), TAP_CHARS("arg_1"), TAP_CHARS("arg_2"), TAP_CHARS("arg_3") };
-    const int argc = TAP_ARRAY_SIZE(argv);
+    ArgParse::Counts expected;
 
-    ArgParse args;
+    expected.defined.flags++; // Initial adding of '--help'.
+    ArgParse ap;
 
-    args.def(Flag(g_longFlag, g_shortFlag, g_description));
+    ap.def(Flag());
+    expected.defined.flags++; ap.def(Flag("--long", "-l", "Simple Flag"));
+    ap.def(Flag("--long", "-l", "Double defination of a Flag"));
+    expected.defined.flags++; ap.def(Flag("--LONG", "-L", "Flag with value", Value("value")));
 
-    const bool parseRet = args.parse(argc, argv);
+    ap.def(Arg());
+    expected.defined.args.required++; ap.def(Arg("arg", "Simple Arg"));
+    expected.defined.args.required++; ap.def(Arg("arg", "Required Arg with value", Arg::Required, Value("value")));
+    expected.defined.args.required++; ap.def(Arg("arg", "Required Arg without value", Arg::Required));
+    expected.defined.args.nonRequired++; ap.def(Arg("arg", "Non required Arg with value", !Arg::Required, Value("value")));
+    expected.defined.args.nonRequired++; ap.def(Arg("arg", "Non required Arg without value", !Arg::Required));
 
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
+    std::vector<char*> argv;
+    expected.parsed.defined.args.required++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.defined.args.required++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.defined.args.required++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.defined.args.nonRequired++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.defined.args.nonRequired++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.undefined.args.nonRequired++; argv.push_back(TAP_CHARS("arg"));
+    expected.parsed.defined.flags++; argv.push_back(TAP_CHARS("--long"));
+    expected.parsed.undefined.flags++; argv.push_back(TAP_CHARS("--short"));
+    expected.parsed.defined.flags++; argv.push_back(TAP_CHARS("-l"));
+    expected.parsed.undefined.flags++; argv.push_back(TAP_CHARS("-s"));
 
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
+    ap.parse(argv.size(), argv.data());
 
-    if (args.counts.args.defined)
-        return TAP_FAIL(ctx, "Defined argument counts not null.");
+    TAP_TEST_COUNTS(ctx, ap, expected);
 
-    if (args.counts.args.undefined != 3)
-        return TAP_FAIL(ctx, "Undefined argument counts wrong.");
-
-    if (args.counts.flags.defined)
-        return TAP_FAIL(ctx, "Defined flag counts not null.");
-
-    if (args.counts.flags.undefined)
-        return TAP_FAIL(ctx, "Undefined flag counts not null.");
-
-    return TAP_PASS(ctx, "Test counters when only undefined arguments.");
+    return TAP_PASS(ctx, "Test struct of counter.parsed.");
 }
 
-TestContext::Return testDefinedFlags(TestContext* ctx)
-{
-    char* argv[] = { TAP_CHARS("program"), TAP_CHARS(g_longFlag.c_str()), TAP_CHARS(g_shortFlag.c_str()), TAP_CHARS("--other"), TAP_CHARS("value") };
-    const int argc = TAP_ARRAY_SIZE(argv);
-
-    ArgParse args;
-
-    args.def(Flag(g_longFlag, "", g_description));
-    args.def(Flag("", g_shortFlag, g_description));
-    args.def(Flag("--other", "-o", "Other description.", Value("")));
-    args.def(Arg("arg", "An arg", !Arg::Required));
-
-    const bool parseRet = args.parse(argc, argv);
-
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-    if (args.counts.args.defined)
-        return TAP_FAIL(ctx, "Defined argument counts not null.");
-
-    if (args.counts.args.undefined)
-        return TAP_FAIL(ctx, "Undefined argument counts not null.");
-
-    if (args.counts.flags.defined != 3)
-        return TAP_FAIL(ctx, "Defined flag counts wrong.");
-
-    if (args.counts.flags.undefined)
-        return TAP_FAIL(ctx, "Undefined flag counts not null.");
-
-    return TAP_PASS(ctx, "Test counters when only defined arguments.");
-}
-
-TestContext::Return testUndefinedFlags(TestContext* ctx)
-{
-    char* argv[] = { TAP_CHARS("program"), TAP_CHARS(g_longFlag.c_str()), TAP_CHARS(g_shortFlag.c_str()), TAP_CHARS("--other") };
-    const int argc = TAP_ARRAY_SIZE(argv);
-
-    ArgParse args;
-
-    args.def(Arg("arg", "An arg", !Arg::Required));
-
-    const bool parseRet = args.parse(argc, argv);
-
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-    if (args.counts.args.defined)
-        return TAP_FAIL(ctx, "Defined argument counts not null.");
-
-    if (args.counts.args.undefined)
-        return TAP_FAIL(ctx, "Undefined argument counts not null.");
-
-    if (args.counts.flags.defined)
-        return TAP_FAIL(ctx, "Defined flag counts not null.");
-
-    if (args.counts.flags.undefined != 3)
-        return TAP_FAIL(ctx, "Undefined flag counts wrong.");
-
-    return TAP_PASS(ctx, "Test counters when only defined arguments.");
-}
-
-TestContext::Return testComplex(TestContext* ctx)
-{
-    char* argv[] = {
-        TAP_CHARS("program"),
-        TAP_CHARS("arg_1"),
-        TAP_CHARS(g_longFlag.c_str()),
-        TAP_CHARS("arg_2"),
-        TAP_CHARS(g_shortFlag.c_str()),
-        TAP_CHARS("value"),
-        TAP_CHARS("arg_3"),
-        TAP_CHARS("--other=value"),
-        TAP_CHARS("arg_4"),
-    };
-    const int argc = TAP_ARRAY_SIZE(argv);
-
-    ArgParse args;
-
-    args.def(Flag(g_longFlag, "", g_description));
-    args.def(Flag("", g_shortFlag, g_description, Value("")));
-    args.def(Flag("--no", "-n", "Do not call this flag."));
-    args.def(Arg("arg1", "An arg 1", Arg::Required));
-    args.def(Arg("arg2", "An arg 2", Arg::Required));
-    args.def(Arg("arg3", "An arg 3", !Arg::Required));
-
-    const bool parseRet = args.parse(argc, argv);
-
-    TAP_CHECK_PARSER_EXPECTED_RETURN(ctx, (parseRet != true));
-
-    TAP_CHECK_NON_REQUIRED_ERRORS(ctx, args, 0);
-
-    if (args.counts.args.defined != 3)
-        return TAP_FAIL(ctx, "Defined argument counts wrong.");
-
-    if (args.counts.args.undefined != 1)
-        return TAP_FAIL(ctx, "Undefined argument counts wrong.");
-
-    if (args.counts.flags.defined != 2)
-        return TAP_FAIL(ctx, "Defined flag counts wrong.");
-
-    if (args.counts.flags.undefined != 1)
-        return TAP_FAIL(ctx, "Undefined flag counts wrong.");
-
-    return TAP_PASS(ctx, "Test counters when only defined arguments.");
-}
+#undef TAP_TEST_COUNTS
+#undef TAP_TEST_COUNTS_DEF
 
 } // namespace anonymous
 
 void unitCountsTests(TestContext* ctx)
 {
     ctx->add(testNoArgNoFlag);
-    ctx->add(testDefinedArgs);
-    ctx->add(testUndefinedArgs);
-    ctx->add(testDefinedFlags);
-    ctx->add(testUndefinedFlags);
-    ctx->add(testComplex);
+    ctx->add(testDefined);
+    ctx->add(testParsed);
 }
 
 } // namespace testargparse

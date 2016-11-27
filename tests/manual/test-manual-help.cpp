@@ -39,9 +39,9 @@ TestContext::Return showHelp(TestContext* ctx)
     struct {
         const std::string option;
     } testCases[] {
-        "help.show=0,margin=30",
-        "help.show=1,tab=\t,help.add=false",
-        "help.show=2,program.name=show-all,help.compact=off,margin=20",
+        "help.show=0,help.margin=30",
+        "help.show=1,help.tab=\t,help.add=false",
+        "help.show=2,program.name=show-all,help.compact=off,help.margin=20",
         ctx->param.str
     };
 

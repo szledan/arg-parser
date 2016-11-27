@@ -31,40 +31,57 @@ namespace {
 
 using namespace argparse;
 
+#ifdef TAP_HELP_SHOW_CASES
+#undef TAP_HELP_SHOW_CASES
+#endif // TAP_HELP_SHOW_CASES
+#define TAP_HELP_SHOW_CASES(TEST_CASES) \
+    struct { \
+        const int helpShow; \
+    } TEST_CASES[] = { \
+        { ArgParse::Options::Help::ShowOnesWithDescription }, \
+        { ArgParse::Options::Help::ShowAllDefined }, \
+        { ArgParse::Options::Help::ShowAll }, \
+    }
+
+#ifdef TAP_HELP_MARGIN_CASES
+#undef TAP_HELP_MARGIN_CASES
+#endif // TAP_HELP_MARGIN_CASES
+#define TAP_HELP_MARGIN_CASES(TEST_CASES) \
+    struct { \
+        const size_t marginSize; \
+    } TEST_CASES[] = { \
+        { 0 }, \
+        { 26 }, \
+    }
+
 TestContext::Return testInterlacedString(TestContext* ctx)
 {
     TAP_VALUE_STR_TEST_CASES(programNameCases);
-    TAP_VALUE_STR_TEST_CASES(tabCases);
     TAP_BOOL_TEST_CASES(modeStrictCases);
     TAP_BOOL_TEST_CASES(helpAddCases);
     TAP_BOOL_TEST_CASES(helpCompactCases);
-    struct {
-        const int helpShow;
-    } helpShowCases[] = {
-        { ArgParse::Options::Help::ShowOnesWithDescription },
-        { ArgParse::Options::Help::ShowAllDefined },
-        { ArgParse::Options::Help::ShowAll },
-    };
+    TAP_HELP_MARGIN_CASES(helpMarginCases);
+    TAP_HELP_SHOW_CASES(helpShowCases);
+    TAP_VALUE_STR_TEST_CASES(tabCases);
 
+    for (size_t tabCase = 0; tabCase < TAP_ARRAY_SIZE(tabCases); ++tabCase)
     for (size_t helpShowCase = 0; helpShowCase < TAP_ARRAY_SIZE(helpShowCases); ++helpShowCase)
+    for (size_t helpMarginCase = 0; helpMarginCase < TAP_ARRAY_SIZE(helpMarginCases); ++helpMarginCase)
     for (size_t helpCompactCase = 0; helpCompactCase < TAP_ARRAY_SIZE(helpCompactCases); ++helpCompactCase)
     for (size_t helpAddCase = 0; helpAddCase < TAP_ARRAY_SIZE(helpAddCases); ++helpAddCase)
     for (size_t modeStrictCase = 0; modeStrictCase < TAP_ARRAY_SIZE(modeStrictCases); ++modeStrictCase)
-    for (size_t tabCase = 0; tabCase < TAP_ARRAY_SIZE(tabCases); ++tabCase)
     for (size_t programNameCase = 0; programNameCase < TAP_ARRAY_SIZE(programNameCases); ++programNameCase) {
         const std::string interlacedOptionString =
                 std::string("program.name=") + programNameCases[programNameCase].str
-                + "," + std::string("tab=") + tabCases[tabCase].str
                 + "," + std::string("mode.strict=") + std::to_string((int)modeStrictCases[modeStrictCase].value)
                 + "," + std::string("help.add=") + std::to_string((int)helpAddCases[helpAddCase].value)
                 + "," + std::string("help.compact=") + std::to_string((int)helpCompactCases[helpCompactCase].value)
-                + "," + std::string("help.show=") + std::to_string(helpShowCases[helpShowCase].helpShow);
+                + "," + std::string("help.margin=") + std::to_string(helpMarginCases[helpMarginCase].marginSize)
+                + "," + std::string("help.show=") + std::to_string(helpShowCases[helpShowCase].helpShow)
+                + "," + std::string("help.tab=") + tabCases[tabCase].str;
         ArgParse args(interlacedOptionString);
 
         if (TAP_CHECK(ctx, args.options.program.name != programNameCases[programNameCase].str))
-            return TAP_FAIL(ctx, "!!!");
-
-        if (TAP_CHECK(ctx, args.options.tab != tabCases[tabCase].str))
             return TAP_FAIL(ctx, "!!!");
 
         if (TAP_CHECK(ctx, args.options.mode.strict != modeStrictCases[modeStrictCase].value))
@@ -77,6 +94,9 @@ TestContext::Return testInterlacedString(TestContext* ctx)
             return TAP_FAIL(ctx, "!!!");
 
         if (TAP_CHECK(ctx, args.options.help.show != helpShowCases[helpShowCase].helpShow))
+            return TAP_FAIL(ctx, "!!!");
+
+        if (TAP_CHECK(ctx, args.options.help.tab != tabCases[tabCase].str))
             return TAP_FAIL(ctx, "!!!");
     }
 
@@ -86,36 +106,30 @@ TestContext::Return testInterlacedString(TestContext* ctx)
 TestContext::Return testInitializerList(TestContext* ctx)
 {
     TAP_VALUE_STR_TEST_CASES(programNameCases);
-    TAP_VALUE_STR_TEST_CASES(tabCases);
     TAP_BOOL_TEST_CASES(modeStrictCases);
     TAP_BOOL_TEST_CASES(helpAddCases);
     TAP_BOOL_TEST_CASES(helpCompactCases);
-    struct {
-        const int helpShow;
-    } helpShowCases[] = {
-        { ArgParse::Options::Help::ShowOnesWithDescription },
-        { ArgParse::Options::Help::ShowAllDefined },
-        { ArgParse::Options::Help::ShowAll },
-    };
+    TAP_HELP_MARGIN_CASES(helpMarginCases);
+    TAP_HELP_SHOW_CASES(helpShowCases);
+    TAP_VALUE_STR_TEST_CASES(tabCases);
 
+    for (size_t tabCase = 0; tabCase < TAP_ARRAY_SIZE(tabCases); ++tabCase)
     for (size_t helpShowCase = 0; helpShowCase < TAP_ARRAY_SIZE(helpShowCases); ++helpShowCase)
+    for (size_t helpMarginCase = 0; helpMarginCase < TAP_ARRAY_SIZE(helpMarginCases); ++helpMarginCase)
     for (size_t helpCompactCase = 0; helpCompactCase < TAP_ARRAY_SIZE(helpCompactCases); ++helpCompactCase)
     for (size_t helpAddCase = 0; helpAddCase < TAP_ARRAY_SIZE(helpAddCases); ++helpAddCase)
     for (size_t modeStrictCase = 0; modeStrictCase < TAP_ARRAY_SIZE(modeStrictCases); ++modeStrictCase)
-    for (size_t tabCase = 0; tabCase < TAP_ARRAY_SIZE(tabCases); ++tabCase)
     for (size_t programNameCase = 0; programNameCase < TAP_ARRAY_SIZE(programNameCases); ++programNameCase) {
         ArgParse args({ std::string("program.name=") + programNameCases[programNameCase].str,
-                        std::string("tab=") + tabCases[tabCase].str,
                         std::string("mode.strict=") + std::to_string((int)modeStrictCases[modeStrictCase].value),
                         std::string("help.add=") + std::to_string((int)helpAddCases[helpAddCase].value),
                         std::string("help.compact=") + std::to_string((int)helpCompactCases[helpCompactCase].value),
-                        std::string("help.show=") + std::to_string(helpShowCases[helpShowCase].helpShow)
+                        std::string("help.margin=") + std::to_string(helpMarginCases[helpMarginCase].marginSize),
+                        std::string("help.show=") + std::to_string(helpShowCases[helpShowCase].helpShow),
+                        std::string("help.tab=") + tabCases[tabCase].str
                       });
 
         if (TAP_CHECK(ctx, args.options.program.name != programNameCases[programNameCase].str))
-            return TAP_FAIL(ctx, "!!!");
-
-        if (TAP_CHECK(ctx, args.options.tab != tabCases[tabCase].str))
             return TAP_FAIL(ctx, "!!!");
 
         if (TAP_CHECK(ctx, args.options.mode.strict != modeStrictCases[modeStrictCase].value))
@@ -128,6 +142,9 @@ TestContext::Return testInitializerList(TestContext* ctx)
             return TAP_FAIL(ctx, "!!!");
 
         if (TAP_CHECK(ctx, args.options.help.show != helpShowCases[helpShowCase].helpShow))
+            return TAP_FAIL(ctx, "!!!");
+
+        if (TAP_CHECK(ctx, args.options.help.tab != tabCases[tabCase].str))
             return TAP_FAIL(ctx, "!!!");
     }
 

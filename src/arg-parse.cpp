@@ -202,13 +202,13 @@ ArgParse::ArgParse(const std::string& oList)
 {
 #define AP_SET_OPTION(VALUE, KEY) (VALUE = readOption(oList, KEY, VALUE))
     AP_SET_OPTION(options.program.name, "program.name");
-    AP_SET_OPTION(options.tab, "tab");
     AP_SET_OPTION(options.mode.strict, "mode.strict");
     if (AP_SET_OPTION(options.help.add, "help.add"))
         def(Flag("--help", "-h", "Show this help."));
     AP_SET_OPTION(options.help.compact, "help.compact");
+    AP_SET_OPTION(options.help.margin, "help.margin");
     AP_SET_OPTION(options.help.show, "help.show");
-    AP_SET_OPTION(options.margin, "margin");
+    AP_SET_OPTION(options.help.tab, "help.tab");
 #undef AP_SET_OPTION
 }
 
@@ -240,6 +240,16 @@ const Flag& ArgParse::def(const Flag& flag, const CallBackFunc cbf)
 {
     if (!flag.isDefined || !flag.isValid())
         return Flag::WrongFlag;
+
+    const bool hasLongFlag = check(flag._longFlag);
+    const bool hasShortFlag = check(flag._shortFlag);
+    if (hasLongFlag || hasShortFlag) {
+        const Flag* addedFlag = hasLongFlag ? _longFlags[flag._longFlag] : _shortFlags[flag._shortFlag];
+        addError(&_errors, Errors::FlagMultiplyDefination, "Multiply definations of flags", addedFlag);
+        return *addedFlag;
+    }
+
+    counts.defined.flags++;
     return addFlag(flag, cbf);
 }
 
@@ -247,6 +257,10 @@ const Arg& ArgParse::def(const Arg& arg)
 {
     if (!arg.isDefined)
         return Arg::WrongArg;
+    if (arg.isRequired)
+        counts.defined.args.required++;
+    else
+        counts.defined.args.nonRequired++;
     _args.push_back(arg);
     return _args.back();
 }
@@ -300,9 +314,9 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             else \
                 addFlag(Flag("", param.paramStr)); \
             FLAGS[param.paramStr]->isDefined = false; \
-            counts.flags.undefined++; \
+            counts.parsed.undefined.flags++; \
         } else \
-            counts.flags.defined++; \
+            counts.parsed.defined.flags++; \
     } while (false)
 
 #define AP_SETUP_FLAG(FLAGS, CHECH_VALUE) do { \
@@ -356,7 +370,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
                     // Add undefined flag with value.
                     def(Flag(param.paramStr, "", "", Value("_")));
                     _longFlags[param.paramStr]->value.str = param.valueStr;
-                    counts.flags.undefined++;
+                    counts.parsed.undefined.flags++;
                 } else {
                     AP_CHECK_FLAG_EXIST(_longFlags, AP_IS_LONG);
                 }
@@ -370,13 +384,15 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
-                if (_args[argCount].isRequired)
+                if (_args[argCount].isRequired) {
+                    counts.parsed.defined.args.required++;
                     requiredArgs--;
+                } else
+                    counts.parsed.defined.args.nonRequired++;
                 setArg(_args[argCount], param.paramStr);
-                counts.args.defined++;
             } else {
+                counts.parsed.undefined.args.nonRequired++;
                 _args.push_back(Arg("", "", !Arg::Required, Value(param.paramStr)));
-                counts.args.undefined++;
             }
             argCount++;
             break;
@@ -407,7 +423,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
 const std::string ArgParse::help()
 {
-    const std::string tab = options.tab;
+    const std::string tab = options.help.tab;
     std::stringstream help;
 
     // Print program name.
@@ -455,12 +471,12 @@ const std::string ArgParse::help()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
                 || (options.help.show == Options::Help::ShowAllDefined && arg.isDefined)
                 || options.help.show == Options::Help::ShowAll)) {
-            std::string margin(generateStr(options.margin, " "));
+            std::string margin(generateStr(options.help.margin, " "));
             help << cutMargin(&margin, tab);
             AP_PRINT_NAME("", arg, arg._name);
             if (!arg._description.empty()) {
                 std::stringstream description;
-                if (!options.help.compact || (options.margin && margin.empty()))
+                if (!options.help.compact || (options.help.margin && margin.empty()))
                     description << std::endl;
                 description << arg._description;
                 if (arg._chooseList.size() && !arg._name.empty()) {
@@ -468,7 +484,7 @@ const std::string ArgParse::help()
                     description << "={" << getChoosesStr(arg, false) << "}";
                 }
 
-                AP_PRINT_DESCRIPTION(help, description, options.margin, margin, tab);
+                AP_PRINT_DESCRIPTION(help, description, options.help.margin, margin, tab);
             } else
                 help << std::endl;
         }
@@ -495,7 +511,7 @@ const std::string ArgParse::help()
             || (options.help.show == Options::Help::ShowAllDefined && !flag.isDefined))
             continue;
 
-        std::string margin(generateStr(options.margin, " "));
+        std::string margin(generateStr(options.help.margin, " "));
         if (hasShortFlag || hasLongFlag)
             help << cutMargin(&margin, tab);
         if (hasShortFlag)
@@ -508,7 +524,7 @@ const std::string ArgParse::help()
 
         if (hasShortFlag || hasLongFlag) {
             std::stringstream description;
-            if (!options.help.compact || (options.margin && margin.empty()))
+            if (!options.help.compact || (options.help.margin && margin.empty()))
                 description << std::endl;
             if (!flag._description.empty()) {
                 description << flag._description;
@@ -521,7 +537,7 @@ const std::string ArgParse::help()
             if (!options.help.compact)
                 description << std::endl << std::endl;
 
-            AP_PRINT_DESCRIPTION(help, description, options.margin, margin, tab);
+            AP_PRINT_DESCRIPTION(help, description, options.help.margin, margin, tab);
         }
 #undef AP_PRINT_FLAG
     }
@@ -567,8 +583,7 @@ const bool ArgParse::checkAndRead(const std::string& flagStr, T* value)
     if (!check(flagStr) || !value)
         return false;
 
-    // FIXME: long and short flags also
-    const Flag& flag = *_longFlags[flagStr];
+    const Flag& flag = _longFlags.find(flagStr) != _longFlags.end() ? *_longFlags[flagStr] : *_shortFlags[flagStr];
     if (!flag.hasValue)
         return false;
 

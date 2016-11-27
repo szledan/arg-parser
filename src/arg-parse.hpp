@@ -71,23 +71,34 @@ public:
     Arg const& operator[](const int idx);
 
     struct Counts {
+        struct Params {
+            const size_t all() const { return flags + args.all(); }
+            size_t flags = 0u;
+            struct {
+                const size_t all() const { return required + nonRequired; }
+                size_t required = 0u;
+                size_t nonRequired = 0u;
+            } args;
+        } defined;
         struct {
-            size_t defined;
-            size_t undefined;
-        } flags, args;
-    } counts = { { 0u, 0u, }, { 0u, 0u } };
+            const size_t flags() const { return defined.flags + undefined.flags; }
+            const size_t args() const { return defined.args.all() + undefined.args.all(); }
+            const size_t all() const { return flags() + args(); }
+            Params defined, undefined;
+        } parsed;
+    } counts;
 
     struct Options {
         struct { std::string name; } program = { "" };
-        std::string tab = "    ";
         struct { bool strict; } mode = { false };
         struct Help {
             enum { ShowOnesWithDescription = 0, ShowAllDefined = 1, ShowAll = 2 };
             bool add;
             bool compact;
+            size_t margin;
             int show;
-        } help = { true, true, Help::ShowAllDefined };
-        size_t margin = 0;
+            std::string tab;
+        } help = { true, true, 0, Help::ShowAllDefined, "    " };
     } options;
 
     struct Errors {
@@ -97,6 +108,7 @@ public:
             RequiredArgumentMissing,
             ArgVIsEmpty,
             ArgCBiggerThanElementsOfArgV,
+            FlagMultiplyDefination,
         } const code;
         const std::string message;
         struct Suspect {
