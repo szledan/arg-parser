@@ -143,17 +143,32 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
     return false;
 }
 
-const std::string getChoosesStr(const Value& value, const bool full)
+const std::string getChoosesStr(const Value& value, const bool isShort)
 {
     if (!value._chooseList.size())
         return "";
 
     std::stringstream s;
-    std::string end(full ? "" : "|...");
-    for (size_t i = 0; i < value._chooseList.size(); ++i)
+    std::string end(isShort ? "|..." : "");
+    const size_t size = isShort ? 1 : value._chooseList.size();
+    for (size_t i = 0; i < size; ++i)
         s << "|" << value._chooseList[i];
 
     return s.str().substr(1) + end;
+}
+
+const std::string& cutMargin(std::string* margin, const std::string& printStr)
+{
+    margin->erase(0, printStr.size());
+    return printStr;
+}
+
+const std::string generateStr(const size_t& size, const std::string& str)
+{
+    std::string generated("");
+    for (size_t i = 0; i < size; ++i)
+        generated.append(str);
+    return generated;
 }
 
 void setArg(Arg& arg, const std::string& value)
@@ -176,6 +191,7 @@ ArgParse::ArgParse(const std::string& oList)
         def(Flag("--help", "-h", "Show this help."));
     AP_SET_OPTION(options.help.compact, "help.compact");
     AP_SET_OPTION(options.help.show, "help.show");
+    AP_SET_OPTION(options.margin, "margin");
 #undef AP_SET_OPTION
 }
 
@@ -245,7 +261,7 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
 
     std::vector<CallBackFunc> callBackFuncs;
     // Parse params.
-    for (size_t adv = 1, argCount = 0; adv < argc; ++adv) {
+    for (size_t adv = 0, argCount = 0; adv < argc; ++adv) {
         struct {
             std::string paramStr;
             const ParamType paramType;
@@ -372,6 +388,8 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     return !_errors.size();
 }
 
+const std::string description();
+
 const std::string ArgParse::help()
 {
     const std::string tab = options.tab;
@@ -381,7 +399,7 @@ const std::string ArgParse::help()
     help << "usage: " << options.program.name;
 
     // Add '[options]' for usage part.
-    if (counts.flags.defined)
+    if (!_flags.empty())
         help << " [options]";
 
     // Print arguments after programname.
@@ -403,13 +421,31 @@ const std::string ArgParse::help()
             && ((options.help.show == Options::Help::ShowOnesWithDescription && !arg._description.empty())
                 || (options.help.show == Options::Help::ShowAllDefined && arg.isDefined)
                 || options.help.show == Options::Help::ShowAll)) {
+            std::string margin(generateStr(options.margin, " "));
+            help << cutMargin(&margin, tab);
             if (arg.isRequired)
-                help << tab << "<" << arg._name << ">";
+                help << cutMargin(&margin, "<") << cutMargin(&margin, arg._name) << cutMargin(&margin, ">");
             else
-                help << tab << "[<" << arg._name << ">]";
-            if (!arg._description.empty())
-                help << tab << arg._description;
-            help << std::endl;
+                help << cutMargin(&margin, "[<") << cutMargin(&margin, arg._name) << cutMargin(&margin, ">]");
+            if (!arg._description.empty()) {
+                std::stringstream description;
+                if (!options.help.compact || (options.margin && margin.empty()))
+                    description << std::endl;
+                description << arg._description;
+                if (arg._chooseList.size() && !arg._name.empty()) {
+                    description << std::endl << arg._name;
+                    description << "={" << getChoosesStr(arg, false) << "}";
+                }
+
+                std::string line;
+                while (std::getline(description, line, '\n')) {
+                    if (!options.margin)
+                        margin += tab;
+                    help << margin << line << std::endl;
+                    margin = options.margin ? generateStr(options.margin, " ") : tab;
+                }
+            } else
+                help << std::endl;
         }
     }
 
@@ -418,18 +454,22 @@ const std::string ArgParse::help()
 
     for (auto const& it : _flags) {
 #define AP_HAS_NAME(CH, VALNAME) do { \
+        std::stringstream s; \
         if (flag.value.isRequired) \
-            help << CH << "<" << VALNAME << ">"; \
+            s << CH << "<" << VALNAME << ">"; \
         else \
-            help << CH << "[<" << VALNAME << ">]"; \
+            s << CH << "[<" << VALNAME << ">]"; \
+        help << cutMargin(&margin, s.str()); \
     } while(false)
 
 #define AP_PRINT_FLAG(FLAG, L) do { \
         help << FLAG; \
-        if (flag.value._chooseList.size() > 0) \
-            AP_HAS_NAME(" ", getChoosesStr(flag.value, hasLongFlag ? L : (L ? 0 : 1))); \
-        else if (!flag.value._name.empty()) \
-            AP_HAS_NAME(" ", flag.value._name); \
+        if (flag.hasValue) {\
+            if (flag.value._chooseList.size()) \
+                AP_HAS_NAME(" ", (!flag.value._name.empty() ? flag.value._name : getChoosesStr(flag.value, hasLongFlag ? L : (L ? 0 : 1)))); \
+            else \
+                AP_HAS_NAME(" ", (flag.value._name.empty() ? "..." : flag.value._name)); \
+        } \
     } while(false)
 
         const Flag& flag = it.second;
@@ -439,19 +479,39 @@ const std::string ArgParse::help()
             || (options.help.show == Options::Help::ShowAllDefined && !flag.isDefined))
             continue;
 
+        std::string margin(generateStr(options.margin, " "));
         if (hasShortFlag || hasLongFlag)
-            help << tab;
+            help << cutMargin(&margin, tab);
         if (hasShortFlag)
-            AP_PRINT_FLAG(flag._shortFlag, 1);
+            AP_PRINT_FLAG(cutMargin(&margin, flag._shortFlag), 1);
         if (hasLongFlag) {
             if (hasShortFlag)
-                help << ", ";
-            AP_PRINT_FLAG(flag._longFlag, 0);
+                help << cutMargin(&margin, ", ");
+            AP_PRINT_FLAG(cutMargin(&margin, flag._longFlag), 0);
         }
+
         if (hasShortFlag || hasLongFlag) {
+            std::stringstream description;
+            if (!options.help.compact || (options.margin && margin.empty()))
+                description << std::endl;
+            if (!flag._description.empty()) {
+                description << flag._description;
+            }
+            if (flag.value._chooseList.size() && !flag.value._name.empty()) {
+                description << std::endl << flag.value._name;
+                description << "={" << getChoosesStr(flag.value, false) << "}";
+                description << tab << flag.value._description;
+            }
             if (!options.help.compact)
-                help << std::endl << tab;
-            help << tab << flag._description << std::endl;
+                description << std::endl << std::endl;
+
+            std::string line;
+            while (std::getline(description, line, '\n')) {
+                if (!options.margin)
+                    margin += tab;
+                help << margin << line << std::endl;
+                margin = options.margin ? generateStr(options.margin, " ") : tab;
+            }
         }
 
 #undef AP_PRINT_FLAG

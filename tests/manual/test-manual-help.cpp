@@ -26,6 +26,8 @@
 
 #include "arg-parse.hpp"
 #include <iostream>
+#include <sstream>
+#include <string>
 
 namespace testargparse {
 namespace {
@@ -37,15 +39,19 @@ TestContext::Return showHelp(TestContext* ctx)
     struct {
         const std::string option;
     } testCases[] {
-        "help.show=0",
-        "help.show=1,tab=\t",
-        "help.show=2,program.name=show-all",
+        "help.show=0,margin=30",
+        "help.show=1,tab=\t,help.add=false",
+        "help.show=2,program.name=show-all,help.compact=off,margin=20",
         ctx->param.str
     };
 
-    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase){
+    for (size_t testCase = 0; testCase < TAP_ARRAY_SIZE(testCases); ++testCase) {
         const std::string& interlacedOption = testCases[testCase].option;
         const std::string caseName = TAP_CASE_NAME(testCase, interlacedOption);
+        std::cout << "--- " << caseName << " ---" << std::endl;
+
+        char* argv[] = { TAP_CHARS("program"), TAP_CHARS("--undefined"), TAP_CHARS("2"), TAP_CHARS("3"), TAP_CHARS("4"), TAP_CHARS("5"), TAP_CHARS("6") };
+        const int argc = TAP_ARRAY_SIZE(argv);
 
         ArgParse ap(interlacedOption);
         ap.def(Flag("", "-s", "Only 'short' flag def, is a setter == without value."));
@@ -53,7 +59,9 @@ TestContext::Return showHelp(TestContext* ctx)
         ap.def(Flag("--long", "-l", "Both 'long' and 'short' flag def, is a setter == without value."));
         ap.def(Flag("", "-o", "Only 'short' flag def, with value.", Value("default", Value::Required)));
         ap.def(Flag("--only-long-with", "", "Only 'long' flag def, with value.", Value("default", !Value::Required)));
-        ap.def(Flag("--long-with", "-L", "Both 'long' and 'short' flag def, with value.", Value("default", Value::Required, "value", "This value is required.")));
+        std::stringstream multilineDescription;
+        multilineDescription << "Both 'long' and 'short' flag def," << std::endl << "with value" << std::endl << "and uses of multi-line description.";
+        ap.def(Flag("--long-with", "-L", multilineDescription.str(), Value("default", Value::Required, "value", "This value is required.")));
         ap.def(Flag("", "-c", "Only 'short' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, Value::Required)));
         ap.def(Flag("--only-long-chooser", "", "Only 'long' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, !Value::Required)));
         ap.def(Flag("--long-chooser", "-C", "Both 'long' and 'short' flag def, with 'chooser' value.", Value( { "D", "A", "B", "C", "E" }, Value::Required, "choose", "This chooser is required.")));
@@ -62,13 +70,16 @@ TestContext::Return showHelp(TestContext* ctx)
         ap.def(Arg("second", "Has description."));
         ap.def(Arg("third", "", Arg::Required));
         ap.def(Arg("fourth", "", Arg::Required, Value("3.14")));
-        ap.def(Arg("fifth", "Has description with default value", Arg::Required, Value("last", !Value::Required, "The value description.")));
+        multilineDescription.str("");
+        multilineDescription << "Has description" << std::endl << "with default value" << std::endl << "and uses of multi-line description.";
+        ap.def(Arg("fifth", multilineDescription.str(), Arg::Required, Value("last", !Value::Required, "The value description.")));
         ap.def(Arg("sixth", "With chooser value", Arg::Required, Value( { "D", "A", "B", "C", "E" } )));
         ap.def(Arg("seventh", "", !Arg::Required, Value("1")));
         ap.def(Arg("eighth", "Has description with default value", !Arg::Required, Value("true", Value::Required, "The value description.")));
         ap.def(Arg("nineth", "With chooser value", !Arg::Required, Value( { "D", "A", "B", "C", "E" } )));
 
-        std::cout << "--- " << caseName << " ---" << std::endl;
+        if (!ap.parse(argc, argv))
+            std::cout << ap.error() << std::endl;
         std::cout << ap.help() << std::endl;
     }
 

@@ -87,6 +87,7 @@ public:
             bool compact;
             int show;
         } help = { true, true, Help::ShowAllDefined };
+        size_t margin = 0;
     } options;
 
     struct Errors {
