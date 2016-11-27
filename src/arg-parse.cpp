@@ -384,8 +384,6 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
     return !_errors.size();
 }
 
-const std::string description();
-
 const std::string ArgParse::help()
 {
     const std::string tab = options.tab;
@@ -504,7 +502,6 @@ const std::string ArgParse::help()
 
             AP_PRINT_DESCRIPTION(help, description, options.margin, margin, tab);
         }
-
 #undef AP_PRINT_FLAG
     }
 #undef AP_PRINT_DESCRIPTION
