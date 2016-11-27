@@ -35,15 +35,15 @@ using namespace argparse;
 
 #define TAP_TEST_COUNTS_DEF(CTX, COUNTS_DEF, EXPECTED_DEF) do { \
         if (TAP_CHECK(CTX, COUNTS_DEF.flags != EXPECTED_DEF.flags)) \
-            return TAP_FAIL(ctx, "!!!"); \
+            return TAP_FAIL(CTX, "!!!"); \
         if (TAP_CHECK(CTX, COUNTS_DEF.args.required != EXPECTED_DEF.args.required)) \
-            return TAP_FAIL(ctx, "!!!"); \
+            return TAP_FAIL(CTX, "!!!"); \
         if (TAP_CHECK(CTX, COUNTS_DEF.args.nonRequired != EXPECTED_DEF.args.nonRequired)) \
-            return TAP_FAIL(ctx, "!!!"); \
+            return TAP_FAIL(CTX, "!!!"); \
         if (TAP_CHECK(CTX, COUNTS_DEF.args.all() != EXPECTED_DEF.args.required + EXPECTED_DEF.args.nonRequired)) \
-            return TAP_FAIL(ctx, "!!!"); \
+            return TAP_FAIL(CTX, "!!!"); \
         if (TAP_CHECK(CTX, COUNTS_DEF.all() != EXPECTED_DEF.flags + EXPECTED_DEF.args.all())) \
-            return TAP_FAIL(ctx, "!!!"); \
+            return TAP_FAIL(CTX, "!!!"); \
     } while (false)
 
 #define TAP_TEST_COUNTS(CTX, AP, EXPECTED) do { \

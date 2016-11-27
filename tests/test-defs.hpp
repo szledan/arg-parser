@@ -76,7 +76,7 @@
             msg += "Error message(s): "; \
             for (auto const& err : ARGS.errors()) \
                 msg += err.message + " "; \
-            return TAP_FAIL(ctx, msg);  \
+            return TAP_FAIL(CTX, msg);  \
         } \
     } while (false)
 
@@ -85,7 +85,7 @@
 #endif // TAP_CHECK_PARSER_EXPECTED_RETURN
 #define TAP_CHECK_PARSER_EXPECTED_RETURN(CTX, CONDITION) do { \
         if (TAP_CHECK(CTX, (CONDITION))) { \
-            return TAP_FAIL(ctx, "The parse() returns wrong value! The wrong condition is: " #CONDITION "."); \
+            return TAP_FAIL(CTX, "The parse() returns wrong value! The wrong condition is: " #CONDITION "."); \
         } \
     } while (false)
 
