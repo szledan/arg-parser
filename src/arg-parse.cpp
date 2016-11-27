@@ -29,10 +29,6 @@
  *  [2] Implement 'mode.strict', and 'help.lexicographic'
  *  [5] Replace every 'true/false' to const values.
  *
- * FIXME LIST:
- *  [4] The 'help()' works buggly: sometimes doeasn't show [value]s.
- *  [3] Update documentation: ./README.md ./doc/api-references.md ./demos/README.md ./src/README.md
- *
  * FUTURE LIST:
  *  [6] Extend ArgParse with: argc(), argv() native getter functions to _argc, _argv.
  *  [7] Extend './demos' with some typical example.
@@ -413,6 +409,25 @@ const std::string ArgParse::help()
         }
     }
 
+#define AP_PRINT_NAME(CH, VALUE, VALNAME) do { \
+        std::stringstream s; \
+        if (VALUE.isRequired) \
+            s << CH << "<" << VALNAME << ">"; \
+        else \
+            s << CH << "[<" << VALNAME << ">]"; \
+        help << cutMargin(&margin, s.str()); \
+    } while (false)
+
+#define AP_PRINT_DESCRIPTION(HELP, DESCRIPT, MARGIN_SIZE, MARGIN_STR, TAB) do { \
+        std::string line; \
+        while (std::getline(DESCRIPT, line, '\n')) { \
+            if (!MARGIN_SIZE) \
+                MARGIN_STR += TAB; \
+            HELP << MARGIN_STR << line << std::endl; \
+            MARGIN_STR = MARGIN_SIZE ? generateStr(MARGIN_SIZE, " ") : TAB; \
+        } \
+    } while (false)
+
     // Print arguments.
     help << std::endl << std::endl << "Arguments:" << std::endl;
 
@@ -423,10 +438,7 @@ const std::string ArgParse::help()
                 || options.help.show == Options::Help::ShowAll)) {
             std::string margin(generateStr(options.margin, " "));
             help << cutMargin(&margin, tab);
-            if (arg.isRequired)
-                help << cutMargin(&margin, "<") << cutMargin(&margin, arg._name) << cutMargin(&margin, ">");
-            else
-                help << cutMargin(&margin, "[<") << cutMargin(&margin, arg._name) << cutMargin(&margin, ">]");
+            AP_PRINT_NAME("", arg, arg._name);
             if (!arg._description.empty()) {
                 std::stringstream description;
                 if (!options.help.compact || (options.margin && margin.empty()))
@@ -437,13 +449,7 @@ const std::string ArgParse::help()
                     description << "={" << getChoosesStr(arg, false) << "}";
                 }
 
-                std::string line;
-                while (std::getline(description, line, '\n')) {
-                    if (!options.margin)
-                        margin += tab;
-                    help << margin << line << std::endl;
-                    margin = options.margin ? generateStr(options.margin, " ") : tab;
-                }
+                AP_PRINT_DESCRIPTION(help, description, options.margin, margin, tab);
             } else
                 help << std::endl;
         }
@@ -453,24 +459,15 @@ const std::string ArgParse::help()
     help << std::endl << "Option flags:" << std::endl;
 
     for (auto const& it : _flags) {
-#define AP_HAS_NAME(CH, VALNAME) do { \
-        std::stringstream s; \
-        if (flag.value.isRequired) \
-            s << CH << "<" << VALNAME << ">"; \
-        else \
-            s << CH << "[<" << VALNAME << ">]"; \
-        help << cutMargin(&margin, s.str()); \
-    } while(false)
-
 #define AP_PRINT_FLAG(FLAG, L) do { \
         help << FLAG; \
         if (flag.hasValue) {\
             if (flag.value._chooseList.size()) \
-                AP_HAS_NAME(" ", (!flag.value._name.empty() ? flag.value._name : getChoosesStr(flag.value, hasLongFlag ? L : (L ? 0 : 1)))); \
+                AP_PRINT_NAME(" ", flag.value, (!flag.value._name.empty() ? flag.value._name : getChoosesStr(flag.value, hasLongFlag ? L : (L ? 0 : 1)))); \
             else \
-                AP_HAS_NAME(" ", (flag.value._name.empty() ? "..." : flag.value._name)); \
+                AP_PRINT_NAME(" ", flag.value, (flag.value._name.empty() ? "..." : flag.value._name)); \
         } \
-    } while(false)
+    } while (false)
 
         const Flag& flag = it.second;
         const bool hasShortFlag = !flag._shortFlag.empty();
@@ -505,18 +502,13 @@ const std::string ArgParse::help()
             if (!options.help.compact)
                 description << std::endl << std::endl;
 
-            std::string line;
-            while (std::getline(description, line, '\n')) {
-                if (!options.margin)
-                    margin += tab;
-                help << margin << line << std::endl;
-                margin = options.margin ? generateStr(options.margin, " ") : tab;
-            }
+            AP_PRINT_DESCRIPTION(help, description, options.margin, margin, tab);
         }
 
 #undef AP_PRINT_FLAG
-#undef AP_HAS_NAME
     }
+#undef AP_PRINT_DESCRIPTION
+#undef AP_PRINT_NAME
 
     return help.str();
 }
