@@ -37,6 +37,11 @@
 
 #include "arg-parse.hpp"
 
+#include <assert.h>
+#include <map>
+#include <sstream>
+#include <string>
+
 #ifdef AP_ASSERT
 #undef AP_ASSERT
 #endif // AP_ASSERT
@@ -48,12 +53,6 @@
 #endif // AP_DEBUG
 #define AP_DEBUG
 #endif // NDEBUG
-
-#include <assert.h>
-#include <iostream>
-#include <map>
-#include <sstream>
-#include <string>
 
 namespace argparse {
 
@@ -90,10 +89,8 @@ const T readOption(const std::string& oList, const std::string& key, const T& de
     std::string option;
     while (std::getline(optionList, option, ',')) {
         const size_t posEq = option.find("=");
-        if (posEq != std::string::npos) {
-            if (option.substr(0, posEq) == key)
-                return returnValue(option.substr(posEq + 1), def);
-        }
+        if (posEq != std::string::npos && option.substr(0, posEq) == key)
+            return returnValue(option.substr(posEq + 1), def);
     }
 
     return def;
@@ -127,13 +124,11 @@ const ParamType mapParamType(const std::string& arg)
     }
 
     AP_ASSERT(arg.size() > 2);
-    if (arg[1] != '-') {
+    if (arg[1] != '-')
         return ParamType::ShortFlagsType;
-    }
 
-    if (arg.find('=') != std::string::npos) {
+    if (arg.find('=') != std::string::npos)
         return ParamType::LongFlagWithEqType;
-    }
 
     return ParamType::LongFlagWithoutEqType;
 }
@@ -143,10 +138,9 @@ const bool findValue(const std::string& valueStr, const std::vector<std::string>
     if (!chooseList.size())
         return true;
 
-    for (auto const& choose : chooseList) {
+    for (auto const& choose : chooseList)
         if (choose == valueStr)
             return true;
-    }
 
     return false;
 }
@@ -246,15 +240,13 @@ const Flag& ArgParse::addFlag(const Flag& flag, const CallBackFunc cbf)
     const std::string name = flag._longFlag + "-" + flag._shortFlag;
     AP_ASSERT(!name.empty());
 
-    Flag* flagPtr = &(_flags[name] = flag);
-    AP_ASSERT(flagPtr == &(_flags[name]));
+    Flag* flagPtr = &(_flags.data[name] = flag);
+    AP_ASSERT(flagPtr == &(_flags.data[name]));
 
-    if (!flag._longFlag.empty()) {
-        _longFlags[flag._longFlag] = flagPtr;
-    }
-    if (!flag._shortFlag.empty()) {
-        _shortFlags[flag._shortFlag] = flagPtr;
-    }
+    if (!flag._longFlag.empty())
+        _flags.longs[flag._longFlag] = flagPtr;
+    if (!flag._shortFlag.empty())
+        _flags.shorts[flag._shortFlag] = flagPtr;
 
     flagPtr->_callBackFunc = cbf;
     return *flagPtr;
@@ -268,7 +260,7 @@ const Flag& ArgParse::def(const Flag& flag, const CallBackFunc cbf)
     const bool hasLongFlag = check(flag._longFlag);
     const bool hasShortFlag = check(flag._shortFlag);
     if (hasLongFlag || hasShortFlag) {
-        const Flag* addedFlag = hasLongFlag ? _longFlags[flag._longFlag] : _shortFlags[flag._shortFlag];
+        const Flag* addedFlag = hasLongFlag ? _flags.longs[flag._longFlag] : _flags.shorts[flag._shortFlag];
         addError(&errors, Errors::Define_FlagMultiply, "Multiply definations of flags", addedFlag);
         return *addedFlag;
     }
@@ -374,37 +366,37 @@ const bool ArgParse::parse(const int argc_, char* const argv_[])
             for (size_t i = 1; i < shortFlags.size(); ++i) {
                 param.paramStr = std::string("-") + shortFlags[i];
                 const bool checkValue = i == (param.paramStr.size() - 1);
-                AP_CHECK_FLAG_EXIST(_shortFlags, !AP_IS_LONG);
-                AP_SETUP_FLAG(_shortFlags, checkValue);
+                AP_CHECK_FLAG_EXIST(_flags.shorts, !AP_IS_LONG);
+                AP_SETUP_FLAG(_flags.shorts, checkValue);
             }
             break;
         }
         case ParamType::ShortFlagType:
-            AP_CHECK_FLAG_EXIST(_shortFlags, !AP_IS_LONG);
-            AP_SETUP_FLAG(_shortFlags, AP_CHECH_VALUE);
+            AP_CHECK_FLAG_EXIST(_flags.shorts, !AP_IS_LONG);
+            AP_SETUP_FLAG(_flags.shorts, AP_CHECH_VALUE);
             break;
         case ParamType::LongFlagWithEqType: {
-            const bool isDefinedFullParam = _longFlags.find(param.paramStr) != _longFlags.end();
+            const bool isDefinedFullParam = _flags.longs.find(param.paramStr) != _flags.longs.end();
             if (!isDefinedFullParam) {
                 const size_t posEq = param.paramStr.find("=");
                 param.valueStr = param.paramStr.substr(posEq + 1);
                 param.paramStr = param.paramStr.substr(0, posEq);
 
-                if (_longFlags.find(param.paramStr) == _longFlags.end()) {
+                if (_flags.longs.find(param.paramStr) == _flags.longs.end()) {
                     // Add undefined flag with value.
                     def(Flag(param.paramStr, "", "", Value("_")));
-                    _longFlags[param.paramStr]->value.str = param.valueStr;
+                    _flags.longs[param.paramStr]->value.str = param.valueStr;
                     counts.parsed.undefined.flags++;
                 } else {
-                    AP_CHECK_FLAG_EXIST(_longFlags, AP_IS_LONG);
+                    AP_CHECK_FLAG_EXIST(_flags.longs, AP_IS_LONG);
                 }
             }
-            AP_SETUP_FLAG(_longFlags, AP_CHECH_VALUE);
+            AP_SETUP_FLAG(_flags.longs, AP_CHECH_VALUE);
             break;
         }
         case ParamType::LongFlagWithoutEqType:
-            AP_CHECK_FLAG_EXIST(_longFlags, AP_IS_LONG);
-            AP_SETUP_FLAG(_longFlags, AP_CHECH_VALUE);
+            AP_CHECK_FLAG_EXIST(_flags.longs, AP_IS_LONG);
+            AP_SETUP_FLAG(_flags.longs, AP_CHECH_VALUE);
             break;
         case ParamType::ArgType:
             if (_args.size() > argCount) {
@@ -456,7 +448,7 @@ const std::string ArgParse::help()
     help << "usage: " << options.program.name;
 
     // Add '[options]' for usage part.
-    if (!_flags.empty())
+    if (!_flags.data.empty())
         help << " [options]";
 
     // Print arguments after programname.
@@ -519,7 +511,7 @@ const std::string ArgParse::help()
     // Print option flags.
     help << std::endl << "Option flags:" << std::endl;
 
-    for (auto const& it : _flags) {
+    for (auto const& it : _flags.data) {
 #define AP_PRINT_FLAG(FLAG, L) do { \
         help << FLAG; \
         if (flag.hasValue) {\
@@ -583,7 +575,7 @@ const std::string ArgParse::error()
 
 const bool ArgParse::check(const std::string& flagStr)
 {
-    return (_longFlags.find(flagStr) != _longFlags.end()) || (_shortFlags.find(flagStr) != _shortFlags.end());
+    return (_flags.longs.find(flagStr) != _flags.longs.end()) || (_flags.shorts.find(flagStr) != _flags.shorts.end());
 }
 
 template<typename T>
@@ -592,7 +584,7 @@ const bool ArgParse::checkAndRead(const std::string& flagStr, T* value)
     if (!check(flagStr) || !value)
         return false;
 
-    const Flag& flag = _longFlags.find(flagStr) != _longFlags.end() ? *_longFlags[flagStr] : *_shortFlags[flagStr];
+    const Flag& flag = _flags.longs.find(flagStr) != _flags.longs.end() ? *_flags.longs[flagStr] : *_flags.shorts[flagStr];
     if (!flag.hasValue)
         return false;
 
@@ -612,17 +604,17 @@ const Flag& ArgParse::operator[](const std::string& idx)
         flagStr = flagStr.substr(0, 2);
         // Fall through.
     case ParamType::ShortFlagType:
-        if (_shortFlags.find(flagStr) == _shortFlags.end())
+        if (_flags.shorts.find(flagStr) == _flags.shorts.end())
             return def(Flag("", flagStr));
-        return *(_shortFlags[flagStr]);
+        return *(_flags.shorts[flagStr]);
     case ParamType::LongFlagWithEqType:
-        if (_longFlags.find(flagStr) == _longFlags.end())
+        if (_flags.longs.find(flagStr) == _flags.longs.end())
             flagStr = flagStr.substr(0, flagStr.find("="));
         // Fall through.
     case ParamType::LongFlagWithoutEqType:
-        if (_longFlags.find(flagStr) == _longFlags.end())
+        if (_flags.longs.find(flagStr) == _flags.longs.end())
             return def(Flag(flagStr));
-        return *(_longFlags[flagStr]);
+        return *(_flags.longs[flagStr]);
     default:
         AP_ASSERT(false);
         break;

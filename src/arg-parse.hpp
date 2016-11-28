@@ -25,13 +25,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
+#include <initializer_list>
 #include <map>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <list>
-#include <initializer_list>
 
 namespace argparse {
 
@@ -132,11 +129,13 @@ public:
     } errors;
 
 private:
-    const Flag& addFlag(const Flag& flag, const CallBackFunc cbf = nullptr);
+    const Flag& addFlag(const Flag&, const CallBackFunc = nullptr);
 
-    std::map<std::string, Flag> _flags;
-    std::map<std::string, Flag*> _longFlags;
-    std::map<std::string, Flag*> _shortFlags;
+    struct {
+        std::map<std::string, Flag> data;
+        std::map<std::string, Flag*> longs;
+        std::map<std::string, Flag*> shorts;
+    } _flags;
     std::vector<Arg> _args;
 };
 
@@ -147,7 +146,7 @@ typedef std::initializer_list<std::string> ChooseList;
 struct Value {
     static const bool Required; // = true
 
-    Value(const Value& v);
+    Value(const Value&);
     Value(const std::string& defaultValue = "",
           const bool& require = !Required,
           const std::string& name = "",
@@ -174,7 +173,7 @@ struct Value {
 struct Flag {
     static const Flag WrongFlag;
 
-    Flag(const Flag& f);
+    Flag(const Flag&);
     Flag(const std::string& longFlag = "",
          const std::string& shortFlag = "",
          const std::string& description = "");
@@ -189,6 +188,7 @@ struct Flag {
     bool isDefined;
     bool hasValue;
     Value value;
+
 // private:
     std::string _longFlag;
     std::string _shortFlag;
@@ -201,7 +201,7 @@ struct Flag {
 struct Arg : Value {
     static const Arg WrongArg;
 
-    Arg(const Arg& a);
+    Arg(const Arg&);
     Arg(const std::string& name = "",
         const std::string& description = "");
     Arg(const std::string& name,
