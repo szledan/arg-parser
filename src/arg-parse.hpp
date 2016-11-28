@@ -58,7 +58,6 @@ public:
 
     const std::string help();
     const std::string error();
-    const std::vector<Errors>& errors() const;
 
     const bool check(const std::string& flagStr);
     template<typename T>
@@ -102,28 +101,35 @@ public:
     } options;
 
     struct Errors {
+        static const int kErrorGroupSize = 256;
         enum Codes {
             NoError = 0,
-            RequiredFlagValueMissing,
-            RequiredArgumentMissing,
-            ArgVIsEmpty,
-            ArgCBiggerThanElementsOfArgV,
-            FlagMultiplyDefination,
-        } const code;
-        const std::string message;
-        struct Suspect {
-            enum {
-                GeneralType,
-                FlagType,
-                ArgType,
-            } const type;
-            union {
-                const void* _ptr;
-                const Flag* flag;
-                const Arg* arg;
-            };
-        } const suspect;
-    };
+            Define = 1 * kErrorGroupSize,
+                Define_FlagMultiply,
+            Parse = 2 * kErrorGroupSize,
+                Parse_RequiredFlagValueMissing,
+                Parse_RequiredArgumentMissing,
+                Parse_ArgVIsEmpty,
+                Parse_ArgCBiggerThanElementsOfArgV,
+            Option = 3 * kErrorGroupSize,
+            Last
+        };
+        struct Error {
+            const Codes code;
+            const std::string message;
+            struct Suspect {
+                enum { GeneralType, FlagType, ArgType } const type;
+                union {
+                    const void* _ptr;
+                    const Flag* flag;
+                    const Arg* arg;
+                };
+            } const suspect;
+        };
+
+        std::vector<Error*> select(Codes code = Codes::Parse);
+        std::vector<Error> data;
+    } errors;
 
 private:
     const Flag& addFlag(const Flag& flag, const CallBackFunc cbf = nullptr);
@@ -132,10 +138,7 @@ private:
     std::map<std::string, Flag*> _longFlags;
     std::map<std::string, Flag*> _shortFlags;
     std::vector<Arg> _args;
-    std::vector<Errors> _errors;
 };
-
-inline std::ostream& operator<<(std::ostream& os, const ArgParse::Errors& err);
 
 // Value
 
