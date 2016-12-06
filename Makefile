@@ -1,14 +1,14 @@
-all: arg-parse
+all: build.demos
 
-arg-parse: build-dir
-	cd build/ && make arg-parse
-
-build-tests: build-dir
+build.tests: make.dir
 	cd build/ && make tests
 
-build-dir:
+build.demos: make.dir
+	cd build/ && make demos
+
+make.dir:
 	mkdir -p build/
-	cd build/ && cmake ../
+	cmake -H. -Bbuild
 
 clean:
 	cd build && make clean
