@@ -1,1 +1,3 @@
-file(COPY arg-parser.h arg-parser.hpp DESTINATION ${INCLUDE_OUTPUT_DIR})
+file(COPY arg-parser.h DESTINATION ${INCLUDE_OUTPUT_DIR})
+
+add_executable(ap-demo "main.cpp")

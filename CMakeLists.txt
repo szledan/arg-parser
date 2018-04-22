@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.10)
-project(arg-parse C CXX)
+project(arg-parser C CXX)
 set(PROJECT_VERSION 1)
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH)
 
-set(EXTRA_FLAGS "-Wall -pedantic -std=c++11 -g")
+set(EXTRA_FLAGS "-Wall -pedantic -std=c++11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}")
 
@@ -17,4 +17,3 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_OUTPUT_DIR})
 
 add_subdirectory(src)
 #add_subdirectory(tests)
-add_subdirectory(demos)
