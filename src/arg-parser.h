@@ -42,7 +42,7 @@
 
 /*! \brief Define flag */
 #define PARSE_FLAG(FLAGS, DEFAULT, MSG) [&](){\
-    /* show help */ if (ap::s_help) { int size = AP_ALIGNMENT - std::string(FLAGS).size() - 2; AP_STDOUT << "  " << FLAGS; std::stringstream _message(MSG); std::string msg; bool first = true; std::stringstream _def; _def << DEFAULT; while (std::getline(_message, msg, '\n')) { PTRNS(msg, _def.str()); AP_STDOUT << std::string(first ? (size > 1 ? size : 2) : AP_ALIGNMENT, ' ') << msg.erase(0, msg.find_first_not_of(' ')) << std::endl; first = false; } return DEFAULT; }\
+    /* show help */ if (ap::s_help) { int size = AP_ALIGNMENT - std::string(FLAGS).size() - 2; AP_STDOUT << "  " << FLAGS; std::stringstream _message(MSG); std::string msg; bool first = true; std::stringstream _def; _def << DEFAULT; while (std::getline(_message, msg, '\n')) { PTRNS(msg, _def.str()); AP_STDOUT << std::string(first ? (size > 1 ? size : 2) : AP_ALIGNMENT, ' ') << msg.erase(0, std::min(msg.find_first_not_of(' '), msg.size())) << std::endl; first = false; } return DEFAULT; }\
     /* parse value */ return PARSE_FLAG_VALUE(FLAGS, DEFAULT, 1, ap::s_argv.size());\
     }()
 
@@ -53,7 +53,7 @@
 
 /*! \brief Add message */
 #define ADD_MSG(MSG) [&](){\
-     if (ap::s_help) AP_STDOUT << PTRNS(MSG, "") << std::endl;\
+    if (ap::s_help) AP_STDOUT << PTRNS(MSG, "") << std::endl;\
     }()
 
 /*** Options *****************************************************************/
@@ -71,6 +71,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 namespace ap {
@@ -79,7 +80,7 @@ static std::vector<std::string> s_argv;
 static bool s_help = false;
 
 #define CHECK_FLAGS(FLAGS, FROM, TO) [&]()->size_t {\
-    /* separate flags */ std::vector<std::string> flags; std::stringstream ss(FLAGS); std::string flag; while (std::getline(ss, flag, ',')) { flag.erase(0, flag.find_first_not_of(' ')); flag.erase(flag.find_last_not_of(' ') + 1); flags.push_back(flag); } std::string& lastFlag = flags.back(); if (lastFlag.find_last_of(' ') < lastFlag.size()) lastFlag.erase(lastFlag.find_last_of(' ')).erase(lastFlag.find_last_not_of(' ') + 1);\
+    /* separate flags */ std::vector<std::string> flags; std::stringstream ss(FLAGS); std::string flag; while (std::getline(ss, flag, ',')) { TRIM_SPACES(flag); flags.push_back(flag);} std::string& lastFlag = flags.back(); size_t pos = lastFlag.find_last_of(" \t"); if (std::string::npos != pos) lastFlag.erase(pos);\
     /* check flag */ for (size_t _i = FROM; _i < TO; ++_i) for (size_t _fi = 0; _fi < flags.size(); ++_fi) if (ap::s_argv[_i] == flags[_fi]) return _i; \
     /* not found */ return 0; }()
 #define HAS_FLAGS(FLAGS) CHECK_FLAGS(FLAGS, 1, ap::s_argv.size())
@@ -91,6 +92,7 @@ static bool s_help = false;
 
 #define REPLACE_PATTERN(MSG, PTRN, VALUE) [&](){ std::string _str(MSG); std::string _ptrn(PTRN); while (_str.find(_ptrn) < _str.size()) _str.replace(_str.find(_ptrn), _ptrn.length(), std::string(VALUE)); return _str; }()
 #define PTRNS(STR, DEF) REPLACE_PATTERN(REPLACE_PATTERN(STR, "%d", DEF), "%p", ap::s_argv[0])
+#define TRIM_SPACES(STR) [&](){ size_t startpos = STR.find_first_not_of(" \t"); if (std::string::npos != startpos) STR.erase(0, startpos); size_t endpos = STR.find_last_not_of(" \t") + 1; if (std::string::npos != endpos) STR.erase(endpos); }()
 
 } // namespace ap
 
