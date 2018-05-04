@@ -31,14 +31,15 @@ int main(int argc, char* argv[])
     // 1. Simple usage in 'main'
 
     /* Parse help. */
-    bool a_help           = PARSE_HELP("-h, --help, --usage", false, "show this help.", "Arg-parser Demo *** Simple version *** (C) 2018. Szilard Ledan\nUsage: %p [options] name number [number...]\n\nOptions:", argc, argv);
+    bool a_help           = PARSE_HELP("-h, --help, --usage", "show this help.", "Arg-parser Demo *** Simple version *** (C) 2018. Szilard Ledan\nUsage: %p [options] name number [number...]\n\nOptions:", argc, argv);
     /* Parse flags. */
-    uint a_size           = PARSE_FLAG("--size SIZE", 300, "set size of window. Default is '%d'.");
+    uint a_size           = PARSE_FLAG("--size SIZE[=%d]", 300, "set size of window.");
     float a_lineWidth     = PARSE_FLAG("-w, --line-width LW", 3.14f, "set width of line. Default is '%d'.");
     std::string a_path    = PARSE_FLAG("-p, --path PATH", std::string("./build"), "set working dir. Default is '%d'.");
-    const char a_dot      = HAS_FLAG("-d", argc, argv) ? PARSE_FLAG("-d DOT", '.', "set separate char. Default is '%d'.") : '\0';
+    const char a_dot      = CHECK_FLAG("-d", argc, argv) ? PARSE_FLAG("-d DOT", '.', "set separate char. Default is '%d'.") : '\0';
     bool a_enable         = PARSE_FLAG("-e, --enable", false, "enable something.");
-    ADD_MSG("\n Frequencies:");
+    bool a_none           = PARSE_FLAG("-none", true, "disable something.");
+    ADD_MSG("\nFrequencies:");
     int a_frequency       = PARSE_FLAG("-f, --frequency FREQ", 60, "set rendering frequency.\n Default is '%d', but '%d' is not the best.");
     int a_Frequency       = PARSE_FLAG("+f, ++frequency FREQ", 25, "set refreshing frequency. Default is '%d'.");
     ADD_MSG("\nExamples:\n  %p -f 90 nothing 1 1 2 3 5 8\n  %p -s 2000 -e something 123 124 125");
@@ -49,30 +50,24 @@ int main(int argc, char* argv[])
         a_to.push_back(PARSE_ARG(0));
     }
     /* Check help. */
-    if (a_help) {
-        return option_main(argc, argv); // 2. Call the Singleton solution.
+    if (!a_help) {
+        std::cout << "a_help:      " << a_help << std::endl;
+        std::cout << "a_frequency: " << a_frequency << std::endl;
+        std::cout << "a_Frequency: " << a_Frequency << std::endl;
+        std::cout << "a_size:      " << a_size << std::endl;
+        std::cout << "a_lineWidth: " << a_lineWidth << std::endl;
+        std::cout << "a_path:      " << a_path << std::endl;
+        std::cout << "a_dot:       " << a_dot << std::endl;
+        std::cout << "a_enable:    " << a_enable << std::endl;
+        std::cout << "a_none:      " << a_none << std::endl;
+        std::cout << "a_from:      " << a_from << std::endl;
+        std::cout << "a_to:        "; for (size_t i = 0; i < a_to.size(); ++i) std::cout << a_to[i] << " "; std::cout << std::endl;
     }
-
-    std::cout << "a_help:      " << a_help << std::endl;
-    std::cout << "a_frequency: " << a_frequency << std::endl;
-    std::cout << "a_Frequency: " << a_Frequency << std::endl;
-    std::cout << "a_size:      " << a_size << std::endl;
-    std::cout << "a_lineWidth: " << a_lineWidth << std::endl;
-    std::cout << "a_path:      " << a_path << std::endl;
-    std::cout << "a_dot:       " << a_dot << std::endl;
-    std::cout << "a_enable:    " << a_enable << std::endl;
-    std::cout << "a_from:      " << a_from << std::endl;
-    std::cout << "a_to:        "; for (size_t i = 0; i < a_to.size(); ++i) std::cout << a_to[i] << " "; std::cout << std::endl;
 
     return option_main(argc, argv); // 2. Call the Singleton solution.
 }
 
 /* 2. Singleton class variant */
-
-#ifdef AP_ALIGNMENT
-#undef AP_ALIGNMENT
-#endif
-#define AP_ALIGNMENT 30
 
 #ifdef AP_STDOUT
 #undef AP_STDOUT
@@ -93,7 +88,9 @@ public:
     Options& parseOptions(int argc, char* argv[])
     {
         /* Parse help. */
-        m_help      = PARSE_HELP("-h, --help, --usage", false, "show this help.", "Arg-parser Demo *** Singleton version *** (C) 2018. Szilard Ledan\nUsage: " + std::string(argv[0]) +  " [options] name number [number...]\n\nOptions:", argc, argv);
+        ap::s_alignment = 30;
+        std::string usage("Arg-parser Demo *** Singleton version *** (C) 2018. Szilard Ledan\nUsage: %p [options] name number [number...]\n\nOptions:");
+        m_help      = PARSE_HELP("-h, --help, --usage", "show this help.", usage, argc, argv);
         /* Parse flags. */
         m_frequency = PARSE_FLAG("-f, --frequency FREQ", 60, "set rendering frequency.\n Default is '%d', but '%d' is not the best.");
         m_Frequency = PARSE_FLAG("+f, ++frequency FREQ", 25, "set refreshing frequency. Default is '%d'.");

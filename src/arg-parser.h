@@ -27,46 +27,42 @@
 
 /*** Interface ***************************************************************/
 
-/*! \brief Return number of unparsed arguments */
-#define UNPARSED_COUNT() (ap::s_argv.size() - 1)
-
-/*! \brief Check flags */
-#define HAS_FLAG(FLAG, ARGC, ARGV) [&]()->bool { for (int _i = 1; _i < ARGC; ++_i) if (std::string(FLAG) == std::string(ARGV[_i])) return true; return false; }()
-
-/*! \brief Initialize the parser and define the help flag */
-#define PARSE_HELP(FLAGS, DEFAULT, MSG, USAGE, ARGC, ARGV) [&](){\
+/*! \brief Initialize parser and define help flag */
+#define PARSE_HELP(FLAGS, MSG, USAGE, ARGC, ARGV) [&](){\
     /* copy argv */ ap::s_argv.resize(ARGC); for (int i = 0; i < ARGC; ++i) ap::s_argv[i] = std::string(ARGV[i]);\
-    /* check help */ if (HAS_FLAGS(FLAGS)) { ap::s_help = true; AP_STDOUT << PTRNS(USAGE, "") << std::endl; } \
-    /* parse value */ return PARSE_FLAG(FLAGS, ap::s_help, MSG);\
+    /* check help */ if (CHECK_FLAG(FLAGS, ARGC, ARGV)) { ap::s_help = true; AP_STDOUT << PTRNS(USAGE, "") << std::endl; PRINT_HELP(FLAGS, ap::s_help, MSG); } \
+    /* parse value */ return ap::s_help;\
     }()
 
 /*! \brief Define flag */
 #define PARSE_FLAG(FLAGS, DEFAULT, MSG) [&](){\
-    /* show help */ if (ap::s_help) { int size = AP_ALIGNMENT - std::string(FLAGS).size() - 2; AP_STDOUT << "  " << FLAGS; std::stringstream _message(MSG); std::string msg; bool first = true; std::stringstream _def; _def << DEFAULT; while (std::getline(_message, msg, '\n')) { PTRNS(msg, _def.str()); AP_STDOUT << std::string(first ? (size > 1 ? size : 2) : AP_ALIGNMENT, ' ') << msg.erase(0, std::min(msg.find_first_not_of(' '), msg.size())) << std::endl; first = false; } return DEFAULT; }\
-    /* parse value */ return PARSE_FLAG_VALUE(FLAGS, DEFAULT, 1, ap::s_argv.size());\
+    /* show help */ if (ap::s_help) { PRINT_HELP(FLAGS, DEFAULT, MSG); return DEFAULT; }\
+    /* parse value */ return [&](){\
+        /* check flag */ size_t j = [&]()->size_t { std::vector<std::string> flags; SEPARATE_FLAGS(FLAGS, flags); for (size_t i = 1; i < ap::s_argv.size(); ++i) for (size_t fi = 0; fi < flags.size(); ++fi) if (ap::s_argv[i] == flags[fi]) return i; return 0; }();\
+        /* parse value */ auto value = DEFAULT;  if (j) { if (typeid(DEFAULT) == typeid(bool)) { ap::s_argv.insert(ap::s_argv.begin() + j + 1, (*reinterpret_cast<bool*>(&value) ? "0" : "1")); } if ((++j) < ap::s_argv.size()) { std::stringstream ss(ap::s_argv[j]); ss >> value; ap::s_argv.erase(ap::s_argv.begin() + j); ap::s_argv.erase(ap::s_argv.begin() + j - 1); } }\
+        /* return value */ return value;\
+        }();\
     }()
 
 /*! \brief Define argument */
 #define PARSE_ARG(DEFAULT) [&](){\
-    /* parse next argument */ auto _arg = DEFAULT; if (ap::s_argv.size() > 1) { std::stringstream ss(ap::s_argv[1]); ss >> _arg; ap::s_argv.erase(ap::s_argv.begin() + 1); } return _arg;\
+    /* parse next argument */ auto arg = DEFAULT; if (ap::s_argv.size() > 1) { std::stringstream ss(ap::s_argv[1]); ss >> arg; ap::s_argv.erase(ap::s_argv.begin() + 1); } return arg;\
     }()
 
 /*! \brief Add message */
-#define ADD_MSG(MSG) [&](){\
-    if (ap::s_help) AP_STDOUT << PTRNS(MSG, "") << std::endl;\
-    }()
+#define ADD_MSG(MSG) [&](){ if (ap::s_help) AP_STDOUT << PTRNS(MSG, "") << std::endl; }()
 
-/*** Options *****************************************************************/
+/*! \brief Return number of unparsed arguments */
+#define UNPARSED_COUNT() (ap::s_argv.size() - 1)
 
-#ifndef AP_STDOUT
+/*! \brief Check flags */
+#define CHECK_FLAG(FLAGS, ARGC, ARGV) [&]()->bool { std::vector<std::string> flags; SEPARATE_FLAGS(FLAGS, flags); for (size_t j = 0; j < flags.size(); ++j) for (int i = 1; i < ARGC; ++i) if (flags[j] == std::string(ARGV[i])) return true; return false; }()
+
+#if !defined(AP_STDOUT)
 #define AP_STDOUT std::cout
-#endif // AP_STDOUT
+#endif // !defined(AP_STDOUT)
 
-#ifndef AP_ALIGNMENT
-#define AP_ALIGNMENT 25
-#endif // AP_ALIGNMENT
-
-/*** Implementation **********************************************************/
+/*** Helpers *****************************************************************/
 
 #include <iostream>
 #include <sstream>
@@ -76,22 +72,16 @@
 
 namespace ap {
 
-static std::vector<std::string> s_argv;
-static bool s_help = false;
+std::vector<std::string> s_argv;
+bool s_help = false;
+int s_alignment = 25;
+std::string s_short_flag_prefixes = "";
+std::string s_long_flag_delimiter = "";
 
-#define CHECK_FLAGS(FLAGS, FROM, TO) [&]()->size_t {\
-    /* separate flags */ std::vector<std::string> flags; std::stringstream ss(FLAGS); std::string flag; while (std::getline(ss, flag, ',')) { TRIM_SPACES(flag); flags.push_back(flag);} std::string& lastFlag = flags.back(); size_t pos = lastFlag.find_last_of(" \t"); if (std::string::npos != pos) lastFlag.erase(pos);\
-    /* check flag */ for (size_t _i = FROM; _i < TO; ++_i) for (size_t _fi = 0; _fi < flags.size(); ++_fi) if (ap::s_argv[_i] == flags[_fi]) return _i; \
-    /* not found */ return 0; }()
-#define HAS_FLAGS(FLAGS) CHECK_FLAGS(FLAGS, 1, ap::s_argv.size())
-#define PARSE_FLAG_VALUE(FLAGS, DEFAULT, FROM, TO) [&](){\
-    /* check flag */ size_t _j = CHECK_FLAGS(FLAGS, FROM, TO);\
-    /* parse value */ auto _r = DEFAULT;  if (_j) { if (typeid(DEFAULT) == typeid(bool)) { ap::s_argv.insert(ap::s_argv.begin() + _j + 1, "1"); } if ((++_j) < ap::s_argv.size()) { std::stringstream ss(ap::s_argv[_j]); ss >> _r; ap::s_argv.erase(ap::s_argv.begin() + _j); ap::s_argv.erase(ap::s_argv.begin() + _j - 1); } }\
-    /* return value */ return _r;\
-    }()
-
-#define REPLACE_PATTERN(MSG, PTRN, VALUE) [&](){ std::string _str(MSG); std::string _ptrn(PTRN); while (_str.find(_ptrn) < _str.size()) _str.replace(_str.find(_ptrn), _ptrn.length(), std::string(VALUE)); return _str; }()
-#define PTRNS(STR, DEF) REPLACE_PATTERN(REPLACE_PATTERN(STR, "%d", DEF), "%p", ap::s_argv[0])
+#define SEPARATE_FLAGS(FLAGS, ARRAY) [&](){ std::stringstream ss(FLAGS); std::string flag; while (std::getline(ss, flag, ',')) { TRIM_SPACES(flag); ARRAY.push_back(flag);} std::string& lastFlag = ARRAY.back(); size_t pos = lastFlag.find_last_of(" \t"); if (std::string::npos != pos) TRIM_SPACES(lastFlag.erase(pos)); }()
+#define PRINT_HELP(FLAGS, DEFAULT, MSG) [&](){ std::stringstream defStream; defStream << DEFAULT; std::string flags = PTRNS(FLAGS, defStream.str()); int size = ap::s_alignment - std::string(flags).size() - 2; AP_STDOUT << "  " << flags; std::stringstream msgStream(PTRNS(MSG, defStream.str())); std::string msg; bool first = true; while (std::getline(msgStream, msg, '\n')) { AP_STDOUT << std::string(first ? (size > 1 ? size : 2) : ap::s_alignment, ' ') << msg.erase(0, std::min(msg.find_first_not_of(' '), msg.size())) << std::endl; first = false; } }()
+#define REPLACE_PATTERN(MSG, PTRN, VALUE) [&](){ std::string str(MSG); std::string ptrn(PTRN); while (str.find(ptrn) < str.size()) str.replace(str.find(ptrn), ptrn.length(), std::string(VALUE)); return str; }()
+#define PTRNS(STR, DEF) REPLACE_PATTERN(REPLACE_PATTERN(STR, "%p", ap::s_argv[0]), "%d", DEF)
 #define TRIM_SPACES(STR) [&](){ size_t startpos = STR.find_first_not_of(" \t"); if (std::string::npos != startpos) STR.erase(0, startpos); size_t endpos = STR.find_last_not_of(" \t") + 1; if (std::string::npos != endpos) STR.erase(endpos); }()
 
 } // namespace ap
