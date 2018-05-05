@@ -51,17 +51,17 @@ int main(int argc, char* argv[])
     }
     /* Check help. */
     if (!a_help) {
-        std::cout << "a_help:      " << a_help << std::endl;
-        std::cout << "a_frequency: " << a_frequency << std::endl;
-        std::cout << "a_Frequency: " << a_Frequency << std::endl;
-        std::cout << "a_size:      " << a_size << std::endl;
-        std::cout << "a_lineWidth: " << a_lineWidth << std::endl;
-        std::cout << "a_path:      " << a_path << std::endl;
-        std::cout << "a_dot:       " << a_dot << std::endl;
-        std::cout << "a_enable:    " << a_enable << std::endl;
-        std::cout << "a_none:      " << a_none << std::endl;
-        std::cout << "a_from:      " << a_from << std::endl;
-        std::cout << "a_to:        "; for (size_t i = 0; i < a_to.size(); ++i) std::cout << a_to[i] << " "; std::cout << std::endl;
+        std::cout << "a_help:      " << a_help << ";" << std::endl;
+        std::cout << "a_frequency: " << a_frequency << ";" << std::endl;
+        std::cout << "a_Frequency: " << a_Frequency << ";" << std::endl;
+        std::cout << "a_size:      " << a_size << ";" << std::endl;
+        std::cout << "a_lineWidth: " << a_lineWidth << ";" << std::endl;
+        std::cout << "a_path:      " << a_path << ";" << std::endl;
+        std::cout << "a_dot:       " << a_dot << ";" << std::endl;
+        std::cout << "a_enable:    " << a_enable << ";" << std::endl;
+        std::cout << "a_none:      " << a_none << ";" << std::endl;
+        std::cout << "a_from:      " << a_from << ";" << std::endl;
+        std::cout << "a_to:        "; for (size_t i = 0; i < a_to.size(); ++i) std::cout << a_to[i] << " "; std::cout << ";" << std::endl;
     }
 
     return option_main(argc, argv); // 2. Call the Singleton solution.
